@@ -24,11 +24,11 @@ def create_rating(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Cocktail not found")
 
     # Opcjonalnie: Sprawdź, czy autor koktajlu to ten sam użytkownik, który próbuje ocenić
-    # if cocktail_to_rate.user_id == current_user.id:
-    #     raise HTTPException(
-    #         status_code=status.HTTP_403_FORBIDDEN,
-    #         detail="Users cannot rate their own cocktails."
-    #     )
+        if cocktail_to_rate.user_id == current_user.id:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Users cannot rate their own cocktails."
+            )
 
     try:
         rating_orm = crud.rating.create_rating(db=db, rating_in=rating_in, user_id=current_user.id)
