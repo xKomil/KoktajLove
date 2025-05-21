@@ -22,7 +22,7 @@ class Cocktail(Base):
     __tablename__ = "cocktails"
 
     id = Column(Integer, primary_key=True, index=True)
-    name = Column(String, index=True, nullable=False)
+    name = Column(String, index=True, nullable=False, unique=True)
     description = Column(Text, nullable=True)
     instructions = Column(Text, nullable=False)
     image_url = Column(String, nullable=True)
