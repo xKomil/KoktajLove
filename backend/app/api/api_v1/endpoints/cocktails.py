@@ -5,7 +5,7 @@ from sqlalchemy.exc import IntegrityError
 
 from app import crud, models, schemas
 from app.dependencies import get_db, get_current_active_user
-from app.schemas.cocktail import CocktailWithDetails, CocktailCreate, CocktailUpdate, Cocktail as CocktailSchema # Zmieniono na CocktailSchema
+from app.schemas.cocktail import CocktailWithDetails, CocktailCreate, CocktailUpdate, Cocktail as CocktailSchema
 
 router = APIRouter()
 
@@ -13,10 +13,9 @@ router = APIRouter()
 def create_cocktail(
     *,
     db: Session = Depends(get_db),
-    cocktail_in: CocktailCreate, # Pydantic automatycznie zwaliduje amount jako int i unit jako UnitEnum
+    cocktail_in: CocktailCreate,
     current_user: models.User = Depends(get_current_active_user)
 ):
-    # Walidacja istnienia składników i tagów
     for ing_data in cocktail_in.ingredients:
         if not crud.ingredient.get_ingredient(db, ing_data.ingredient_id):
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Składnik o ID {ing_data.ingredient_id} nie istnieje.")
@@ -38,8 +37,8 @@ def create_cocktail(
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
     except Exception as e:
         db.rollback()
-        print(f"Error creating cocktail: {type(e).__name__} - {e}")
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Wystąpił wewnętrzny błąd serwera.")
+        print(f"Błąd podczas tworzenia koktajlu: {type(e).__name__} - {e}")
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Wystąpił wewnętrzny błąd serwera podczas tworzenia koktajlu.")
 
 
 @router.get("/", response_model=List[CocktailWithDetails])
@@ -60,7 +59,7 @@ def read_cocktail(
 ):
     cocktail_details = crud.cocktail.get_cocktail(db, cocktail_id=cocktail_id)
     if cocktail_details is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Koktajl nie znaleziony")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Koktajl nie znaleziony.")
     
     if not cocktail_details.is_public:
         if not current_user or cocktail_details.user_id != current_user.id:
@@ -74,12 +73,12 @@ def update_cocktail(
     *,
     db: Session = Depends(get_db),
     cocktail_id: int,
-    cocktail_in: CocktailUpdate, # Pydantic zwaliduje amount jako int i unit jako UnitEnum
+    cocktail_in: CocktailUpdate,
     current_user: models.User = Depends(get_current_active_user)
 ):
-    db_cocktail_orm = db.query(models.Cocktail).get(cocktail_id)
+    db_cocktail_orm = db.query(models.Cocktail).get(cocktail_id) # Bezpośrednie pobranie obiektu ORM
     if not db_cocktail_orm:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Koktajl nie znaleziony")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Koktajl nie znaleziony.")
     if db_cocktail_orm.user_id != current_user.id:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Brak uprawnień do edycji tego koktajlu.")
 
@@ -99,26 +98,26 @@ def update_cocktail(
         return updated_cocktail_details
     except IntegrityError:
         db.rollback()
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Aktualizacja spowodowałaby konflikt.")
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Aktualizacja spowodowałaby konflikt (np. zduplikowana nazwa).")
     except ValueError as e:
         db.rollback()
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
     except Exception as e:
         db.rollback()
-        print(f"Error updating cocktail: {type(e).__name__} - {e}")
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Wystąpił wewnętrzny błąd serwera.")
+        print(f"Błąd podczas aktualizacji koktajlu: {type(e).__name__} - {e}")
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Wystąpił wewnętrzny błąd serwera podczas aktualizacji koktajlu.")
 
 
-@router.delete("/{cocktail_id}", response_model=CocktailSchema) # Użyj zaimportowanego CocktailSchema
+@router.delete("/{cocktail_id}", response_model=CocktailSchema)
 def delete_cocktail(
     *,
     db: Session = Depends(get_db),
     cocktail_id: int,
     current_user: models.User = Depends(get_current_active_user)
 ):
-    db_cocktail_orm = db.query(models.Cocktail).get(cocktail_id)
+    db_cocktail_orm = db.query(models.Cocktail).get(cocktail_id) # Bezpośrednie pobranie obiektu ORM
     if not db_cocktail_orm:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Koktajl nie znaleziony")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Koktajl nie znaleziony.")
 
     if db_cocktail_orm.user_id != current_user.id:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Brak uprawnień do usunięcia tego koktajlu.")
@@ -126,6 +125,6 @@ def delete_cocktail(
     deleted_cocktail_orm = crud.cocktail.delete_cocktail(db=db, cocktail_id=cocktail_id)
     
     if not deleted_cocktail_orm:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Nie udało się usunąć koktajlu.")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Nie udało się usunąć koktajlu lub nie został on znaleziony.")
         
     return deleted_cocktail_orm

@@ -21,13 +21,13 @@ def register_user(
     if user:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="The user with this email already exists in the system.",
+            detail="Użytkownik z tym adresem email już istnieje w systemie.",
         )
     user = crud.user.get_user_by_username(db, username=user_in.username)
     if user:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="The user with this username already exists in the system.",
+            detail="Użytkownik z tą nazwą użytkownika już istnieje w systemie.",
         )
     user = crud.user.create_user(db=db, user_in=user_in)
     return user
@@ -41,7 +41,7 @@ def login_for_access_token(
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect username or password",
+            detail="Nieprawidłowa nazwa użytkownika lub hasło.",
             headers={"WWW-Authenticate": "Bearer"},
         )
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
