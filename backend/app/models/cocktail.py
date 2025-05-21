@@ -8,8 +8,8 @@ cocktail_ingredient_association = Table(
     'cocktail_ingredients', Base.metadata,
     Column('cocktail_id', Integer, ForeignKey('cocktails.id', ondelete="CASCADE"), primary_key=True),
     Column('ingredient_id', Integer, ForeignKey('ingredients.id', ondelete="RESTRICT"), primary_key=True),
-    Column('amount', String, nullable=False),
-    Column('unit', String, nullable=False)
+    Column('amount', Integer, nullable=False),
+    Column('unit', String(50), nullable=False)
 )
 
 cocktail_tag_association = Table(
@@ -22,7 +22,7 @@ class Cocktail(Base):
     __tablename__ = "cocktails"
 
     id = Column(Integer, primary_key=True, index=True)
-    name = Column(String, index=True, nullable=False, unique=True)
+    name = Column(String, index=True, nullable=False, unique=True) # Zakładam, że unikalność nazwy pozostała
     description = Column(Text, nullable=True)
     instructions = Column(Text, nullable=False)
     image_url = Column(String, nullable=True)
@@ -34,14 +34,16 @@ class Cocktail(Base):
     author = relationship("User", back_populates="cocktails")
 
     ingredients = relationship(
-        "Ingredient",
+        "Ingredient", # Nazwa klasy modelu Ingredient
         secondary=cocktail_ingredient_association,
-        back_populates="cocktails"
+        back_populates="cocktails" # Nazwa relacji w modelu Ingredient
     )
+    
     tags = relationship(
-        "Tag",
+        "Tag", # Nazwa klasy modelu Tag
         secondary=cocktail_tag_association,
-        back_populates="cocktails"
+        back_populates="cocktails" # Nazwa relacji w modelu Tag
     )
+    
     ratings = relationship("Rating", back_populates="cocktail", cascade="all, delete-orphan")
     favorited_by = relationship("Favorite", back_populates="cocktail", cascade="all, delete-orphan")

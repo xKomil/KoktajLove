@@ -2,9 +2,12 @@ from .token import Token, TokenData
 from .user import User, UserCreate, UserUpdate, UserInDBBase, UserBase
 from .ingredient import Ingredient, IngredientCreate, IngredientUpdate, IngredientBase
 from .tag import Tag, TagCreate, TagUpdate, TagBase
+# Dodaj import UnitEnum i IngredientInCocktailDetail, jeśli są potrzebne na zewnątrz
 from .cocktail import (
+    UnitEnum, # <--- NOWY EKSPORT
     Cocktail, CocktailCreate, CocktailUpdate, CocktailBase,
-    CocktailIngredientData, CocktailTagData, # Zmienione nazwy dla jasności w CocktailCreate/Update
+    CocktailIngredientData, CocktailTagData,
+    IngredientInCocktailDetail, # <--- NOWY EKSPORT
     CocktailWithDetails
 )
 from .rating import Rating, RatingCreate, RatingUpdate, RatingBase, RatingInDBBase

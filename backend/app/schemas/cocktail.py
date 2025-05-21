@@ -1,23 +1,36 @@
 from typing import Optional, List, Annotated
 from pydantic import BaseModel, HttpUrl, Field
 from datetime import datetime
+from enum import Enum # <--- NOWY IMPORT
 
-# Importuj uproszczone schematy dla zagnieżdżonych obiektów
-from .user import User as UserSchema # Zmieniono nazwę importu, aby uniknąć konfliktu z modelem User
+from .user import User as UserSchema
 from .ingredient import Ingredient as IngredientSchema
 from .tag import Tag as TagSchema
 
+# Krok 1: Zdefiniuj Enum dla jednostek
+class UnitEnum(str, Enum):
+    ML = "ml"
+    L = "l"
+    G = "g"
+    KG = "kg"
+    TSP = "łyżeczka" # teaspoon
+    TBSP = "łyżka"   # tablespoon
+    OZ = "oz"        # ounce
+    SHOT = "shot"
+    DASH = "kropla" # dash/kropla
+    PIECE = "sztuka" # sztuka/kawałek
+    SLICE = "plasterek"
+    OTHER = "inna"   # dla niestandardowych
 
 # Schemat danych dla składnika w koktajlu (przy tworzeniu/aktualizacji)
 class CocktailIngredientData(BaseModel):
     ingredient_id: int
-    amount: str
-    unit: str
+    amount: int # <--- ZMIANA: str na int
+    unit: UnitEnum # <--- ZMIANA: str na UnitEnum
 
 # Schemat danych dla tagu w koktajlu (przy tworzeniu/aktualizacji)
 class CocktailTagData(BaseModel):
     tag_id: int
-
 
 class CocktailBase(BaseModel):
     name: Annotated[str, Field(min_length=3, max_length=100)]
@@ -27,12 +40,10 @@ class CocktailBase(BaseModel):
     is_public: bool = True
 
 class CocktailCreate(CocktailBase):
-    # Lista obiektów definiujących składniki i ich ilości
     ingredients: List[CocktailIngredientData] = []
-    # Lista obiektów definiujących tagi
     tags: List[CocktailTagData] = []
 
-class CocktailUpdate(BaseModel): # Wszystkie pola opcjonalne
+class CocktailUpdate(BaseModel):
     name: Optional[Annotated[str, Field(min_length=3, max_length=100)]] = None
     description: Optional[Annotated[str, Field(max_length=500)]] = None
     instructions: Optional[Annotated[str, Field(min_length=10)]] = None
@@ -41,30 +52,25 @@ class CocktailUpdate(BaseModel): # Wszystkie pola opcjonalne
     ingredients: Optional[List[CocktailIngredientData]] = None
     tags: Optional[List[CocktailTagData]] = None
 
-
 class CocktailInDBBase(CocktailBase):
     id: int
-    user_id: int # ID autora
+    user_id: int
     created_at: datetime
     updated_at: Optional[datetime] = None
 
     class Config:
-        from_attributes = True # Pydantic v2, orm_mode w v1
+        from_attributes = True
 
-# Podstawowy schemat odpowiedzi dla koktajlu
 class Cocktail(CocktailInDBBase):
     pass
 
-# Schemat dla składnika zwracanego w szczegółach koktajlu
-class IngredientInCocktailDetail(IngredientSchema): # Dziedziczy z pełnego schematu Ingredient
-    amount: str
-    unit: str
+# Schemat dla składnika zwracanego w szczegółach koktajlu (z amount i unit)
+class IngredientInCocktailDetail(IngredientSchema):
+    amount: int # <--- ZMIANA: str na int
+    unit: UnitEnum # <--- ZMIANA: str na UnitEnum
 
 # Schemat odpowiedzi dla koktajlu z pełnymi szczegółami
-# (autor, składniki z ilościami, tagi)
-class CocktailWithDetails(CocktailInDBBase): # Dziedziczy z CocktailInDBBase, aby mieć wszystkie jego pola
-    author: UserSchema # Pełny schemat użytkownika (autora)
-    # Lista pełnych obiektów składników wraz z ilością i jednostką
+class CocktailWithDetails(CocktailInDBBase):
+    author: UserSchema
     ingredients: List[IngredientInCocktailDetail] = []
-    # Lista pełnych obiektów tagów
     tags: List[TagSchema] = []
