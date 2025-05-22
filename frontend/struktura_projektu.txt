@@ -1,0 +1,105 @@
+frontend/
+├── .gitignore
+├── README.md
+├── eslint.config.js
+├── index.html
+├── package-lock.json
+├── package.json
+├── public/
+│   └── vite.svg
+├── src/
+│   ├── .env
+│   ├── .env.example
+│   ├── App.css
+│   ├── App.tsx
+│   ├── assets/
+│   │   └── react.svg
+│   ├── components/
+│   │   ├── features/
+│   │   │   ├── auth/
+│   │   │   │   ├── LoginForm.module.css
+│   │   │   │   ├── LoginForm.tsx
+│   │   │   │   ├── RegisterForm.module.css
+│   │   │   │   └── RegisterForm.tsx
+│   │   │   ├── cocktails/
+│   │   │   │   ├── CocktailCard.module.css
+│   │   │   │   ├── CocktailCard.tsx
+│   │   │   │   ├── CocktailForm.module.css
+│   │   │   │   ├── CocktailForm.tsx
+│   │   │   │   ├── CocktailList.module.css
+│   │   │   │   ├── CocktailList.tsx
+│   │   │   │   ├── RatingStars.module.css
+│   │   │   │   └── RatingStars.tsx
+│   │   │   └── profile/
+│   │   │       ├── ProfileDetails.module.css
+│   │   │       ├── ProfileDetails.tsx
+│   │   │       ├── UserCocktailList.module.css
+│   │   │       └── UserCocktailList.tsx
+│   │   ├── layout/
+│   │   │   ├── Footer/
+│   │   │   │   ├── Footer.module.css
+│   │   │   │   └── Footer.tsx
+│   │   │   ├── MainLayout/
+│   │   │   │   ├── MainLayout.module.css
+│   │   │   │   └── MainLayout.tsx
+│   │   │   └── Navbar/
+│   │   │       ├── Navbar.module.css
+│   │   │       └── Navbar.tsx
+│   │   └── ui/
+│   │       ├── Button/
+│   │       │   ├── Button.module.css
+│   │       │   └── Button.tsx
+│   │       ├── Input/
+│   │       │   ├── Input.module.css
+│   │       │   └── Input.tsx
+│   │       ├── Modal/
+│   │       │   ├── Modal.module.css
+│   │       │   └── Modal.tsx
+│   │       └── Spinner/
+│   │           ├── Spinner.module.css
+│   │           └── Spinner.tsx
+│   ├── contexts/
+│   │   └── AuthContext.tsx
+│   ├── hooks/
+│   │   ├── useApi.ts
+│   │   └── useAuth.ts
+│   ├── index.css
+│   ├── main.tsx
+│   ├── pages/
+│   │   ├── AddCocktailPage.tsx
+│   │   ├── CocktailDetailPage.tsx
+│   │   ├── EditCocktailPage.tsx
+│   │   ├── HomePage.tsx
+│   │   ├── LoginPage.tsx
+│   │   ├── MyFavoritesPage.tsx
+│   │   ├── NotFoundPage.tsx
+│   │   ├── ProfilePage.tsx
+│   │   └── RegisterPage.tsx
+│   ├── router/
+│   │   ├── AppRoutes.tsx
+│   │   └── ProtectedRoute.tsx
+│   ├── services/
+│   │   ├── apiClient.ts
+│   │   ├── authService.ts
+│   │   ├── cocktailService.ts
+│   │   ├── favoriteService.ts
+│   │   ├── ingredientService.ts
+│   │   ├── ratingService.ts
+│   │   ├── tagService.ts
+│   │   └── userService.ts
+│   ├── styles/
+│   │   ├── global.css
+│   │   └── variables.css
+│   ├── types/
+│   │   ├── authTypes.ts
+│   │   ├── cocktailTypes.ts
+│   │   ├── commonTypes.ts
+│   │   └── index.ts
+│   ├── utils/
+│   │   ├── helpers.ts
+│   │   └── localStorage.ts
+│   └── vite-env.d.ts
+├── tsconfig.app.json
+├── tsconfig.json
+├── tsconfig.node.json
+└── vite.config.ts
