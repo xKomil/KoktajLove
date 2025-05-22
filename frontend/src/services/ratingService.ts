@@ -65,9 +65,13 @@ export const deleteRating = async (ratingId: number | string): Promise<void> => 
  * @returns A promise that resolves to the user's rating for that cocktail, or null/error if not found.
  */
 export const getUserRatingForCocktail = async (userId: number | string, cocktailId: number | string): Promise<Rating | null> => {
-  // This endpoint might vary greatly, e.g., /users/{userId}/ratings/{cocktailId} or /ratings/?user_id=X&cocktail_id=Y
   try {
-    const response = await apiClient.get<Rating>(`/users/${userId}/cocktails/${cocktailId}/rating`); // Adjust endpoint
+    const response = await apiClient.get<Rating | null>(`/ratings/user-cocktail-rating/`, {
+      params: { // Przekazujemy jako parametry zapytania
+        user_id: userId,
+        cocktail_id: cocktailId
+      }
+    });
     return response.data;
   } catch (error: any) {
     if (error.response && error.response.status === 404) {

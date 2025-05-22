@@ -79,3 +79,21 @@ def delete_my_rating(
     if not deleted_rating_orm:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Ocena nie znaleziona lub została już usunięta.")
     return deleted_rating_orm
+
+@router.get(
+    "/user-cocktail-rating/", # Nowa, bardziej ogólna ścieżka
+    response_model=Optional[schemas.Rating], # Może zwrócić Rating lub None
+    summary="Pobierz ocenę danego użytkownika dla konkretnego koktajlu przez query params"
+)
+def get_rating_for_user_and_cocktail_query( # Inna nazwa funkcji
+    user_id: int, # Parametr zapytania
+    cocktail_id: int, # Parametr zapytania
+    db: Session = Depends(get_db),
+    # current_user: models.User = Depends(get_current_active_user) # Opcjonalnie do autoryzacji
+):
+    print(f"--- DEBUG [ratings.py /user-cocktail-rating/] --- Sprawdzam ocenę dla user_id: {user_id}, cocktail_id: {cocktail_id}")
+    # Potrzebujesz funkcji CRUD
+    rating = crud.rating.get_rating_by_user_and_cocktail(db, user_id=user_id, cocktail_id=cocktail_id)
+    if not rating:
+        return None # FastAPI zamieni na null w JSON
+    return rating

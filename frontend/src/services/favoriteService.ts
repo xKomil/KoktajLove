@@ -1,33 +1,38 @@
 // frontend/src/services/favoriteService.ts
 import apiClient from './apiClient';
 import { CocktailWithDetails } from '@/types/cocktailTypes';
-import { User } from '@/types/authTypes'; // If needed for specific user favorites
+// User nie jest tu potrzebny, jeśli getCurrentUser jest w authService
+// import { User } from '@/types/authTypes'; 
 
+// Typ dla odpowiedzi /is-favorite (jeśli go używasz, upewnij się, że jest zdefiniowany)
 interface FavoriteStatusResponse {
   is_favorite: boolean;
   cocktail_id: number;
-  // user_id might also be part of the response
 }
 
 /**
- * Fetches the list of favorite cocktails for the currently authenticated user.
- * @returns A promise that resolves to an array of favorite cocktails.
+ * Fetches the list of favorite cocktails with full details for the currently authenticated user.
+ * @returns A promise that resolves to an array of favorite cocktails with details.
  */
 export const getFavoriteCocktails = async (): Promise<CocktailWithDetails[]> => {
-  // Endpoint might be /users/me/favorites or /favorites/
-  const response = await apiClient.get<CocktailWithDetails[]>('/users/me/favorites'); 
+  // Zmień ścieżkę, aby pasowała do backendowego endpointu zwracającego pełne dane
+  const response = await apiClient.get<CocktailWithDetails[]>('/favorites/my-favorites/cocktails');
   return response.data;
 };
 
 /**
  * Adds a cocktail to the user's favorites.
  * @param cocktailId - The ID of the cocktail to add.
- * @returns A promise that resolves when the cocktail is added (response might be minimal or the favorite entry).
+ * @returns A promise that resolves when the cocktail is added.
  */
 export const addCocktailToFavorites = async (cocktailId: number | string): Promise<any> => {
-  // Endpoint might be /cocktails/{cocktailId}/favorite or /favorites/
-  const response = await apiClient.post(`/cocktails/${cocktailId}/favorite`);
-  return response.data; // Or handle as void if no meaningful data returned
+  // Ten endpoint prawdopodobnie powinien być pod /favorites/, a nie /cocktails/
+  // Zgodnie z twoim favorites.py: @router.post("/") montowany pod /favorites
+  // więc powinno być: /favorites/ z ciałem { cocktail_id: ... }
+  // LUB jeśli backend ma /cocktails/{id}/favorite, to tak zostaw.
+  // Na razie zakładam, że POST /favorites/ jest poprawny
+  const response = await apiClient.post(`/favorites/`, { cocktail_id: Number(cocktailId) });
+  return response.data;
 };
 
 /**
@@ -36,7 +41,8 @@ export const addCocktailToFavorites = async (cocktailId: number | string): Promi
  * @returns A promise that resolves when the cocktail is removed.
  */
 export const removeCocktailFromFavorites = async (cocktailId: number | string): Promise<void> => {
-  await apiClient.delete(`/cocktails/${cocktailId}/favorite`);
+  // Zgodnie z twoim favorites.py: @router.delete("/{cocktail_id}") montowany pod /favorites
+  await apiClient.delete(`/favorites/${cocktailId}`);
 };
 
 /**
@@ -45,13 +51,16 @@ export const removeCocktailFromFavorites = async (cocktailId: number | string): 
  * @returns A promise that resolves to an object indicating favorite status.
  */
 export const isCocktailFavorite = async (cocktailId: number | string): Promise<FavoriteStatusResponse> => {
-    const response = await apiClient.get<FavoriteStatusResponse>(`/cocktails/${cocktailId}/is-favorite`);
-    return response.data;
+    // Zgodnie z sugestią, dodaj endpoint /favorites/cocktail/{cocktail_id}/status
+    try {
+        const response = await apiClient.get<FavoriteStatusResponse>(`/favorites/cocktail/${cocktailId}/status`);
+        return response.data;
+    } catch (error: any) {
+        console.error("Błąd podczas isCocktailFavorite:", error);
+        if (error.response && error.response.status === 404) {
+             // Jeśli endpoint nie istnieje lub nie ma informacji, zwróć domyślny status
+            return { is_favorite: false, cocktail_id: Number(cocktailId) };
+        }
+        throw error;
+    }
 };
-
-// If you need to manage favorites for a specific user (e.g., admin viewing another user's favorites)
-// you might have functions like:
-// export const getUserFavorites = async (userId: number | string): Promise<CocktailWithDetails[]> => {
-//   const response = await apiClient.get<CocktailWithDetails[]>(`/users/${userId}/favorites`);
-//   return response.data;
-// };

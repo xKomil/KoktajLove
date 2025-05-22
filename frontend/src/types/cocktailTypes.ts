@@ -144,16 +144,3 @@ export interface Rating {
 
 export type RatingCreate = Pick<Rating, 'score' | 'cocktail_id'>;
 export type RatingUpdate = Partial<Pick<Rating, 'score'>>;
-
-/**
- * Generic paginated response structure from the API.
- */
-export interface PaginatedResponse<T> {
-  items: T[];
-  total: number;    // Total number of items available
-  page: number;     // Current page number
-  size: number;     // Number of items per page
-  pages?: number;   // Total number of pages (optional, can be calculated)
-  next?: string | null; // URL for the next page
-  previous?: string | null; // URL for the previous page
-}

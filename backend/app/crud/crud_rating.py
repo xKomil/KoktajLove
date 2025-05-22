@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 
 from app.models.rating import Rating
 from app.schemas.rating import RatingCreate, RatingUpdate
+from app import models
 
 class CRUDRating:
     def get_rating(self, db: Session, rating_id: int) -> Optional[Rating]:
@@ -49,5 +50,11 @@ class CRUDRating:
             db.delete(db_rating)
             db.commit()
         return db_rating
+    
+    def get_rating_by_user_and_cocktail(self, db: Session, *, user_id: int, cocktail_id: int) -> Optional[models.Rating]:
+        return db.query(models.Rating).filter(
+            models.Rating.user_id == user_id,
+            models.Rating.cocktail_id == cocktail_id
+        ).first()
 
 rating = CRUDRating()
