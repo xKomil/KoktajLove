@@ -9,9 +9,9 @@ export interface PaginatedResponse<T> {
   total: number;
   page: number;
   size: number;
-  pages?: number; // Optional, can be calculated: Math.ceil(total / size)
-  // next_page?: number | null; // Alternative pagination info
-  // prev_page?: number | null;
+  pages?: number;
+  next?: string | null;
+  previous?: string | null;
 }
 
 /**

@@ -127,7 +127,7 @@ const CocktailDetailPage: React.FC = () => {
   }
   
   const isOwner = isAuthenticated && user && user.id === cocktail.owner_id;
-  const placeholderImage = 'https://via.placeholder.com/600x400.png?text=Cocktail';
+  const placeholderImage = 'https://www.kwestiasmaku.com/przepis/owocowy-koktajl-mocy';
 
   return (
     <div className={`${styles.pageContainer} ${detailStyles.cocktailDetailContainer}`}>
@@ -196,7 +196,7 @@ const CocktailDetailPage: React.FC = () => {
             <ul className={detailStyles.ingredientList}>
             {cocktail.ingredients.map(item => (
                 <li key={item.ingredient.id}>
-                {item.ingredient.name}: {item.quantity} {item.unit}
+                {item.ingredient.name}: {item.amount} {item.unit}
                 </li>
             ))}
             </ul>

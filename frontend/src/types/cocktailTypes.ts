@@ -7,20 +7,10 @@ export interface Ingredient {
   id: number;
   name: string;
   description?: string | null;
-  // created_at?: string; // If you track creation/update times
-  // updated_at?: string;
 }
 
-/**
- * Data for creating a new ingredient.
- */
 export type IngredientCreate = Omit<Ingredient, 'id'>;
-
-/**
- * Data for updating an existing ingredient (all fields optional).
- */
 export type IngredientUpdate = Partial<IngredientCreate>;
-
 
 /**
  * Represents a tag.
@@ -28,54 +18,46 @@ export type IngredientUpdate = Partial<IngredientCreate>;
 export interface Tag {
   id: number;
   name: string;
-  // created_at?: string;
-  // updated_at?: string;
 }
 
-/**
- * Data for creating a new tag.
- */
 export type TagCreate = Omit<Tag, 'id'>;
-
-/**
- * Data for updating an existing tag.
- */
 export type TagUpdate = Partial<TagCreate>;
-
 
 /**
  * Enum for units of measurement for ingredients.
  * Should match the enum defined in your FastAPI backend.
  */
 export enum UnitEnum {
-  ml = "ml",
-  l = "l", // Liter
-  oz = "oz", // Ounce
-  cl = "cl", // Centiliter
-  piece = "piece",
-  g = "g",   // Gram
-  kg = "kg", // Kilogram
-  dash = "dash",
-  pinch = "pinch",
-  splash = "splash", // Splash
-  tsp = "tsp", // Teaspoon
-  tbsp = "tbsp", // Tablespoon
-  cup = "cup", // Cup
-  slice = "slice",
-  sprig = "sprig", // e.g. for mint
-  leaf = "leaf", // e.g. for basil
-  // Add other units as necessary
+  ML = "ml",
+  L = "l",
+  G = "g",
+  KG = "kg",
+  TSP = "łyżeczka",
+  TBSP = "łyżka",
+  OZ = "oz",
+  SHOT = "shot",
+  DASH = "kropla",
+  PIECE = "sztuka",
+  SLICE = "plasterek",
+  OTHER = "inna",
+}
+
+// --- ZMIANY ZACZYNAJĄ SIĘ TUTAJ ---
+
+/**
+ * Data for an ingredient when creating/updating a cocktail (to match backend's CocktailIngredientData).
+ */
+export interface CocktailIngredientCreateData {
+  ingredient_id: number;
+  amount: number; // ZMIANA: z quantity na amount (i typ na number, zakładając, że backend oczekuje int)
+  unit: UnitEnum;
 }
 
 /**
- * Represents an ingredient used in a cocktail, including its quantity and unit.
- * This is for displaying cocktail details where ingredient info is populated.
+ * Data for a tag when creating/updating a cocktail (to match backend's CocktailTagData).
  */
-export interface CocktailIngredient {
-  ingredient: Ingredient; // The full ingredient object
-  quantity: number;
-  unit: UnitEnum;
-  // id?: number; // If this link has its own ID in a join table
+export interface CocktailTagCreateData {
+  tag_id: number;
 }
 
 /**
@@ -85,44 +67,67 @@ export interface CocktailBase {
   name: string;
   description: string;
   instructions: string;
-  image_url?: string | null;
-  is_public: boolean; // Default to true or false based on your app logic
+  image_url?: string | null; // Pozwalamy na null
+  is_public: boolean;
 }
 
 /**
+ * Data structure for creating a new cocktail.
+ * This now matches the backend's CocktailCreate schema.
+ */
+export interface CocktailCreate extends CocktailBase {
+  ingredients: CocktailIngredientCreateData[]; // Używa nowego typu
+  tags: CocktailTagCreateData[];             // Używa nowego typu
+}
+
+/**
+ * Represents an ingredient as part of detailed cocktail information (matches backend's IngredientInCocktailDetail).
+ */
+export interface CocktailIngredientDetail { // Zmieniona nazwa z CocktailIngredient dla jasności
+  ingredient: Ingredient; // Pełny obiekt składnika (lub tylko ID i name, jeśli tak zwraca backend)
+                          // Twój backendowy IngredientInCocktailDetail dziedziczy z IngredientSchema,
+                          // więc powinien mieć wszystkie pola IngredientSchema.
+  amount: number;         // ZMIANA: z quantity na amount
+  unit: UnitEnum;
+}
+
+
+/**
  * Represents a cocktail with all its details, including populated ingredients and tags.
- * This is typically what you get when fetching a single cocktail or a list.
  */
 export interface CocktailWithDetails extends CocktailBase {
   id: number;
   created_at: string;
   updated_at: string;
-  average_rating: number | null; // Can be null if not rated
-  total_ratings?: number; // Optional: number of ratings received
-  ingredients: CocktailIngredient[];
-  tags: Tag[];
-  owner_id: number; // ID of the user who created the cocktail
-  // owner?: User; // Optional: if you want to embed owner details
+  average_rating: number | null;
+  total_ratings?: number;
+  ingredients: CocktailIngredientDetail[]; // Używa nowego typu
+  tags: Tag[]; // Tagi są nadal pełnymi obiektami Tag
+  owner_id: number;
+  // author?: User; // Zgodnie z Twoim backendowym CocktailWithDetails, masz 'author: UserSchema'
+                    // Jeśli masz typ User w authTypes.ts, możesz go tu użyć.
 }
 
-/**
- * Data structure for creating a new cocktail.
- * Ingredients and tags are referenced by their IDs.
- */
-export interface CocktailCreate extends CocktailBase {
-  ingredients: {
-    ingredient_id: number;
-    quantity: number;
-    unit: UnitEnum;
-  }[];
-  tag_ids: number[]; // Array of tag IDs
-}
 
 /**
  * Data structure for updating an existing cocktail.
- * All fields are optional (Partial), and you might send only the changes.
+ * All fields are optional.
+ * Ważne: Backendowy CocktailUpdate jest bardziej elastyczny (każde pole Optional).
+ * Ta definicja jest OK, jeśli aktualizujesz te same pola co przy tworzeniu.
  */
-export type CocktailUpdate = Partial<CocktailCreate>;
+export type CocktailUpdate = Partial<Omit<CocktailCreate, 'name' | 'description' | 'instructions'> & {
+  name?: string; // Jeśli nazwa może być aktualizowana
+  description?: string;
+  instructions?: string;
+  // image_url, is_public, ingredients, tags są już Optional z Partial<CocktailCreate>
+}>;
+// LUB PROŚCIEJ, jeśli CocktailUpdate na backendzie jest po prostu Partial od pól CocktailCreate:
+// export type CocktailUpdate = Partial<CocktailCreate>;
+// Jednak Twój backendowy CocktailUpdate jest zdefiniowany jako osobna klasa,
+// więc frontendowy CocktailUpdate powinien odzwierciedlać to, co FAKTYCZNIE można zaktualizować.
+// Na razie zostawmy Partial<CocktailCreate> dla uproszczenia, ale dostosuj, jeśli backend ma inne pola dla update.
+
+// --- KONIEC ZMIAN ---
 
 
 /**
@@ -130,24 +135,15 @@ export type CocktailUpdate = Partial<CocktailCreate>;
  */
 export interface Rating {
   id: number;
-  score: number; // e.g., 1-5
+  score: number;
   cocktail_id: number;
   user_id: number;
   created_at: string;
   updated_at: string;
-  // comment?: string | null; // Optional: if ratings can have comments
 }
 
-/**
- * Data for creating a new rating.
- */
-export type RatingCreate = Pick<Rating, 'score' | 'cocktail_id'>; // user_id usually from auth token
-
-/**
- * Data for updating an existing rating (e.g., changing the score).
- */
+export type RatingCreate = Pick<Rating, 'score' | 'cocktail_id'>;
 export type RatingUpdate = Partial<Pick<Rating, 'score'>>;
-
 
 /**
  * Generic paginated response structure from the API.
