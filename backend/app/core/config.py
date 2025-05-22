@@ -12,7 +12,7 @@ class Settings(BaseSettings):
     DATABASE_URL: str = "sqlite:///./koktajlove.db"
 
     # JWT
-    SECRET_KEY: str = "twoj_super_tajny_klucz_jwt_min_32_znaki_domyslny" # Powinien być nadpisany przez .env
+    SECRET_KEY: str = "84ffb6af5c52f4c99ca2ca0778a86e5f888b1b3a83b66339791b9db1aac99c50"
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
 
@@ -54,6 +54,6 @@ class Settings(BaseSettings):
     class Config:
         env_file = ".env"
         env_file_encoding = 'utf-8'
-        case_sensitive = True # Dla pydantic-settings v2, domyślnie jest False, co może być problemem dla niektórych zmiennych
+        case_sensitive = True 
 
 settings = Settings()

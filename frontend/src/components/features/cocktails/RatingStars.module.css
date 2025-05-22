@@ -1,0 +1,24 @@
+.starsContainer {
+  display: inline-flex; /* Align stars in a row */
+  align-items: center;
+}
+
+.star {
+  color: #ccc; /* Default star color (empty) */
+  font-size: 1.2em; /* Adjust size as needed */
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.star.filled {
+  color: #fadb14; /* Filled star color (e.g., gold) */
+}
+
+.star.readOnly {
+  cursor: default;
+}
+
+.star:not(.readOnly):hover,
+.star:not(.readOnly):hover ~ .star {
+  /* color: #fadb14; /* Highlight on hover, less useful if using filled state */
+}

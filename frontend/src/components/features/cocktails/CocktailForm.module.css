@@ -1,0 +1,71 @@
+.form {
+  max-width: 700px;
+  margin: 2rem auto;
+  padding: 2rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background-color: #fff;
+}
+
+.formTitle {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.formGroup {
+  margin-bottom: 1rem;
+}
+
+.formGroup label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: bold;
+}
+
+.formGroup textarea {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  min-height: 100px;
+  box-sizing: border-box;
+}
+
+.errorMessage {
+  color: red;
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+}
+
+.ingredientsSection, .tagsSection {
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px dashed #eee;
+}
+
+.ingredientItem, .tagItem {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.ingredientItem select, .ingredientItem input {
+  flex-grow: 1;
+}
+
+.checkboxLabel {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: normal;
+}
+
+.checkboxLabel input[type="checkbox"] {
+  margin-right: 0.5rem;
+}
+
+.submitButton {
+  margin-top: 1.5rem;
+  width: 100%;
+}

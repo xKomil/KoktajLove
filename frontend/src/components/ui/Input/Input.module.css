@@ -1,0 +1,28 @@
+.input {
+  width: 100%;
+  padding: 0.65rem 0.75rem; /* Slightly taller padding */
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 1rem;
+  box-sizing: border-box; /* Important for width: 100% */
+  transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.input:focus {
+  border-color: #007bff; /* Example focus color */
+  outline: none; /* Remove default outline */
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25); /* Bootstrap-like focus shadow */
+}
+
+.input[aria-invalid="true"] {
+  border-color: #dc3545; /* Error color */
+}
+
+.input[aria-invalid="true"]:focus {
+  border-color: #dc3545;
+  box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+}
+
+.input::placeholder {
+  color: #aaa;
+}

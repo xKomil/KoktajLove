@@ -52,3 +52,76 @@ export default tseslint.config({
   },
 })
 ```
+
+// frontend/README.md
+# KoktajLOVE Frontend
+
+Frontend aplikacji webowej "KoktajLOVE" napisany w React z TypeScript, wykorzystujący Vite.
+
+## Główne Technologie
+
+*   **Framework:** React (v18+) z TypeScript
+*   **Build Tool:** Vite (z szablonem React-TS + SWC)
+*   **Routing:** React Router DOM (v6+)
+*   **Zarządzanie stanem:**
+    *   Globalny: React Context API (uwierzytelnienie)
+    *   Lokalny: Hooki `useState` i `useReducer`
+    *   Stan serwera: Axios w serwisach + `useApi` hook
+*   **Komunikacja HTTP:** Axios
+*   **Stylizacja:** CSS Modules + globalne style CSS
+*   **Walidacja formularzy:** React Hook Form
+*   **Formatowanie kodu i Linting:** Prettier i ESLint
+
+## Struktura Projektu
+
+Struktura projektu znajduje się w katalogu `frontend/`. Główne katalogi w `src/`:
+
+*   `assets/`: Statyczne zasoby (obrazy, fonty).
+*   `components/`: Reużywalne komponenty UI, layoutu i specyficzne dla funkcjonalności.
+*   `contexts/`: Konteksty React (np. `AuthContext`).
+*   `hooks/`: Customowe hooki React.
+*   `pages/`: Komponenty reprezentujące widoki/strony aplikacji.
+*   `router/`: Konfiguracja routingu.
+*   `services/`: Logika komunikacji z API.
+*   `styles/`: Globalne style i zmienne CSS.
+*   `types/`: Definicje typów TypeScript.
+*   `utils/`: Funkcje pomocnicze.
+
+## Dostępne Skrypty
+
+W katalogu projektu możesz uruchomić:
+
+### `npm run dev`
+
+Uruchamia aplikację w trybie deweloperskim.<br />
+Otwórz [http://localhost:5173](http://localhost:5173) (lub inny port wskazany przez Vite) aby zobaczyć ją w przeglądarce.
+
+Strona będzie się automatycznie przeładowywać po dokonaniu zmian.<br />
+Zobaczysz również błędy lintowania w konsoli.
+
+### `npm run build`
+
+Buduje aplikację do produkcyjnego folderu `dist/`.<br />
+Poprawnie bundluje React w trybie produkcyjnym i optymalizuje build dla najlepszej wydajności.
+
+### `npm run lint`
+
+Uruchamia ESLint do analizy kodu pod kątem błędów i stylu.
+
+### `npm run format`
+
+Uruchamia Prettier do automatycznego formatowania kodu.
+
+### `npm run preview`
+
+Uruchamia lokalny serwer statyczny z produkcyjną wersją aplikacji z folderu `dist/`.
+
+## Zmienne Środowiskowe
+
+Aplikacja używa zmiennych środowiskowych do konfiguracji, np. adresu URL backendu.
+
+*   Skopiuj plik `.env.example` do `.env`.
+*   Dostosuj wartości w pliku `.env` do swojej konfiguracji.
+
+Przykład:
+`VITE_API_BASE_URL=http://localhost:8000/api/v1`

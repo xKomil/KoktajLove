@@ -1,0 +1,13 @@
+
+.layout {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.mainContent {
+  flex-grow: 1;
+  padding-top: 60px; /* Adjust if Navbar height changes, or use CSS Grid/Flex for better layout */
+  /* Alternatively, ensure Navbar is position: fixed or sticky and main has appropriate padding/margin */
+  width: 100%;
+}

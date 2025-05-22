@@ -1,25 +1,40 @@
+// frontend/tsconfig.node.json
 {
   "compilerOptions": {
-    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.node.tsbuildinfo",
+    // --- Ustawienia dla "references" i "allowImportingTsExtensions" ---
+    "composite": true,               // MUSI być true dla projektów referowanych
+    "declaration": true,             // Wymagane, aby emitować pliki .d.ts
+    "declarationMap": true,          // Opcjonalne, dla source map dla .d.ts
+    "emitDeclarationOnly": true,     // KLUCZOWE: Umożliwia "allowImportingTsExtensions" i jest zgodne z "composite" + "declaration"
+                                     // Oznacza, że ten tsconfig będzie emitował TYLKO pliki .d.ts, nie .js
+
+    // "outDir": "./dist-node-types", // Opcjonalnie, gdzie mają trafić pliki .d.ts (dodaj do .gitignore)
+                                     // Jeśli nie ustawisz, .d.ts będą obok plików .ts
+
+    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.node.tsbuildinfo", // To jest OK
+
+    // --- Pozostałe opcje (w większości OK) ---
     "target": "ES2022",
     "lib": ["ES2023"],
     "module": "ESNext",
     "skipLibCheck": true,
+    "moduleResolution": "bundler",   // Wymagane dla "allowImportingTsExtensions"
+    "allowImportingTsExtensions": true, // Teraz powinno być OK
 
-    /* Bundler mode */
-    "moduleResolution": "bundler",
-    "allowImportingTsExtensions": true,
-    "verbatimModuleSyntax": true,
-    "moduleDetection": "force",
-    "noEmit": true,
+    "verbatimModuleSyntax": true,    // OK, jeśli używasz TS 5.0+
+    "moduleDetection": "force",      // OK, jeśli używasz TS 5.2+
 
     /* Linting */
     "strict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "erasableSyntaxOnly": true,
-    "noFallthroughCasesInSwitch": true,
-    "noUncheckedSideEffectImports": true
+    "noFallthroughCasesInSwitch": true // Upewnij się, że ta opcja jest (jeśli chcesz)
+    // "noUncheckedSideEffectImports": true // Jak wcześniej, opcjonalne
   },
-  "include": ["vite.config.ts"]
+  "include": [
+    "vite.config.ts",
+    "eslint.config.js",
+    "postcss.config.js"
+    // Dodaj inne pliki konfiguracyjne Node.js, jeśli są
+  ]
 }
