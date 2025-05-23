@@ -3,7 +3,7 @@ import React from 'react';
 import { Link, LinkProps } from 'react-router-dom';
 import styles from './Button.module.css';
 
-type ButtonVariant = 'primary' | 'secondary' | 'danger' | 'success' | 'warning' | 'info' | 'ghost';
+type ButtonVariant = 'primary' | 'secondary' | 'danger' | 'success' | 'warning' | 'info' | 'ghost' | 'outline-primary';
 type ButtonSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
 type ButtonShape = 'square' | 'rounded' | 'pill';
 

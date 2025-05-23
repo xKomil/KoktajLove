@@ -1,18 +1,167 @@
+/* CocktailList.module.css - Przeprojektowany */
+
 .listContainer {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 1rem;
-  padding: 1rem;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: var(--spacing-lg);
+  padding: var(--spacing-xl);
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
 }
 
-.loading, .error, .noCocktails {
-  grid-column: 1 / -1; /* Span all columns */
+/* Responsywność dla mniejszych ekranów */
+@media (max-width: 768px) {
+  .listContainer {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: var(--spacing-md);
+    padding: var(--spacing-lg);
+  }
+}
+
+@media (max-width: 480px) {
+  .listContainer {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-md);
+    padding: var(--spacing-md);
+  }
+}
+
+/* Wspólny kontener dla wszystkich stanów aplikacji */
+.statusMessageContainer {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+  padding: var(--spacing-xl);
+  background: linear-gradient(135deg, var(--color-gray-50) 0%, var(--color-gray-100) 100%);
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--color-gray-200);
   text-align: center;
-  padding: 2rem;
-  font-size: 1.2rem;
-  color: #555;
 }
 
-.error {
-  color: red;
+/* Stan ładowania */
+.loadingContainer {
+  gap: var(--spacing-lg);
+}
+
+.loadingText {
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-secondary);
+  margin: 0;
+  letter-spacing: 0.025em;
+}
+
+.loadingSpinner {
+  margin-bottom: var(--spacing-md);
+}
+
+/* Stan błędu */
+.errorContainer {
+  gap: var(--spacing-md);
+}
+
+.errorTitle {
+  font-family: var(--font-family-heading);
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-danger);
+  margin: 0 0 var(--spacing-sm) 0;
+  line-height: 1.4;
+}
+
+.errorMessage {
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-normal);
+  color: var(--color-text-primary);
+  margin: 0 0 var(--spacing-lg) 0;
+  max-width: 500px;
+  line-height: 1.6;
+}
+
+.errorIcon {
+  width: 48px;
+  height: 48px;
+  margin-bottom: var(--spacing-md);
+  color: var(--color-danger);
+  opacity: 0.8;
+}
+
+/* Stan braku danych */
+.emptyContainer {
+  gap: var(--spacing-md);
+}
+
+.emptyTitle {
+  font-family: var(--font-family-heading);
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  margin: 0 0 var(--spacing-sm) 0;
+  line-height: 1.4;
+}
+
+.emptyMessage {
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-normal);
+  color: var(--color-text-secondary);
+  margin: 0 0 var(--spacing-lg) 0;
+  max-width: 400px;
+  line-height: 1.6;
+}
+
+.emptyIcon {
+  width: 64px;
+  height: 64px;
+  margin-bottom: var(--spacing-md);
+  color: var(--color-text-secondary);
+  opacity: 0.6;
+}
+
+/* Animacje dla lepszego UX */
+.statusMessageContainer {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Hover effects dla przycisków w stanach błędu/pustej listy */
+.actionButton {
+  margin-top: var(--spacing-sm);
+  transition: all 0.2s ease-in-out;
+}
+
+.actionButton:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+/* Dodatkowe klasy pomocnicze */
+.textCenter {
+  text-align: center;
+}
+
+.flexColumn {
+  display: flex;
+  flex-direction: column;
+}
+
+.alignCenter {
+  align-items: center;
 }

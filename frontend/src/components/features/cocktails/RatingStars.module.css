@@ -1,24 +1,208 @@
-.starsContainer {
-  display: inline-flex; /* Align stars in a row */
+/* RatingStars.module.css */
+
+.ratingContainer {
+  --star-size: 1.2rem;
+  --star-gap: 0.125rem;
+  --star-color-empty: var(--color-gray-300);
+  --star-color-filled: var(--color-warning, #fadb14);
+  --star-color-hover: var(--color-warning-light, #ffd93d);
+  --star-color-focus: var(--color-primary, #1976d2);
+  --transition-duration: var(--transition-fast, 0.15s);
+  --focus-ring-color: var(--color-primary-alpha, rgba(25, 118, 210, 0.2));
+  
+  display: inline-flex;
   align-items: center;
+  gap: var(--star-gap);
+  position: relative;
 }
 
-.star {
-  color: #ccc; /* Default star color (empty) */
-  font-size: 1.2em; /* Adjust size as needed */
+/* Size variants */
+.small {
+  --star-size: 1rem;
+  --star-gap: 0.0625rem;
+}
+
+.medium {
+  --star-size: 1.2rem;
+  --star-gap: 0.125rem;
+}
+
+.large {
+  --star-size: 1.5rem;
+  --star-gap: 0.1875rem;
+}
+
+/* Interactive vs Read-only states */
+.interactive {
   cursor: pointer;
-  transition: color 0.2s;
 }
 
-.star.filled {
-  color: #fadb14; /* Filled star color (e.g., gold) */
+.interactive:focus-visible {
+  outline: 2px solid var(--star-color-focus);
+  outline-offset: 2px;
+  border-radius: var(--border-radius-sm, 4px);
 }
 
-.star.readOnly {
+.readOnly {
   cursor: default;
 }
 
-.star:not(.readOnly):hover,
-.star:not(.readOnly):hover ~ .star {
-  /* color: #fadb14; /* Highlight on hover, less useful if using filled state */
+/* Star button styling */
+.starButton {
+  all: unset;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--star-size);
+  height: var(--star-size);
+  border-radius: 50%;
+  cursor: inherit;
+  transition: all var(--transition-duration) ease;
+  position: relative;
+  padding: 0;
+  margin: 0;
+}
+
+.starButton:disabled {
+  cursor: default;
+}
+
+.starButton:not(:disabled):hover {
+  transform: translateY(-1px) scale(1.1);
+}
+
+.starButton:not(:disabled):active {
+  transform: translateY(0) scale(0.95);
+}
+
+/* Focus ring for individual stars when needed */
+.starButton:focus-visible {
+  outline: 2px solid var(--focus-ring-color);
+  outline-offset: 2px;
+  border-radius: 50%;
+}
+
+/* Star icon styling */
+.starIcon {
+  width: 100%;
+  height: 100%;
+  transition: all var(--transition-duration) ease;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
+}
+
+/* Empty star state */
+.empty {
+  color: var(--star-color-empty);
+}
+
+.emptyStar .starIcon.empty {
+  color: var(--star-color-empty);
+}
+
+/* Filled star state */
+.filled {
+  color: var(--star-color-filled);
+}
+
+.filledStar .starIcon.filled {
+  color: var(--star-color-filled);
+  filter: drop-shadow(0 2px 4px rgba(250, 219, 20, 0.3));
+}
+
+/* Hover effects for interactive mode */
+.interactive .starButton:not(:disabled):hover .starIcon {
+  color: var(--star-color-hover);
+  filter: drop-shadow(0 2px 6px rgba(255, 217, 61, 0.4));
+}
+
+/* Focus state for accessibility */
+.starIcon.focused {
+  color: var(--star-color-focus);
+  filter: drop-shadow(0 2px 6px var(--focus-ring-color));
+}
+
+/* Gradient effect for premium look */
+.filledStar .starIcon.filled {
+  background: linear-gradient(
+    135deg,
+    var(--star-color-filled) 0%,
+    var(--color-warning-dark, #d4b106) 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+/* Alternative: Use solid fill if gradient doesn't work properly */
+@supports not (-webkit-background-clip: text) {
+  .filledStar .starIcon.filled {
+    background: none;
+    -webkit-text-fill-color: initial;
+    color: var(--star-color-filled);
+  }
+}
+
+/* Smooth color transitions */
+.starIcon {
+  transition: 
+    color var(--transition-duration) ease,
+    filter var(--transition-duration) ease,
+    transform var(--transition-duration) ease;
+}
+
+/* Enhanced hover effect for the whole rating when interactive */
+.interactive:hover {
+  filter: brightness(1.05);
+}
+
+/* Special styling for read-only mode */
+.readOnly .starIcon {
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.08));
+}
+
+.readOnly .filledStar .starIcon.filled {
+  filter: drop-shadow(0 1px 3px rgba(250, 219, 20, 0.2));
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .small {
+    --star-size: 0.875rem;
+  }
+  
+  .medium {
+    --star-size: 1rem;
+  }
+  
+  .large {
+    --star-size: 1.25rem;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .starIcon {
+    filter: none;
+  }
+  
+  .empty {
+    color: var(--color-gray-600, #666);
+  }
+  
+  .filled {
+    color: var(--color-warning-dark, #b8860b);
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .starButton,
+  .starIcon {
+    transition: none;
+  }
+  
+  .starButton:not(:disabled):hover {
+    transform: none;
+  }
 }

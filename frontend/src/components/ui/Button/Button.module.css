@@ -1,4 +1,4 @@
-/* Button.module.css - Kompletnie przeprojektowany */
+/* Button.module.css - Zmodyfikowany dla większego zaokrąglenia */
 .button {
   position: relative;
   display: inline-flex;
@@ -12,6 +12,10 @@
   transition: all var(--transition-base);
   cursor: pointer;
   user-select: none;
+  /* === NOWOŚĆ: Domyślne zaokrąglenie dla wszystkich przycisków === */
+  /* Jeśli chcesz, aby domyślne zaokrąglenie było inne, zmień wartość var(--border-radius-base) */
+  /* w miejscu, gdzie jest zdefiniowana, lub ustaw tutaj inną wartość. */
+  border-radius: var(--border-radius-base);
 }
 
 /* Sizes */
@@ -47,14 +51,16 @@
 
 /* Shapes */
 .square {
+  /* Dla mniejszego zaokrąglenia lub ostrych krawędzi (jeśli --border-radius-sm to 0) */
   border-radius: var(--border-radius-sm);
 }
 
 .rounded {
-  border-radius: var(--border-radius-base);
+  border-radius: 8px;
 }
 
 .pill {
+  /* Dla kształtu kapsułki / w pełni zaokrąglonego */
   border-radius: var(--border-radius-full);
 }
 
