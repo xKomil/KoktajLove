@@ -1,32 +1,38 @@
-// frontend/src/components/ui/Button/Button.tsx
+// Button.tsx - Znacznie ulepszona wersja
 import React from 'react';
 import { Link, LinkProps } from 'react-router-dom';
 import styles from './Button.module.css';
 
-type ButtonVariant = 'primary' | 'secondary' | 'danger' | 'outlinePrimary';
-type ButtonSize = 'small' | 'medium' | 'large';
+type ButtonVariant = 'primary' | 'secondary' | 'danger' | 'success' | 'warning' | 'info' | 'ghost';
+type ButtonSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
+type ButtonShape = 'square' | 'rounded' | 'pill';
 
 interface BaseButtonProps {
   children: React.ReactNode;
-  onClick?: React.MouseEventHandler<HTMLButtonElement>;
-  type?: 'button' | 'submit' | 'reset';
   variant?: ButtonVariant;
   size?: ButtonSize;
+  shape?: ButtonShape;
+  fullWidth?: boolean;
+  isLoading?: boolean;
+  loadingText?: string;
+  leftIcon?: React.ReactNode;
+  rightIcon?: React.ReactNode;
   disabled?: boolean;
   className?: string;
-  fullWidth?: boolean;
 }
 
 // Props for when the component is used as a standard HTML button
 interface HtmlButtonProps extends BaseButtonProps {
   as?: 'button';
-  href?: never; // Ensure href is not allowed for 'button'
+  onClick?: React.MouseEventHandler<HTMLButtonElement>;
+  type?: 'button' | 'submit' | 'reset';
+  href?: never;
 }
 
 // Props for when the component is used as a React Router Link
 interface RouterLinkProps extends BaseButtonProps, Omit<LinkProps, 'className' | 'style' | 'children'> {
   as: 'link';
-  to: LinkProps['to']; // 'to' is required for Link
+  to: LinkProps['to'];
 }
 
 type ButtonProps = HtmlButtonProps | RouterLinkProps;
@@ -34,32 +40,77 @@ type ButtonProps = HtmlButtonProps | RouterLinkProps;
 const Button: React.FC<ButtonProps> = ({
   as = 'button',
   children,
-  onClick,
-  type = 'button',
   variant = 'primary',
-  size = 'medium',
+  size = 'md',
+  shape = 'rounded',
+  fullWidth = false,
+  isLoading = false,
+  loadingText,
+  leftIcon,
+  rightIcon,
   disabled = false,
   className = '',
-  fullWidth = false,
-  ...rest // Catches 'to' for Link and other props
+  ...rest
 }) => {
   const buttonClasses = [
     styles.button,
     styles[variant],
     styles[size],
-    fullWidth ? styles.fullWidth : '',
-    className,
-  ].join(' ').trim();
+    styles[shape],
+    fullWidth && styles.fullWidth,
+    isLoading && styles.loading,
+    className
+  ].filter(Boolean).join(' ');
+
+  const content = (
+    <>
+      {isLoading && (
+        <span className={styles.spinner} aria-hidden="true">
+          <svg
+            className={styles.spinnerIcon}
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
+          </svg>
+        </span>
+      )}
+      {leftIcon && !isLoading && (
+        <span className={styles.leftIcon} aria-hidden="true">
+          {leftIcon}
+        </span>
+      )}
+      <span className={styles.content}>
+        {isLoading && loadingText ? loadingText : children}
+      </span>
+      {rightIcon && !isLoading && (
+        <span className={styles.rightIcon} aria-hidden="true">
+          {rightIcon}
+        </span>
+      )}
+    </>
+  );
 
   if (as === 'link') {
     const linkProps = rest as Omit<RouterLinkProps, keyof BaseButtonProps | 'as'>;
     return (
-      <Link {...linkProps} className={buttonClasses} 
-        // Prevent navigation on disabled link-like button
-        onClick={(e) => { if (disabled) e.preventDefault(); }}
-        aria-disabled={disabled}
+      <Link
+        {...linkProps}
+        className={buttonClasses}
+        onClick={(e) => {
+          if (disabled || isLoading) {
+            e.preventDefault();
+            return;
+          }
+          linkProps.onClick?.(e);
+        }}
+        aria-disabled={disabled || isLoading}
       >
-        {children}
+        {content}
       </Link>
     );
   }
@@ -67,13 +118,12 @@ const Button: React.FC<ButtonProps> = ({
   const btnProps = rest as Omit<HtmlButtonProps, keyof BaseButtonProps | 'as'>;
   return (
     <button
-      type={type}
-      className={buttonClasses}
-      onClick={onClick}
-      disabled={disabled}
       {...btnProps}
+      className={buttonClasses}
+      disabled={disabled || isLoading}
+      type={btnProps.type || 'button'}
     >
-      {children}
+      {content}
     </button>
   );
 };

@@ -1,63 +1,201 @@
+/* Modal.module.css - Kompletnie przeprojektowany */
+.portal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1000;
+}
+
 .overlay {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent backdrop */
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1000; /* Ensure it's on top */
+  padding: 1rem;
+  animation: fadeIn 0.2s ease-out;
 }
 
 .modal {
-  background-color: white;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-  min-width: 300px;
-  max-width: 90%;
-  max-height: 90vh;
-  overflow-y: auto;
-  position: relative; /* For positioning close button */
+  background: white;
+  border-radius: 12px;
+  box-shadow: 
+    0 25px 50px -12px rgba(0, 0, 0, 0.25),
+    0 0 0 1px rgba(255, 255, 255, 0.1);
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100vh - 2rem);
+  width: 100%;
+  position: relative;
+  animation: slideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+}
+
+/* Sizes */
+.sm {
+  max-width: 384px;
+}
+
+.md {
+  max-width: 512px;
+}
+
+.lg {
+  max-width: 768px;
+}
+
+.xl {
+  max-width: 1024px;
+}
+
+.full {
+  max-width: calc(100vw - 2rem);
+  max-height: calc(100vh - 2rem);
+}
+
+/* Header */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.5rem 1.5rem 0;
+  border-bottom: 1px solid #f3f4f6;
+  margin-bottom: 1.5rem;
+  flex-shrink: 0;
+}
+
+.title {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #111827;
+  line-height: 1.2;
 }
 
 .closeButton {
-  position: absolute;
-  top: 10px;
-  right: 10px;
   background: none;
   border: none;
-  font-size: 1.5rem;
   cursor: pointer;
-  color: #888;
+  padding: 0.5rem;
+  border-radius: 8px;
+  color: #6b7280;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: -0.5rem -0.5rem -0.5rem 1rem;
 }
+
 .closeButton:hover {
-  color: #333;
+  background-color: #f3f4f6;
+  color: #374151;
 }
 
-.modalHeader {
-  padding-bottom: 10px;
-  margin-bottom: 15px;
-  border-bottom: 1px solid #eee;
+.closeButton:focus {
+  outline: 2px solid #667eea;
+  outline-offset: 2px;
 }
 
-.modalTitle {
-  margin: 0;
-  font-size: 1.5rem;
+/* Body */
+.body {
+  padding: 0 1.5rem;
+  overflow-y: auto;
+  flex: 1;
+  min-height: 0;
 }
 
-.modalBody {
-  margin-bottom: 15px;
+/* Footer */
+.footer {
+  padding: 1.5rem;
+  border-top: 1px solid #f3f4f6;
+  margin-top: 1.5rem;
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  flex-shrink: 0;
 }
 
-.modalFooter {
-  padding-top: 10px;
-  border-top: 1px solid #eee;
-  text-align: right; /* Align buttons to the right, common pattern */
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
-.modalFooter button + button {
-  margin-left: 0.5rem; /* Space between buttons in footer */
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .overlay {
+    padding: 0.5rem;
+    align-items: flex-end;
+  }
+  
+  .modal {
+    border-radius: 12px 12px 0 0;
+    max-height: 90vh;
+    animation: slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  .header,
+  .body,
+  .footer {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+  
+  .title {
+    font-size: 1.25rem;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+/* Focus styles */
+.modal:focus {
+  outline: none;
+}
+
+/* Scrollbar styling for modal body */
+.body::-webkit-scrollbar {
+  width: 6px;
+}
+
+.body::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.body::-webkit-scrollbar-thumb {
+  background-color: #d1d5db;
+  border-radius: 3px;
+}
+
+.body::-webkit-scrollbar-thumb:hover {
+  background-color: #9ca3af;
 }

@@ -1,4 +1,4 @@
-// frontend/src/components/layout/MainLayout/MainLayout.tsx
+// MainLayout.tsx - Ulepszona wersja
 import React from 'react';
 import { Outlet } from 'react-router-dom';
 import Navbar from '../Navbar/Navbar';
@@ -10,7 +10,9 @@ const MainLayout: React.FC = () => {
     <div className={styles.layout}>
       <Navbar />
       <main className={styles.mainContent}>
-        <Outlet /> {/* Nested routes will render here */}
+        <div className={styles.contentContainer}>
+          <Outlet />
+        </div>
       </main>
       <Footer />
     </div>

@@ -1,13 +1,31 @@
-
+/* MainLayout.module.css - Ulepszona wersja */
 .layout {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
   min-height: 100vh;
+  --navbar-height: 60px;
 }
 
 .mainContent {
-  flex-grow: 1;
-  padding-top: 60px; /* Adjust if Navbar height changes, or use CSS Grid/Flex for better layout */
-  /* Alternatively, ensure Navbar is position: fixed or sticky and main has appropriate padding/margin */
+  padding-top: var(--navbar-height);
+  position: relative;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  min-height: calc(100vh - var(--navbar-height));
+}
+
+.contentContainer {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
   width: 100%;
+}
+
+@media (max-width: 768px) {
+  .layout {
+    --navbar-height: 56px;
+  }
+  
+  .contentContainer {
+    padding: 1rem 0.75rem;
+  }
 }

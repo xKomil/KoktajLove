@@ -1,28 +1,185 @@
+/* Input.module.css - Kompletnie przeprojektowany */
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-1);
+}
+
+.fullWidth {
+  width: 100%;
+}
+
+.label {
+  color: var(--color-gray-700);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  margin-bottom: var(--spacing-1);
+}
+
+.inputWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
 .input {
   width: 100%;
-  padding: 0.65rem 0.75rem; /* Slightly taller padding */
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  font-size: 1rem;
-  box-sizing: border-box; /* Important for width: 100% */
-  transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-base);
+  color: var(--color-gray-900);
+  background-color: var(--color-white);
+  border: 1px solid var(--color-gray-300);
+  border-radius: var(--border-radius-base);
+  transition: all var(--transition-base);
+  padding: var(--spacing-2) var(--spacing-3);
+}
+
+/* Size variants */
+.sm .input {
+  padding: var(--spacing-1) var(--spacing-2);
+  font-size: var(--font-size-sm);
+}
+
+.lg .input {
+  padding: var(--spacing-3) var(--spacing-4);
+  font-size: var(--font-size-lg);
+}
+
+/* Style variants */
+.outlined .input {
+  background-color: transparent;
+}
+
+.filled .input {
+  background-color: var(--color-gray-100);
+  border-color: transparent;
+}
+
+.filled .input:hover {
+  background-color: var(--color-gray-200);
+}
+
+/* States */
+.input:hover {
+  border-color: var(--color-gray-400);
 }
 
 .input:focus {
-  border-color: #007bff; /* Example focus color */
-  outline: none; /* Remove default outline */
-  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25); /* Bootstrap-like focus shadow */
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px var(--color-primary-light);
 }
 
-.input[aria-invalid="true"] {
-  border-color: #dc3545; /* Error color */
+.hasError .input {
+  border-color: var(--color-danger);
 }
 
-.input[aria-invalid="true"]:focus {
-  border-color: #dc3545;
-  box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+.hasError .input:focus {
+  box-shadow: 0 0 0 2px var(--color-danger-light);
 }
 
-.input::placeholder {
-  color: #aaa;
+/* Icons */
+.startIcon,
+.endIcon {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--color-gray-500);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.startIcon {
+  left: var(--spacing-3);
+}
+
+.endIcon {
+  right: var(--spacing-3);
+}
+
+.hasStartIcon {
+  padding-left: calc(var(--spacing-3) * 2 + 24px); /* icon width + padding */
+}
+
+.hasEndIcon {
+  padding-right: calc(var(--spacing-3) * 2 + 24px);
+}
+
+/* Helper and error text */
+.bottomText {
+  min-height: 20px;
+  font-size: var(--font-size-sm);
+  margin-top: var(--spacing-1);
+}
+
+.helperText {
+  color: var(--color-gray-600);
+}
+
+.error {
+  color: var(--color-danger);
+}
+
+/* Disabled state */
+.input:disabled {
+  background-color: var(--color-gray-100);
+  border-color: var(--color-gray-200);
+  color: var(--color-gray-500);
+  cursor: not-allowed;
+}
+
+/* Dark mode */
+@media (prefers-color-scheme: dark) {
+  .label {
+    color: var(--color-gray-300);
+  }
+
+  .input {
+    color: var(--color-white);
+    background-color: var(--color-gray-800);
+    border-color: var(--color-gray-700);
+  }
+
+  .input:hover {
+    border-color: var(--color-gray-600);
+  }
+
+  .filled .input {
+    background-color: var(--color-gray-900);
+  }
+
+  .filled .input:hover {
+    background-color: var(--color-gray-800);
+  }
+
+  .input:disabled {
+    background-color: var(--color-gray-900);
+    border-color: var(--color-gray-800);
+    color: var(--color-gray-600);
+  }
+
+  .helperText {
+    color: var(--color-gray-400);
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  .hasLeftIcon {
+    padding-left: 2.5rem;
+  }
+  
+  .hasRightIcon {
+    padding-right: 2.5rem;
+  }
+  
+  .leftIconWrapper {
+    left: 0.75rem;
+  }
+  
+  .rightIconWrapper {
+    right: 0.75rem;
+  }
 }
