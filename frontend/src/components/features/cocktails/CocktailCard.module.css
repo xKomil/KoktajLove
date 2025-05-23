@@ -1,62 +1,275 @@
+/* CocktailCard.module.css - Ulepszona wersja */
+
 .card {
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  padding: 1rem;
-  margin: 0.5rem;
-  background-color: #fff;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  /* Struktura i układ */
   display: flex;
   flex-direction: column;
-  transition: transform 0.2s ease-in-out;
+  
+  /* Nowoczesne tło z gradientem */
+  background: linear-gradient(135deg, var(--color-gray-50) 0%, var(--color-gray-100) 100%);
+  
+  /* Zaokrąglone rogi */
+  border-radius: var(--border-radius-lg);
+  
+  /* Nowoczesny cień z wielowarstwowością */
+  box-shadow: 
+    var(--shadow-sm),
+    0 0 0 1px rgba(var(--color-primary-rgb), 0.05);
+  
+  /* Smooth transitions */
+  transition: 
+    transform var(--transition-base),
+    box-shadow var(--transition-base),
+    background var(--transition-base);
+  
+  /* Padding z wykorzystaniem zmiennych */
+  padding: var(--spacing-lg);
+  
+  /* Wysokość i overflow */
+  height: 100%;
+  overflow: hidden;
+  
+  /* Cursor pointer dla całej karty */
+  cursor: pointer;
+  
+  /* Pozycjonowanie dla efektów */
+  position: relative;
 }
 
-.card:hover {
-  transform: translateY(-5px);
+/* Subtelny efekt aktywnego stanu */
+.card:active {
+  transform: translateY(-4px) scale(1.01);
+  transition-duration: 0.1s;
+}
+
+/* Kontener obrazka z overflow i pozycjonowaniem */
+.imageContainer {
+  position: relative;
+  width: 100%;
+  height: 200px;
+  margin-bottom: var(--spacing-md);
+  border-radius: var(--border-radius-md);
+  overflow: hidden;
+  background: linear-gradient(135deg, var(--color-gray-200) 0%, var(--color-gray-300) 100%);
 }
 
 .image {
   width: 100%;
-  max-height: 200px;
+  height: 100%;
   object-fit: cover;
-  border-radius: 4px;
-  margin-bottom: 0.75rem;
+  transition: transform var(--transition-slow);
+}
+
+/* Efekt hover na obrazku */
+.card:hover .image {
+  transform: scale(1.05);
+}
+
+/* Overlay dla lepszej czytelności tekstu na obrazku */
+.imageOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    transparent 60%,
+    rgba(0, 0, 0, 0.1) 100%
+  );
+  opacity: 0;
+  transition: opacity var(--transition-base);
+}
+
+.card:hover .imageOverlay {
+  opacity: 1;
+}
+
+/* Placeholder dla obrazka podczas ładowania */
+.imagePlaceholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, var(--color-gray-200) 0%, var(--color-gray-300) 100%);
+  color: var(--color-gray-600);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+}
+
+/* Główna treść karty */
+.content {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  gap: var(--spacing-sm);
 }
 
 .name {
-  font-size: 1.25rem;
-  font-weight: bold;
-  margin-bottom: 0.5rem;
-  color: #333;
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-gray-900);
+  line-height: var(--line-height-tight);
+  margin: 0;
+  
+  /* Ograniczenie do 2 linii z elipsą */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .description {
-  font-size: 0.9rem;
-  color: #666;
-  margin-bottom: 0.75rem;
-  flex-grow: 1; /* Makes description take available space */
+  font-size: var(--font-size-sm);
+  color: var(--color-gray-600);
+  line-height: var(--line-height-relaxed);
+  margin: 0;
+  flex-grow: 1;
+  
+  /* Ograniczenie do 3 linii z elipsą */
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
+/* Kontener dla metadanych (rating, tagi) */
+.metadata {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  margin-top: var(--spacing-sm);
+}
+
+/* Kontener ratingu */
+.ratingContainer {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.ratingText {
+  font-size: var(--font-size-sm);
+  color: var(--color-gray-600);
+  font-weight: var(--font-weight-medium);
+}
+
+/* Kontener tagów */
 .tagsContainer {
-  margin-bottom: 0.5rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-xs);
+  margin-top: var(--spacing-xs);
 }
 
 .tag {
-  display: inline-block;
-  background-color: #e0e0e0;
-  color: #555;
-  padding: 0.25rem 0.5rem;
-  border-radius: 12px;
-  font-size: 0.75rem;
-  margin-right: 0.25rem;
-  margin-bottom: 0.25rem;
+  display: inline-flex;
+  align-items: center;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  background: linear-gradient(135deg, rgba(var(--color-primary-rgb), 0.1) 0%, rgba(var(--color-primary-rgb), 0.05) 100%);
+  color: var(--color-primary-dark);
+  border-radius: var(--border-radius-full);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  border: 1px solid rgba(var(--color-primary-rgb), 0.2);
+  transition: all var(--transition-fast);
 }
 
-.rating {
-  margin-bottom: 0.5rem;
-  font-size: 0.9rem;
+.tag:hover {
+  background: linear-gradient(135deg, rgba(var(--color-primary-rgb), 0.15) 0%, rgba(var(--color-primary-rgb), 0.1) 100%);
+  border-color: rgba(var(--color-primary-rgb), 0.3);
 }
 
-.detailsLink {
-  align-self: flex-start; /* Aligns button to the left */
-  margin-top: auto; /* Pushes button to the bottom */
+/* Kontener przycisku */
+.actionContainer {
+  margin-top: var(--spacing-md);
+  padding-top: var(--spacing-sm);
+  border-top: 1px solid var(--color-gray-200);
+}
+
+/* Customowe style dla przycisku w karcie */
+.detailsButton {
+  width: 100%;
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+  color: var(--color-white);
+  border: none;
+  font-weight: var(--font-weight-semibold);
+  transition: all var(--transition-base);
+}
+
+.detailsButton:hover {
+  background: linear-gradient(135deg, var(--color-primary-dark) 0%, var(--color-primary) 100%);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+/* Badge dla nowych koktajli (opcjonalne) */
+.newBadge {
+  position: absolute;
+  top: var(--spacing-sm);
+  right: var(--spacing-sm);
+  background: linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-dark) 100%);
+  color: var(--color-white);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--border-radius-full);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+  z-index: 2;
+}
+
+/* Stan loading */
+.loading {
+  pointer-events: none;
+  opacity: 0.7;
+}
+
+.loading .image {
+  filter: blur(1px);
+}
+
+/* Responsywność */
+@media (max-width: 768px) {
+  .card {
+    padding: var(--spacing-md);
+  }
+  
+  .imageContainer {
+    height: 160px;
+  }
+  
+  .name {
+    font-size: var(--font-size-lg);
+  }
+  
+  .description {
+    -webkit-line-clamp: 2;
+  }
+}
+
+/* Focus styles dla dostępności */
+.card:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* Redukcja animacji dla użytkowników z prefers-reduced-motion */
+@media (prefers-reduced-motion: reduce) {
+  .card,
+  .image,
+  .tag,
+  .detailsButton {
+    transition: none;
+  }
+  
+  .card:hover {
+    transform: none;
+  }
+  
+  .card:hover .image {
+    transform: none;
+  }
 }

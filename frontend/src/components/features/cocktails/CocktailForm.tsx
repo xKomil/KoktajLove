@@ -1,6 +1,6 @@
 // frontend/src/components/features/cocktails/CocktailForm.tsx
 import React, { useEffect, useState } from 'react';
-import { useForm, SubmitHandler, useFieldArray, Controller, FieldError, FieldErrorsImpl, Merge } from 'react-hook-form'; // Dodaj FieldError itp.
+import { useForm, SubmitHandler, useFieldArray, Controller, FieldError, FieldErrorsImpl, Merge } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import {
   CocktailCreate,
@@ -142,7 +142,7 @@ const CocktailForm: React.FC<CocktailFormProps> = ({ cocktail, onSubmitSuccess }
     const processedIngredients = data.ingredients
       .map(ing => ({
         ingredient_id: parseInt(ing.ingredient_id, 10),
-        amount: parseInt(ing.quantity, 10), // Backend oczekuje int
+        amount: parseInt(ing.quantity, 10),
         unit: ing.unit as UnitEnum,
       }))
       .filter(ing => ing.ingredient_id && !isNaN(ing.ingredient_id) && !isNaN(ing.amount) && ing.amount > 0);
@@ -208,97 +208,125 @@ const CocktailForm: React.FC<CocktailFormProps> = ({ cocktail, onSubmitSuccess }
   return (
     <form onSubmit={handleSubmit(onSubmit)} className={styles.form}>
       <h2 className={styles.formTitle}>{cocktail ? 'Edit Cocktail' : 'Add New Cocktail'}</h2>
-      {formError && <p className={styles.errorMessage} role="alert">{formError}</p>}
+      
+      {formError && (
+        <div className={styles.formErrorContainer} role="alert">
+          <p className={styles.errorMessage}>{formError}</p>
+        </div>
+      )}
 
       <div className={styles.formGroup}>
-        <label htmlFor="name">Name</label>
-        <Input id="name" {...register('name', { required: 'Name is required' })} />
-        {errors.name && <p className={styles.errorMessage} role="alert">{errors.name.message}</p>}
+        <Input 
+          id="name" 
+          label="Name"
+          placeholder="Enter cocktail name..."
+          {...register('name', { required: 'Name is required' })} 
+          error={errors.name?.message}
+        />
       </div>
 
       <div className={styles.formGroup}>
         <label htmlFor="description">Description</label>
-        <textarea id="description" {...register('description', { required: 'Description is required' })} />
+        <textarea 
+          id="description" 
+          placeholder="Describe your cocktail..."
+          {...register('description', { required: 'Description is required' })} 
+        />
         {errors.description && <p className={styles.errorMessage} role="alert">{errors.description.message}</p>}
       </div>
 
       <div className={styles.formGroup}>
         <label htmlFor="instructions">Instructions</label>
-        <textarea id="instructions" {...register('instructions', { required: 'Instructions are required' })} />
+        <textarea 
+          id="instructions" 
+          placeholder="How to make this cocktail..."
+          {...register('instructions', { required: 'Instructions are required' })} 
+        />
         {errors.instructions && <p className={styles.errorMessage} role="alert">{errors.instructions.message}</p>}
       </div>
 
       <div className={styles.formGroup}>
-        <label htmlFor="image_url">Image URL (optional)</label>
-        <Input id="image_url" type="url" {...register('image_url')} />
-        {errors.image_url && <p className={styles.errorMessage} role="alert">{errors.image_url.message}</p>}
+        <Input 
+          id="image_url" 
+          type="url" 
+          label="Image URL (optional)"
+          placeholder="https://example.com/image.jpg"
+          {...register('image_url')} 
+          error={errors.image_url?.message}
+        />
       </div>
       
       <div className={styles.formGroup}>
         <label className={styles.checkboxLabel}>
           <input type="checkbox" {...register('is_public')} defaultChecked={cocktail?.is_public ?? true} />
-          Publicly Visible
+          <span className={styles.checkboxText}> Publicly Visible</span>
         </label>
       </div>
 
       <section className={styles.ingredientsSection}>
         <h3>Ingredients</h3>
-        {fields.map((field, index) => (
-          <div key={field.id} className={styles.ingredientItem}>
-            <Controller
-              name={`ingredients.${index}.ingredient_id`}
-              control={control}
-              rules={{ required: 'Ingredient is required' }}
-              render={({ field: controllerField }) => ( // Zmieniono nazwę, aby uniknąć konfliktu z `field` z map
-                <select {...controllerField} defaultValue="">
-                  <option value="" disabled>Select Ingredient</option>
-                  {availableIngredients.map(ing => (
-                    <option key={ing.id} value={String(ing.id)}>{ing.name}</option>
-                  ))}
-                </select>
-              )}
-            />
-            <Input
-              type="number"
-              step="1"
-              placeholder="Ilość"
-              {...register(`ingredients.${index}.quantity`, { 
-                required: 'Ilość jest wymagalna', 
-                valueAsNumber: false,
-                validate: value => {
-                    const num = parseInt(value, 10);
-                    return !isNaN(num) && num > 0 || "Ilość musi wynosić liczbe większą od 0";
-                }
-              })}
-            />
-            <Controller
-              name={`ingredients.${index}.unit`}
-              control={control}
-              rules={{ required: 'Unit is required' }}
-              render={({ field: controllerField }) => ( // Zmieniono nazwę
-                <select {...controllerField} defaultValue={UnitEnum.ML}>
-                  {Object.values(UnitEnum).map(unit => (
-                    <option key={unit} value={unit}>{unit}</option>
-                  ))}
-                </select>
-              )}
-            />
-            <Button type="button" onClick={() => remove(index)} variant="danger" size="small">Remove</Button>
-          </div>
-        ))}
+        <div className={styles.ingredientsContainer}>
+          {fields.map((field, index) => (
+            <div key={field.id} className={styles.ingredientItem}>
+              <Controller
+                name={`ingredients.${index}.ingredient_id`}
+                control={control}
+                rules={{ required: 'Ingredient is required' }}
+                render={({ field: controllerField }) => (
+                  <select {...controllerField}>
+                    <option value="">Select Ingredient</option>
+                    {availableIngredients.map(ing => (
+                      <option key={ing.id} value={String(ing.id)}>{ing.name}</option>
+                    ))}
+                  </select>
+                )}
+              />
+              <Input
+                type="number"
+                step="1"
+                placeholder="Amount"
+                {...register(`ingredients.${index}.quantity`, { 
+                  required: 'Amount is required', 
+                  valueAsNumber: false,
+                  validate: value => {
+                      const num = parseInt(value, 10);
+                      return !isNaN(num) && num > 0 || "Amount must be greater than 0";
+                  }
+                })}
+              />
+              <Controller
+                name={`ingredients.${index}.unit`}
+                control={control}
+                rules={{ required: 'Unit is required' }}
+                render={({ field: controllerField }) => (
+                  <select {...controllerField}>
+                    {Object.values(UnitEnum).map(unit => (
+                      <option key={unit} value={unit}>{unit}</option>
+                    ))}
+                  </select>
+                )}
+              />
+              <Button 
+                type="button" 
+                onClick={() => remove(index)} 
+                variant="danger" 
+                size="sm"
+              >
+                Remove
+              </Button>
+            </div>
+          ))}
+        </div>
         
-        {/* Poprawiona sekcja wyświetlania błędów dla ingredients */}
+        {/* Błędy dla ingredients */}
         {errors.ingredients && Array.isArray(errors.ingredients) && (
           errors.ingredients.map((itemError, index) => {
             if (!itemError) return null;
 
-            // Sprawdzamy, czy itemError jest obiektem z polami FieldError
-            // Typowanie z RHF: FieldError | Merge<FieldError, FieldErrorsImpl<DeepRequired<TFieldValues>...>>
-            // Uproszczone sprawdzenie dla message
             const ingredientIdMsg = (itemError.ingredient_id as FieldError)?.message;
             const quantityMsg = (itemError.quantity as FieldError)?.message;
             const unitMsg = (itemError.unit as FieldError)?.message;
-            const rootMsg = (itemError as FieldError)?.message; // Dla błędów na poziomie całego obiektu w tablicy
+            const rootMsg = (itemError as FieldError)?.message;
 
             if (ingredientIdMsg || quantityMsg || unitMsg || rootMsg) {
               return (
@@ -306,7 +334,6 @@ const CocktailForm: React.FC<CocktailFormProps> = ({ cocktail, onSubmitSuccess }
                   {ingredientIdMsg && <p role="alert">Ingredient: {ingredientIdMsg}</p>}
                   {quantityMsg && <p role="alert">Quantity: {quantityMsg}</p>}
                   {unitMsg && <p role="alert">Unit: {unitMsg}</p>}
-                  {/* Renderuj rootMsg tylko jeśli nie ma bardziej szczegółowych błędów pól, aby uniknąć duplikacji */}
                   {rootMsg && !ingredientIdMsg && !quantityMsg && !unitMsg && <p role="alert">{rootMsg}</p>}
                 </div>
               );
@@ -314,32 +341,38 @@ const CocktailForm: React.FC<CocktailFormProps> = ({ cocktail, onSubmitSuccess }
             return null;
           })
         )}
-        {/* Błąd dla całej tablicy ingredients (np. "minimum jeden składnik") */}
         {errors.ingredients && !Array.isArray(errors.ingredients) && (errors.ingredients as FieldError)?.message && (
             <div className={styles.errorMessage} role="alert">
                 <p>{(errors.ingredients as FieldError).message}</p>
             </div>
         )}
 
-        <Button type="button" onClick={() => append({ ingredient_id: '', quantity: '', unit: UnitEnum.ML })} variant="secondary">
+        <Button 
+          type="button" 
+          onClick={() => append({ ingredient_id: '', quantity: '', unit: UnitEnum.ML })} 
+          variant="secondary"
+          className={styles.addIngredientButton}
+        >
           Add Ingredient
         </Button>
       </section>
 
       <section className={styles.tagsSection}>
         <h3>Tags (optional)</h3>
-        <div className={styles.formGroup}>
+        <div className={styles.tagsContainer}>
+          <div className={styles.tagsGrid}>
             {availableTags.map(tag => (
-                <label key={tag.id} className={styles.checkboxLabel} htmlFor={`tag-${tag.id}`}>
-                    <input
-                        type="checkbox"
-                        id={`tag-${tag.id}`}
-                        value={String(tag.id)}
-                        {...register('tag_ids')}
-                    />
-                    {tag.name}
-                </label>
+              <label key={tag.id} className={styles.checkboxLabel} htmlFor={`tag-${tag.id}`}>
+                <input
+                  type="checkbox"
+                  id={`tag-${tag.id}`}
+                  value={String(tag.id)}
+                  {...register('tag_ids')}
+                />
+                <span className={styles.checkboxText}>{tag.name}</span>
+              </label>
             ))}
+          </div>
         </div>
         {errors.tag_ids && <p className={styles.errorMessage} role="alert">{errors.tag_ids.message}</p>}
       </section>

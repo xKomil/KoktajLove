@@ -1,5 +1,5 @@
-// frontend/src/components/features/cocktails/CocktailCard.tsx
-import React, { useState, useEffect } from 'react';
+// CocktailCard.tsx - Ulepszona wersja
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { CocktailWithDetails, Tag } from '@/types/cocktailTypes';
 import RatingStars from './RatingStars';
@@ -8,83 +8,206 @@ import styles from './CocktailCard.module.css';
 
 interface CocktailCardProps {
   cocktail: CocktailWithDetails;
+  showNewBadge?: boolean;
+  onCardClick?: (cocktail: CocktailWithDetails) => void;
+  className?: string;
 }
 
-const CocktailCard: React.FC<CocktailCardProps> = ({ cocktail }) => {
-  const placeholderViaUrl = `https://pixabay.com/pl/photos/koktajl-kieliszek-koktajle-drink-1869860/`;
-  // Opcjonalny lokalny placeholder, jeśli via.placeholder.com zawiedzie
-  const localFallbackImageUrl = '/assets/default-cocktail.png'; // Umieść obrazek w public/assets
+const CocktailCard: React.FC<CocktailCardProps> = ({ 
+  cocktail, 
+  showNewBadge = false,
+  onCardClick,
+  className = ''
+}) => {
+  const [imageState, setImageState] = useState<'loading' | 'loaded' | 'error'>('loading');
+  const [currentSrc, setCurrentSrc] = useState<string>('');
+  
+  // URLs dla fallbacków
+  const placeholderUrl = `https://via.placeholder.com/400x300/f3f4f6/6b7280?text=${encodeURIComponent(cocktail.name)}`;
+  const localFallbackUrl = '/assets/default-cocktail.png';
 
-  const [currentSrc, setCurrentSrc] = useState(cocktail.image_url || placeholderViaUrl);
-  // Flagi do śledzenia, które źródła już zawiodły
-  const [originalImageFailed, setOriginalImageFailed] = useState(false);
-  const [placeholderViaFailed, setPlaceholderViaFailed] = useState(false);
-
-  const handleImageError = () => {
-    if (!originalImageFailed && currentSrc === (cocktail.image_url || placeholderViaUrl) && cocktail.image_url) {
-      // Pierwszy błąd: Oryginalny URL (cocktail.image_url) nie zadziałał
-      console.warn(`Nie udało się załadować obrazka: ${cocktail.image_url}. Próbuję default-cocktail.`);
-      setCurrentSrc(placeholderViaUrl);
-      setOriginalImageFailed(true);
-    } else if (!placeholderViaFailed && currentSrc === placeholderViaUrl) {
-      // Drugi błąd: via.placeholder.com nie zadziałał
-      console.warn(`Nie udało się załadować obrazka z default-cocktail. Próbuję lokalny fallback (jeśli istnieje).`);
-      // Spróbuj lokalnego fallbacku, jeśli go zdefiniowałeś
-      // Jeśli nie masz localFallbackImageUrl, możesz tu ustawić currentSrc na pusty string lub specjalny data URI
-      setCurrentSrc(localFallbackImageUrl); // Ustaw na lokalny, jeśli go masz
-      setPlaceholderViaFailed(true);
-    } else if (currentSrc === localFallbackImageUrl) {
-      // Trzeci błąd: Nawet lokalny fallback nie zadziałał. Nie rób nic więcej.
-      console.error(`Nie udało się załadować nawet lokalnego fallbacku: ${localFallbackImageUrl}.`);
+  // Inicjalizacja źródła obrazka
+  useEffect(() => {
+    if (cocktail.image_url) {
+      setCurrentSrc(cocktail.image_url);
+      setImageState('loading');
+    } else {
+      setCurrentSrc(placeholderUrl);
+      setImageState('loaded');
     }
+  }, [cocktail.id, cocktail.image_url, placeholderUrl]);
+
+  // Obsługa błędów ładowania obrazka
+  const handleImageError = useCallback(() => {
+    if (currentSrc === cocktail.image_url) {
+      // Pierwszy fallback - placeholder
+      console.warn(`Failed to load original image: ${cocktail.image_url}`);
+      setCurrentSrc(placeholderUrl);
+    } else if (currentSrc === placeholderUrl) {
+      // Drugi fallback - lokalny obrazek
+      console.warn('Failed to load placeholder image, trying local fallback');
+      setCurrentSrc(localFallbackUrl);
+    } else {
+      // Ostateczny fallback nie zadziałał
+      console.error('All image sources failed to load');
+      setImageState('error');
+    }
+  }, [currentSrc, cocktail.image_url, placeholderUrl, localFallbackUrl]);
+
+  // Obsługa pomyślnego załadowania obrazka
+  const handleImageLoad = useCallback(() => {
+    setImageState('loaded');
+  }, []);
+
+  // Obsługa kliknięcia w kartę
+  const handleCardClick = useCallback((e: React.MouseEvent) => {
+    // Zapobiegaj propagacji jeśli kliknięto w button
+    if ((e.target as HTMLElement).closest('button, a')) {
+      return;
+    }
+    
+    if (onCardClick) {
+      onCardClick(cocktail);
+    }
+  }, [onCardClick, cocktail]);
+
+  // Obsługa klawiatury dla dostępności
+  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      if (onCardClick) {
+        onCardClick(cocktail);
+      }
+    }
+  }, [onCardClick, cocktail]);
+
+  // Przygotowanie opisu z intelligent truncation
+  const truncateDescription = (text: string, maxLength: number = 120): string => {
+    if (text.length <= maxLength) return text;
+    
+    // Znajdź ostatnią spację przed limitem
+    const truncated = text.substring(0, maxLength);
+    const lastSpace = truncated.lastIndexOf(' ');
+    
+    return lastSpace > maxLength * 0.8 
+      ? truncated.substring(0, lastSpace) + '...'
+      : truncated + '...';
   };
 
-  // Efekt do resetowania stanu, gdy zmienia się koktajl
-  useEffect(() => {
-    setCurrentSrc(cocktail.image_url || placeholderViaUrl);
-    setOriginalImageFailed(false);
-    setPlaceholderViaFailed(false);
-  }, [cocktail.id, cocktail.image_url, placeholderViaUrl]); // Dodaj cocktail.id, aby resetować przy zmianie koktajlu
+  const description = cocktail.description || "No description available.";
+  const displayDescription = truncateDescription(description);
+
+  // Ograniczenie tagów do wyświetlenia
+  const maxVisibleTags = 3;
+  const visibleTags = cocktail.tags?.slice(0, maxVisibleTags) || [];
+  const remainingTagsCount = (cocktail.tags?.length || 0) - maxVisibleTags;
 
   return (
-    <div className={styles.card}>
-      <img
-        src={currentSrc}
-        alt={cocktail.name}
-        className={styles.image}
-        onError={handleImageError}
-      />
-      <h3 className={styles.name}>{cocktail.name}</h3>
-      <p className={styles.description}>
-        {cocktail.description.length > 100
-          ? `${cocktail.description.substring(0, 100)}...`
-          : cocktail.description}
-      </p>
-
-      {cocktail.average_rating !== undefined && cocktail.average_rating !== null && (
-        <div className={styles.rating}>
-          <RatingStars rating={cocktail.average_rating} readOnly />
-          ({cocktail.average_rating.toFixed(1)})
+    <article 
+      className={`${styles.card} ${imageState === 'loading' ? styles.loading : ''} ${className}`}
+      onClick={handleCardClick}
+      onKeyDown={handleKeyDown}
+      tabIndex={onCardClick ? 0 : -1}
+      role={onCardClick ? "button" : undefined}
+      aria-label={`Cocktail: ${cocktail.name}`}
+    >
+      {/* Badge dla nowych koktajli */}
+      {showNewBadge && (
+        <div className={styles.newBadge} aria-label="New cocktail">
+          NEW
         </div>
       )}
 
-      {cocktail.tags && cocktail.tags.length > 0 && (
-        <div className={styles.tagsContainer}>
-          {cocktail.tags.slice(0, 3).map((tag: Tag) => (
-            <span key={tag.id} className={styles.tag}>{tag.name}</span>
-          ))}
-        </div>
-      )}
+      {/* Kontener obrazka */}
+      <div className={styles.imageContainer}>
+        {imageState === 'error' ? (
+          <div className={styles.imagePlaceholder} role="img" aria-label="Image not available">
+            🍹 Image not available
+          </div>
+        ) : (
+          <>
+            <img
+              src={currentSrc}
+              alt={`${cocktail.name} cocktail`}
+              className={styles.image}
+              onError={handleImageError}
+              onLoad={handleImageLoad}
+              loading="lazy"
+              decoding="async"
+            />
+            <div className={styles.imageOverlay} aria-hidden="true" />
+          </>
+        )}
+      </div>
 
-      <Button
-        as="link"
-        to={`/cocktail/${cocktail.id}`}
-        variant="secondary"
-        className={styles.detailsLink}
-      >
-        View Details
-      </Button>
-    </div>
+      {/* Główna treść */}
+      <div className={styles.content}>
+        <h3 className={styles.name}>
+          {cocktail.name}
+        </h3>
+
+        <p className={styles.description}>
+          {displayDescription}
+        </p>
+
+        {/* Metadata (rating, tagi) */}
+        <div className={styles.metadata}>
+          {/* Rating */}
+          {(cocktail.average_rating !== undefined && cocktail.average_rating !== null) && (
+            <div className={styles.ratingContainer}>
+              <RatingStars 
+                rating={cocktail.average_rating} 
+                readOnly 
+                size="small"
+                aria-label={`Rating: ${cocktail.average_rating} out of 5 stars`}
+              />
+              <span className={styles.ratingText} aria-hidden="true">
+                ({cocktail.average_rating.toFixed(1)})
+              </span>
+            </div>
+          )}
+
+          {/* Tagi */}
+          {visibleTags.length > 0 && (
+            <div className={styles.tagsContainer} role="list" aria-label="Cocktail tags">
+              {visibleTags.map((tag: Tag) => (
+                <span 
+                  key={tag.id} 
+                  className={styles.tag}
+                  role="listitem"
+                  title={tag.name}
+                >
+                  {tag.name}
+                </span>
+              ))}
+              {remainingTagsCount > 0 && (
+                <span 
+                  className={styles.tag}
+                  role="listitem"
+                  title={`${remainingTagsCount} more tags`}
+                >
+                  +{remainingTagsCount}
+                </span>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* Przycisk akcji */}
+        <div className={styles.actionContainer}>
+          <Button
+            as="link"
+            to={`/cocktail/${cocktail.id}`}
+            variant="primary"
+            size="sm"
+            className={styles.detailsButton}
+            aria-label={`View details for ${cocktail.name}`}
+          >
+            View Details
+          </Button>
+        </div>
+      </div>
+    </article>
   );
 };
 

@@ -1,71 +1,429 @@
+/* CocktailForm.module.css */
+
 .form {
-  max-width: 700px;
-  margin: 2rem auto;
-  padding: 2rem;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  background-color: #fff;
+max-width: 800px;
+margin: var(--spacing-xl) auto;
+padding: var(--spacing-xl);
+background: linear-gradient(135deg, var(--color-gray-50) 0%, rgba(97, 97, 97, 0.9) 100%);
+border: 1px solid var(--color-gray-200);
+border-radius: var(--border-radius-xl);
+box-shadow: var(--shadow-lg);
+position: relative;
+overflow: hidden;
+}
+
+.form::before {
+content: '';
+position: absolute;
+top: 0;
+left: 0;
+right: 0;
+height: 4px;
+background: linear-gradient(90deg, var(--color-primary) 0%, var(--color-secondary) 100%);
 }
 
 .formTitle {
-  text-align: center;
-  margin-bottom: 1.5rem;
+text-align: center;
+margin-bottom: var(--spacing-xl);
+font-size: var(--font-size-2xl);
+font-weight: var(--font-weight-bold);
+color: var(--color-text-primary);
+position: relative;
+}
+
+.formTitle::after {
+content: '';
+position: absolute;
+bottom: -var(--spacing-sm);
+left: 50%;
+transform: translateX(-50%);
+width: 60px;
+height: 3px;
+background: linear-gradient(90deg, var(--color-primary) 0%, var(--color-secondary) 100%);
+border-radius: 2px;
 }
 
 .formGroup {
-  margin-bottom: 1rem;
+margin-bottom: var(--spacing-lg);
+position: relative;
 }
 
 .formGroup label {
-  display: block;
-  margin-bottom: 0.5rem;
-  font-weight: bold;
+display: block;
+margin-bottom: var(--spacing-sm);
+font-weight: var(--font-weight-semibold);
+color: var(--color-text-primary);
+font-size: var(--font-size-sm);
+letter-spacing: 0.025em;
+}
+
+/* Unified styling for all input fields */
+.formGroup input,
+.formGroup textarea,
+.formGroup select {
+width: 100%;
+padding: var(--spacing-md);
+border: 1px solid var(--color-gray-300);
+border-radius: var(--border-radius-md);
+font-family: inherit;
+font-size: var(--font-size-sm);
+color: var(--color-text-primary);
+/* === ZMIANA TUTAJ === */
+background-color: var(--color-gray-200); /* Zmieniono z var(--color-white) na szary */
+transition: all 0.2s ease;
+box-sizing: border-box;
+line-height: 1.5;
 }
 
 .formGroup textarea {
-  width: 100%;
-  padding: 0.5rem;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  min-height: 100px;
-  box-sizing: border-box;
+min-height: 120px;
+resize: vertical;
+}
+
+.formGroup input:focus,
+.formGroup textarea:focus,
+.formGroup select:focus {
+outline: none;
+border-color: var(--color-primary);
+box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb), 0.1);
+background-color: var(--color-gray-300); /* Tło select przy focusie - możesz dostosować, jeśli chcesz inny odcień */
+}
+
+.formGroup input::placeholder,
+.formGroup textarea::placeholder {
+color: var(--color-gray-500);
+}
+
+/* Override Input component styles to ensure consistency */
+.formGroup :global(.input-wrapper) input {
+width: 100% !important;
+padding: var(--spacing-md) !important;
+border: 1px solid var(--color-gray-300) !important;
+border-radius: var(--border-radius-md) !important;
+font-family: inherit !important;
+font-size: var(--font-size-sm) !important;
+color: var(--color-text-primary) !important;
+background-color: var(--color-grey) !important; /* To jest dla inputów, nie selectów, zostawiamy */
+transition: all 0.2s ease !important;
+box-sizing: border-box !important;
+line-height: 1.5 !important;
+}
+
+.formGroup :global(.input-wrapper) input:focus {
+outline: none !important;
+border-color: var(--color-primary) !important;
+box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb), 0.1) !important;
+background-color: var(--color-white) !important;
+}
+
+.formGroup :global(.input-wrapper) input::placeholder {
+color: var(--color-gray-500) !important;
+}
+
+/* Additional override for Input component label */
+.formGroup :global(.input-wrapper) label {
+display: block !important;
+margin-bottom: var(--spacing-sm) !important;
+font-weight: var(--font-weight-semibold) !important;
+color: var(--color-text-grey) !important;
+font-size: var(--font-size-sm) !important;
+letter-spacing: 0.025em !important;
 }
 
 .errorMessage {
-  color: red;
-  font-size: 0.875rem;
-  margin-top: 0.25rem;
+color: var(--color-danger);
+font-size: var(--font-size-xs);
+margin-top: var(--spacing-xs);
+font-weight: var(--font-weight-medium);
+display: flex;
+align-items: center;
+gap: var(--spacing-xs);
 }
 
-.ingredientsSection, .tagsSection {
-  margin-top: 1.5rem;
-  padding-top: 1rem;
-  border-top: 1px dashed #eee;
+.errorMessage::before {
+content: '⚠';
+font-size: var(--font-size-sm);
+opacity: 0.8;
 }
 
-.ingredientItem, .tagItem {
-  display: flex;
-  gap: 0.5rem;
-  align-items: center;
-  margin-bottom: 0.5rem;
+/* Sekcje formularza */
+.ingredientsSection,
+.tagsSection {
+margin-top: var(--spacing-xl);
+padding: var(--spacing-lg);
+background: rgba(var(--color-primary-rgb), 0.02);
+border: 1px solid rgba(var(--color-primary-rgb), 0.08);
+border-radius: var(--border-radius-lg);
+position: relative;
 }
 
-.ingredientItem select, .ingredientItem input {
-  flex-grow: 1;
+.ingredientsSection::before,
+.tagsSection::before {
+content: '';
+position: absolute;
+top: 0;
+left: var(--spacing-md);
+right: var(--spacing-md);
+height: 1px;
+background: linear-gradient(90deg, transparent 0%, var(--color-primary) 50%, transparent 100%);
+opacity: 0.3;
 }
 
+.ingredientsSection h3,
+.tagsSection h3 {
+margin: 0 0 var(--spacing-lg) 0;
+font-size: var(--font-size-lg);
+font-weight: var(--font-weight-semibold);
+color: var(--color-text-primary);
+display: flex;
+align-items: center;
+gap: var(--spacing-sm);
+}
+
+.ingredientsSection h3::before {
+content: '🧪';
+font-size: var(--font-size-base);
+}
+
+.tagsSection h3::before {
+content: '🏷️';
+font-size: var(--font-size-base);
+}
+
+/* Elementy składników */
+.ingredientItem {
+display: grid;
+grid-template-columns: 2fr 1fr 1fr auto;
+gap: var(--spacing-md);
+align-items: start;
+margin-bottom: var(--spacing-lg);
+padding: var(--spacing-md);
+background: var(--color-white);
+border: 1px solid var(--color-gray-200);
+border-radius: var(--border-radius-md);
+box-shadow: var(--shadow-sm);
+transition: all 0.2s ease;
+}
+
+.ingredientItem:hover {
+transform: translateY(-1px);
+box-shadow: var(--shadow-md);
+border-color: var(--color-gray-300);
+}
+
+.ingredientItem select {
+padding: var(--spacing-sm) var(--spacing-md);
+border: 1px solid var(--color-gray-300);
+border-radius: var(--border-radius-md);
+font-size: var(--font-size-sm);
+color: var(--color-text-primary);
+/* === ZMIANA TUTAJ === */
+background-color: var(--color-gray-200); /* Zmieniono z var(--color-white) na szary */
+transition: all 0.2s ease;
+cursor: pointer;
+}
+
+.ingredientItem select:focus {
+outline: none;
+border-color: var(--color-primary);
+box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb), 0.1);
+/* Możesz też chcieć, aby tło przy focusie było inne, np. var(--color-gray-300)
+   ale to jest już objęte przez ogólną regułę .formGroup select:focus */
+}
+
+.ingredientItem select option {
+padding: var(--spacing-sm);
+color: var(--color-text-primary);
+background-color: var(--color-white); /* Opcje selecta mogą pozostać białe dla lepszej czytelności */
+}
+
+.ingredientItem select option:disabled {
+color: var(--color-gray-500);
+font-style: italic;
+}
+
+/* Styling for amount input within ingredient item */
+.ingredientItem input {
+padding: var(--spacing-sm) var(--spacing-md) !important;
+border: 1px solid var(--color-gray-300) !important;
+border-radius: var(--border-radius-md) !important;
+font-size: var(--font-size-sm) !important;
+color: var(--color-text-primary) !important;
+background-color: var(--color-white) !important; /* Inputy w ingredientItem zostają białe, chyba że chcesz inaczej */
+transition: all 0.2s ease !important;
+box-sizing: border-box !important;
+}
+
+.ingredientItem input:focus {
+outline: none !important;
+border-color: var(--color-primary) !important;
+box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb), 0.1) !important;
+background-color: var(--color-white) !important;
+}
+
+.ingredientItem input::placeholder {
+color: var(--color-gray-500) !important;
+}
+
+/* Override for Input component within ingredient items */
+.ingredientItem :global(.input-wrapper) input {
+padding: var(--spacing-sm) var(--spacing-md) !important;
+border: 1px solid var(--color-gray-300) !important;
+border-radius: var(--border-radius-md) !important;
+font-size: var(--font-size-sm) !important;
+color: var(--color-text-primary) !important;
+background-color: var(--color-white) !important;
+transition: all 0.2s ease !important;
+box-sizing: border-box !important;
+}
+
+.ingredientItem :global(.input-wrapper) input:focus {
+outline: none !important;
+border-color: var(--color-primary) !important;
+box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb), 0.1) !important;
+background-color: var(--color-white) !important;
+}
+
+/* Checkbox styling */
 .checkboxLabel {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-weight: normal;
+display: flex;
+align-items: center;
+gap: var(--spacing-sm);
+font-weight: var(--font-weight-normal);
+color: var(--color-text-primary);
+cursor: pointer;
+padding: var(--spacing-sm) var(--spacing-md);
+border-radius: var(--border-radius-md);
+transition: all 0.2s ease;
+margin-bottom: var(--spacing-sm);
+border: 1px solid transparent;
+}
+
+.checkboxLabel:hover {
+background-color: rgba(var(--color-primary-rgb), 0.05);
+border-color: rgba(var(--color-primary-rgb), 0.1);
 }
 
 .checkboxLabel input[type="checkbox"] {
-  margin-right: 0.5rem;
+width: 18px;
+height: 18px;
+margin: 0;
+accent-color: var(--color-primary);
+cursor: pointer;
 }
 
+/* Tagi w siatce */
+.tagsSection .formGroup {
+display: grid;
+grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+gap: var(--spacing-sm);
+margin-bottom: 0;
+}
+
+/* Przycisk dodawania składnika */
+.ingredientsSection > button {
+margin-top: var(--spacing-md);
+align-self: flex-start;
+}
+
+/* Submit button */
 .submitButton {
-  margin-top: 1.5rem;
-  width: 100%;
+margin-top: var(--spacing-xl);
+width: 100%;
+min-height: 48px;
+font-size: var(--font-size-base);
+font-weight: var(--font-weight-semibold);
+}
+
+.addIngredientButton {
+margin-top: var(--spacing-md);
+align-self: flex-start;
+background-color: var(--color-primary) !important;
+color: white !important;
+border: none !important;
+transition: all 0.2s ease !important;
+}
+
+.addIngredientButton:hover {
+background-color: var(--color-primary-dark, var(--color-primary)) !important;
+transform: translateY(-1px) !important;
+box-shadow: 0 4px 12px rgba(var(--color-primary-rgb), 0.3) !important;
+}
+
+/* Responsywność */
+@media (max-width: 768px) {
+.form {
+margin: var(--spacing-lg) var(--spacing-md);
+padding: var(--spacing-lg);
+}
+
+.formTitle {
+font-size: var(--font-size-xl);
+}
+
+.ingredientItem {
+grid-template-columns: 1fr;
+gap: var(--spacing-sm);
+}
+
+.ingredientItem select,
+.ingredientItem input { /* Select również tutaj objęty */
+width: 100%;
+}
+
+.tagsSection .formGroup {
+grid-template-columns: 1fr;
+}
+
+.checkboxLabel {
+padding: var(--spacing-md);
+background-color: var(--color-white);
+border: 1px solid var(--color-gray-200);
+border-radius: var(--border-radius-md);
+}
+}
+
+@media (max-width: 480px) {
+.form {
+margin: var(--spacing-md) var(--spacing-sm);
+padding: var(--spacing-md);
+}
+
+.formTitle {
+font-size: var(--font-size-lg);
+margin-bottom: var(--spacing-lg);
+}
+
+.ingredientsSection,
+.tagsSection {
+padding: var(--spacing-md);
+}
+}
+
+/* Stany ładowania */
+.form:has(.submitButton:disabled) {
+opacity: 0.8;
+pointer-events: none;
+}
+
+/* Animacje */
+@keyframes slideIn {
+from {
+opacity: 0;
+transform: translateY(10px);
+}
+to {
+opacity: 1;
+transform: translateY(0);
+}
+}
+
+.ingredientItem {
+animation: slideIn 0.3s ease-out;
+}
+
+/* Fokus dla dostępności */
+.form *:focus-visible {
+outline: 2px solid var(--color-primary);
+outline-offset: 2px;
 }
