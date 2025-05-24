@@ -9,9 +9,6 @@ const RegisterPage: React.FC = () => {
     <div className={styles.pageContainer}>
       {/* <h1 className={styles.pageTitle}>Create Account</h1> */}
       <RegisterForm />
-      <p className={styles.authRedirectText}>
-        Already have an account? <Link to="/login">Login here</Link>
-      </p>
     </div>
   );
 };

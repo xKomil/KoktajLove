@@ -1,5 +1,6 @@
-// Input.tsx - Znacznie ulepszona wersja
+// Input.tsx - Enhanced version with improved password toggle
 import React, { forwardRef, InputHTMLAttributes, useState } from 'react';
+import { Eye, EyeOff, X } from 'lucide-react';
 import styles from './Input.module.css';
 
 export interface InputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'size'> {
@@ -18,6 +19,7 @@ export interface InputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 
   endIcon?: React.ReactNode;
   fullWidth?: boolean;
   inputSize?: 'sm' | 'md' | 'lg';
+  showPasswordToggle?: boolean; // New prop to control password toggle visibility
 }
 
 const Input = forwardRef<HTMLInputElement, InputProps>(
@@ -40,6 +42,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
     endIcon,
     fullWidth = false,
     inputSize = 'md',
+    showPasswordToggle = true, // Default to true for password fields
     ...props
   }, ref) => {
     const [isFocused, setIsFocused] = useState(false);
@@ -47,6 +50,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
     
     const hasError = isInvalid || !!error;
     const hasValue = value !== undefined && value !== '';
+    const isPasswordField = type === 'password';
     
     const inputClasses = [
       styles.input,
@@ -55,7 +59,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
       hasError && styles.error,
       isFocused && styles.focused,
       leftIcon && styles.hasLeftIcon,
-      (rightIcon || showClearButton || type === 'password') && styles.hasRightIcon,
+      (rightIcon || showClearButton || (isPasswordField && showPasswordToggle)) && styles.hasRightIcon,
       className,
     ].filter(Boolean).join(' ');
 
@@ -80,6 +84,9 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
       className
     ].filter(Boolean).join(' ');
 
+    // Determine the actual input type
+    const actualInputType = isPasswordField ? (showPassword ? 'text' : 'password') : type;
+
     return (
       <div className={containerClasses}>
         {label && (
@@ -99,7 +106,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
           <input
             ref={ref}
             id={inputId}
-            type={type === 'password' ? (showPassword ? 'text' : 'password') : type}
+            type={actualInputType}
             value={value}
             className={`${inputClasses} ${startIcon ? styles.hasStartIcon : ''} ${endIcon ? styles.hasEndIcon : ''}`}
             onFocus={(e) => {
@@ -128,22 +135,22 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
                 className={styles.clearButton}
                 aria-label="Clear input"
               >
-                ✕
+                <X size={16} />
               </button>
             )}
             
-            {type === 'password' && (
+            {isPasswordField && showPasswordToggle && (
               <button
                 type="button"
                 onClick={handleTogglePassword}
                 className={styles.passwordToggle}
                 aria-label={showPassword ? 'Hide password' : 'Show password'}
               >
-                {showPassword ? '👁️‍🗨️' : '👁️'}
+                {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
               </button>
             )}
             
-            {endIcon && <span>{endIcon}</span>}
+            {endIcon && <span className={styles.endIcon}>{endIcon}</span>}
           </div>
         </div>
         

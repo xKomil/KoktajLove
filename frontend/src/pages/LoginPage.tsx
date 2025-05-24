@@ -13,9 +13,6 @@ const LoginPage: React.FC = () => {
       {/* <h1 className={styles.pageTitle}>Login</h1> */}
       {message && <p className={styles.successMessage}>{message}</p>}
       <LoginForm />
-      <p className={styles.authRedirectText}>
-        Don't have an account? <Link to="/register">Register here</Link>
-      </p>
     </div>
   );
 };

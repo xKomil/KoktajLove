@@ -1,13 +1,12 @@
 /* frontend/src/pages/PageStyles.module.css */
 .pageContainer {
-  padding: 1rem 1.5rem; /* Default padding for pages */
-  max-width: 1200px;
-  margin-left: auto;
-  margin-right: auto;
+  padding: 1rem 1.5rem;
+  width: 100%; 
+  box-sizing: border-box;
 }
 
 .pageTitle {
-  font-size: 2rem; /* Consistent title size */
+  font-size: 2rem;
   margin-bottom: 1.5rem;
   color: #333;
   text-align: center;

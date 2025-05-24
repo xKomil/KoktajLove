@@ -27,7 +27,6 @@
   font-size: var(--font-size-base);
   line-height: var(--line-height-base);
   color: var(--color-gray-900);
-  background-color: var(--color-white);
   border: 1px solid var(--color-gray-300);
   border-radius: var(--border-radius-base);
   transition: all var(--transition-base);
@@ -45,14 +44,9 @@
   font-size: var(--font-size-lg);
 }
 
-/* Style variants */
-.outlined .input {
-  background-color: transparent;
-}
 
 .filled .input {
   background-color: var(--color-gray-100);
-  border-color: transparent;
 }
 
 .filled .input:hover {
@@ -137,7 +131,6 @@
   }
 
   .input {
-    color: var(--color-white);
     background-color: var(--color-gray-800);
     border-color: var(--color-gray-700);
   }
