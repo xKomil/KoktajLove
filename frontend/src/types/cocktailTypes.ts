@@ -101,38 +101,15 @@ export interface CocktailWithDetails extends CocktailBase {
   updated_at: string;
   average_rating: number | null;
   total_ratings?: number;
-  ingredients: CocktailIngredientDetail[]; // Używa nowego typu
-  tags: Tag[]; // Tagi są nadal pełnymi obiektami Tag
+  ingredients: CocktailIngredientDetail[]; 
+  tags: Tag[];
   owner_id: number;
-  // author?: User; // Zgodnie z Twoim backendowym CocktailWithDetails, masz 'author: UserSchema'
-                    // Jeśli masz typ User w authTypes.ts, możesz go tu użyć.
 }
-
-
-/**
- * Data structure for updating an existing cocktail.
- * All fields are optional.
- * Ważne: Backendowy CocktailUpdate jest bardziej elastyczny (każde pole Optional).
- * Ta definicja jest OK, jeśli aktualizujesz te same pola co przy tworzeniu.
- */
 export type CocktailUpdate = Partial<Omit<CocktailCreate, 'name' | 'description' | 'instructions'> & {
-  name?: string; // Jeśli nazwa może być aktualizowana
+  name?: string;
   description?: string;
   instructions?: string;
-  // image_url, is_public, ingredients, tags są już Optional z Partial<CocktailCreate>
 }>;
-// LUB PROŚCIEJ, jeśli CocktailUpdate na backendzie jest po prostu Partial od pól CocktailCreate:
-// export type CocktailUpdate = Partial<CocktailCreate>;
-// Jednak Twój backendowy CocktailUpdate jest zdefiniowany jako osobna klasa,
-// więc frontendowy CocktailUpdate powinien odzwierciedlać to, co FAKTYCZNIE można zaktualizować.
-// Na razie zostawmy Partial<CocktailCreate> dla uproszczenia, ale dostosuj, jeśli backend ma inne pola dla update.
-
-// --- KONIEC ZMIAN ---
-
-
-/**
- * Represents a rating given to a cocktail.
- */
 export interface Rating {
   id: number;
   score: number;

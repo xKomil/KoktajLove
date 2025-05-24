@@ -1,8 +1,8 @@
 // frontend/src/services/userService.ts
 import apiClient from './apiClient';
-import { User, UserUpdate, PaginatedResponse } from '@/types/authTypes'; // Assuming User type is in authTypes
+import { User, UserUpdate, PaginatedUserResponse } from '@/types/authTypes'; // Assuming User type is in authTypes
 import { CocktailWithDetails } from '@/types/cocktailTypes';
-import { CommonQueryPaginationParams } from '@/types/commonTypes';
+import { CommonQueryPaginationParams, PaginatedResponse } from '@/types/commonTypes';
 
 export interface UserFilters extends CommonQueryPaginationParams {
   username?: string;

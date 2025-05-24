@@ -1,24 +1,28 @@
-/* frontend/src/pages/PageStyles.module.css */
+/* PageStyles.module.css - Poprawione style bez własnych kontenerów szerokości */
+
 .pageContainer {
-  padding: 1rem 1.5rem;
-  width: 100%; 
-  box-sizing: border-box;
+  /* Usunięte: max-width, margin: 0 auto - to jest już w MainLayout */
+  /* Kontener szerokości jest już zdefiniowany w .contentContainer w MainLayout */
 }
 
 .pageTitle {
-  font-size: 2rem;
-  margin-bottom: 1.5rem;
-  color: #333;
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--color-gray-900);
+  margin-bottom: 1rem;
   text-align: center;
-  border-bottom: 1px solid #eee;
-  padding-bottom: 0.75rem;
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .pageSubtitle {
-  font-size: 1.1rem;
-  color: #666;
+  font-size: 1.2rem;
+  color: var(--color-gray-50);
   text-align: center;
   margin-bottom: 2rem;
+  line-height: 1.6;
 }
 
 .centeredMessage {
@@ -26,56 +30,30 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-height: 200px; /* Ensure some space for the message */
+  gap: 1rem;
+  padding: 2rem;
   text-align: center;
-  color: #555;
-}
-
-.centeredMessage p {
-    margin-top: 1rem;
+  color: var(--color-gray-600);
 }
 
 .error {
-  color: #dc3545; /* Bootstrap danger color */
-  font-weight: bold;
+  color: var(--color-danger);
+  background-color: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  border-radius: var(--border-radius-md);
+  padding: 1rem;
 }
 
-.successMessage {
-  background-color: #d4edda; /* Bootstrap success background */
-  color: #155724; /* Bootstrap success text */
-  border: 1px solid #c3e6cb; /* Bootstrap success border */
-  padding: 0.75rem 1.25rem;
-  margin-bottom: 1rem;
-  border-radius: 0.25rem;
-  text-align: center;
-}
-
-.authRedirectText {
-  text-align: center;
-  margin-top: 1.5rem;
-  font-size: 0.95rem;
-}
-
-.authRedirectText a {
-  color: #007bff;
-  text-decoration: underline;
-}
-
-.styledLink {
-  color: #007bff;
-  text-decoration: none;
-  font-weight: bold;
-}
-.styledLink:hover {
-  text-decoration: underline;
-}
-
-.backLink {
-  display: inline-block;
-  margin-top: 1.5rem;
-  color: #007bff;
-  text-decoration: none;
-}
-.backLink:hover {
-  text-decoration: underline;
+@media (max-width: 768px) {
+  .pageTitle {
+    font-size: 2rem;
+  }
+  
+  .pageSubtitle {
+    font-size: 1.1rem;
+  }
+  
+  .centeredMessage {
+    padding: 1rem;
+  }
 }

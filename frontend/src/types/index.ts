@@ -2,7 +2,7 @@
 
 export * from './authTypes';
 export * from './cocktailTypes';
-export * from './commonTypes'; // To wyeksportuje PaginatedResponse z commonTypes.ts
+export * from './commonTypes';
 
 export interface AppNotification {
   id: string;

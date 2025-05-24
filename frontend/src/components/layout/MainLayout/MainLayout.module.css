@@ -1,9 +1,8 @@
-/* MainLayout.module.css - Ulepszona wersja */
+/* MainLayout.module.css - Poprawiona wersja ze sticky footer */
 .layout {
   display: grid;
   grid-template-rows: auto 1fr auto;
   min-height: 100vh;
-  --navbar-height: 60px;
 }
 
 .mainContent {
@@ -14,7 +13,7 @@
 }
 
 .contentContainer {
-  max-width: 1200px;
+  max-width: var(--layout-max-width);
   margin: 0 auto;
   padding: 2rem 1rem;
   width: 100%;
