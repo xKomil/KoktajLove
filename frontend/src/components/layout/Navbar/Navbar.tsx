@@ -1,4 +1,4 @@
-// Navbar.tsx - Kolejna modyfikacja
+// Navbar.tsx - Zaktualizowany z linkiem do ulubionych
 import React, { useState, useEffect } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
@@ -59,11 +59,8 @@ const Navbar: React.FC = () => {
           </NavLink>
         )}
 
-        {/* === POCZĄTEK ZMIANY === */}
-        {/* Link "Cocktails" jest teraz częścią bloku dla zalogowanych użytkowników */}
         {!isLoading && isAuthenticated && (
           <>
-            {/* Dodajemy link "Cocktails" tutaj */}
             <NavLink to="/cocktails" className={getNavLinkClass} onClick={closeMobileMenu}>
               Discover
             </NavLink>
@@ -88,7 +85,6 @@ const Navbar: React.FC = () => {
             </button>
           </>
         )}
-        {/* === KONIEC ZMIANY === */}
 
         {!isLoading && !isAuthenticated && (
           <>

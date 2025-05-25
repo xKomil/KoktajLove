@@ -35,7 +35,7 @@ const AppRoutes: React.FC = () => (
         <Route path="cocktails" element={<CocktailsPage />} />
         <Route path="cocktails/:id" element={<CocktailDetailPage />} />
         <Route path="profile" element={<ProfilePage />} />
-        <Route path="favorites" element={<MyFavoritesPage />} />
+        <Route path="my-favorites" element={<MyFavoritesPage />} />
       </Route>
       
       {/* Not Found */}

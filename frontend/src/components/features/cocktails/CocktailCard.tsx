@@ -1,6 +1,6 @@
-// CocktailCard.tsx - Zoptymalizowana wersja z pełną funkcjonalnością i obsługą ulubionych
+// CocktailCard.tsx - Ulepszona wersja z lepszą obsługą stanu ulubionych
 import React, { useState, useEffect, useCallback } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { Heart } from 'lucide-react';
 import { CocktailWithDetails, Tag } from '@/types/cocktailTypes';
 import { useAuth } from '@/hooks/useAuth';
@@ -13,6 +13,7 @@ interface CocktailCardProps {
   cocktail: CocktailWithDetails;
   showNewBadge?: boolean;
   onCardClick?: (cocktail: CocktailWithDetails) => void;
+  onFavoriteChange?: (cocktailId: number, isFavorite: boolean) => void; // Nowe: callback dla zmian ulubionych
   className?: string;
 }
 
@@ -20,9 +21,11 @@ const CocktailCard: React.FC<CocktailCardProps> = ({
   cocktail, 
   showNewBadge = false,
   onCardClick,
+  onFavoriteChange,
   className = ''
 }) => {
   const { isAuthenticated } = useAuth();
+  const location = useLocation();
   const [imageState, setImageState] = useState<'loading' | 'loaded' | 'error'>('loading');
   const [currentSrc, setCurrentSrc] = useState<string>('');
   const [isFavorite, setIsFavorite] = useState<boolean>(false);
@@ -117,13 +120,27 @@ const CocktailCard: React.FC<CocktailCardProps> = ({
     setFavoriteError(null);
 
     try {
+      const newFavoriteState = !isFavorite;
+      
       if (isFavorite) {
         await favoriteService.removeCocktailFromFavorites(cocktail.id);
-        setIsFavorite(false);
       } else {
         await favoriteService.addCocktailToFavorites(cocktail.id);
-        setIsFavorite(true);
       }
+      
+      setIsFavorite(newFavoriteState);
+      
+      // Notify parent component about the change
+      if (onFavoriteChange) {
+        onFavoriteChange(cocktail.id, newFavoriteState);
+      }
+      
+      // If we're on the favorites page and item was removed, show success message
+      if (location.pathname === '/my-favorites' && !newFavoriteState) {
+        // Optional: Show a toast notification
+        console.log('Cocktail removed from favorites');
+      }
+      
     } catch (error: any) {
       console.error('Error toggling favorite:', error);
       
@@ -133,16 +150,18 @@ const CocktailCard: React.FC<CocktailCardProps> = ({
         errorMessage = 'Koktajl nie został znaleziony.';
       } else if (error.response?.status === 400) {
         errorMessage = error.response.data?.detail || 'Nieprawidłowe żądanie.';
+      } else if (error.response?.status === 401) {
+        errorMessage = 'Sesja wygasła. Zaloguj się ponownie.';
       }
       
       setFavoriteError(errorMessage);
       
-      // Clear error after 3 seconds
-      setTimeout(() => setFavoriteError(null), 3000);
+      // Clear error after 5 seconds
+      setTimeout(() => setFavoriteError(null), 5000);
     } finally {
       setIsTogglingFavorite(false);
     }
-  }, [isAuthenticated, isTogglingFavorite, isFavorite, cocktail.id]);
+  }, [isAuthenticated, isTogglingFavorite, isFavorite, cocktail.id, onFavoriteChange, location.pathname]);
 
   // Prepare description with intelligent truncation
   const truncateDescription = (text: string, maxLength: number = 120): string => {

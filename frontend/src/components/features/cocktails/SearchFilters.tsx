@@ -85,12 +85,12 @@ const SearchFilters: React.FC<SearchFiltersProps> = ({
         </div>
 
         {/* Rating Filter */}
-        <div className="space-y-2">
+        <div className="space-y-1">
           <StarRatingInput
-            label="Minimum rating"
+            label=" ."
             value={currentMinRating}
             onChange={onRatingChange}
-            size="md"
+            size="sm"
             className="w-full"
           />
         </div>
