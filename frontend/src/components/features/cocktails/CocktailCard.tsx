@@ -1,4 +1,4 @@
-// CocktailCard.tsx - Ulepszona wersja
+// CocktailCard.tsx - Poprawiona wersja z nowym fallback obrazkiem
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { CocktailWithDetails, Tag } from '@/types/cocktailTypes';
@@ -22,37 +22,37 @@ const CocktailCard: React.FC<CocktailCardProps> = ({
   const [imageState, setImageState] = useState<'loading' | 'loaded' | 'error'>('loading');
   const [currentSrc, setCurrentSrc] = useState<string>('');
   
-  // URLs dla fallbacków
-  const placeholderUrl = `https://via.placeholder.com/400x300/f3f4f6/6b7280?text=${encodeURIComponent(cocktail.name)}`;
+  // URL dla fallback obrazka - konkretny obrazek koktajlu zamiast placeholder
+  const fallbackImageUrl = 'https://az.przepisy.pl/www-przepisy-pl/www.przepisy.pl/przepisy3ii/img/variants/800x0/koktajl-truskawkowy185615.jpg';
   const localFallbackUrl = '/assets/default-cocktail.png';
 
   // Inicjalizacja źródła obrazka
   useEffect(() => {
-    if (cocktail.image_url) {
+    if (cocktail.image_url && cocktail.image_url.trim() !== '') {
       setCurrentSrc(cocktail.image_url);
       setImageState('loading');
     } else {
-      setCurrentSrc(placeholderUrl);
+      setCurrentSrc(fallbackImageUrl);
       setImageState('loaded');
     }
-  }, [cocktail.id, cocktail.image_url, placeholderUrl]);
+  }, [cocktail.id, cocktail.image_url, fallbackImageUrl]);
 
   // Obsługa błędów ładowania obrazka
   const handleImageError = useCallback(() => {
     if (currentSrc === cocktail.image_url) {
-      // Pierwszy fallback - placeholder
+      // Pierwszy fallback - obrazek truskawkowego koktajlu
       console.warn(`Failed to load original image: ${cocktail.image_url}`);
-      setCurrentSrc(placeholderUrl);
-    } else if (currentSrc === placeholderUrl) {
-      // Drugi fallback - lokalny obrazek
-      console.warn('Failed to load placeholder image, trying local fallback');
+      setCurrentSrc(fallbackImageUrl);
+    } else if (currentSrc === fallbackImageUrl) {
+      // Drugi fallback - lokalny obrazek (jeśli istnieje)
+      console.warn('Failed to load fallback image, trying local fallback');
       setCurrentSrc(localFallbackUrl);
     } else {
-      // Ostateczny fallback nie zadziałał
+      // Ostateczny fallback nie zadziałał - pokaż placeholder div
       console.error('All image sources failed to load');
       setImageState('error');
     }
-  }, [currentSrc, cocktail.image_url, placeholderUrl, localFallbackUrl]);
+  }, [currentSrc, cocktail.image_url, fallbackImageUrl, localFallbackUrl]);
 
   // Obsługa pomyślnego załadowania obrazka
   const handleImageLoad = useCallback(() => {
@@ -127,7 +127,7 @@ const CocktailCard: React.FC<CocktailCardProps> = ({
         ) : (
           <>
             <img
-              src={currentSrc}
+              src={currentSrc || fallbackImageUrl}
               alt={`${cocktail.name} cocktail`}
               className={styles.image}
               onError={handleImageError}
