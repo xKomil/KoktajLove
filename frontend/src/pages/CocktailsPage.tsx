@@ -3,7 +3,7 @@ import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import CocktailList from '@/components/features/cocktails/CocktailList';
 import SearchFilters from '@/components/features/cocktails/SearchFilters';
-// import ActiveFilters from '@/components/features/cocktails/ActiveFilters'; // Zakomentowany lub usunięty import
+// import ActiveFilters from '@/components/features/cocktails/ActiveFilters'; // Commented out or removed import
 import Pagination from '@/components/ui/Pagination/Pagination';
 import Button from '@/components/ui/Button/Button';
 import { getCocktails, CocktailFilters } from '@/services/cocktailService';
@@ -115,6 +115,7 @@ const CocktailsPage: React.FC = () => {
           setTotalCount(response.total);
           setTotalPages(response.pages ?? Math.ceil(response.total / ITEMS_PER_PAGE));
         } else {
+          // Fallback for APIs that might return just an array
           const items = response as unknown as CocktailWithDetails[];
           setCocktails(items);
           setTotalCount(items.length);
@@ -212,14 +213,16 @@ const CocktailsPage: React.FC = () => {
   const handleRetry = useCallback(() => {
     setError(null);
     setIsLoading(true);
+    // Re-trigger fetching data by depending on apiFilters, which will change if state changes
+    // Or directly call fetchCocktails if it's memoized and state hasn't changed
   }, []);
 
   const handleAddCocktail = useCallback(() => {
     navigate('/add-cocktail');
   }, [navigate]);
 
-  // `hasActiveFilters` nie jest już potrzebne do warunkowego renderowania ActiveFilters,
-  // ale może być przydatne gdzie indziej, np. do decydowania, czy pokazać przycisk "Resetuj" w SearchFilters
+  // `hasActiveFilters` is no longer needed for conditionally rendering ActiveFilters,
+  // but it might be useful elsewhere, e.g., for deciding whether to show the "Reset" button in SearchFilters
   const hasActiveFilters = useMemo(() =>
     filters.name?.trim() !== '' ||
     filters.selectedIngredients.length > 0 ||
@@ -235,17 +238,17 @@ const CocktailsPage: React.FC = () => {
       <div className={styles.header || "text-center mb-12"}>
         <div className={styles.headerContent || ""}>
           <h1 className={styles.pageTitle || "text-4xl font-bold text-gray-800 mb-2"}>
-            Odkryj Koktajle
+            Discover Cocktails
           </h1>
           <p className={styles.pageSubtitle || "text-lg text-gray-600"}>
-            Przeglądaj naszą kolekcję {totalCount > 0 ? `ponad ${totalCount}` : ''} przepisów na koktajle
+            Browse our collection {totalCount > 0 ? `of over ${totalCount}` : ''} cocktail recipes
           </p>
           <Button
             variant="primary"
             onClick={handleAddCocktail}
             className={styles.addButton || "mt-6"}
           >
-            Dodaj Nowy Koktajl
+            Add New Cocktail
           </Button>
         </div>
       </div>
@@ -262,22 +265,26 @@ const CocktailsPage: React.FC = () => {
           onIngredientChange={handleIngredientChange}
           onTagChange={handleTagChange}
           onRatingChange={handleRatingChange}
-          onReset={handleResetFilters} 
+          onReset={handleResetFilters}
           isLoading={isFiltering && !showInitialSpinner}
         />
 
-        {}
-        {}
+        {/* 
+          ActiveFilters component might have been here.
+          If needed, its logic (displaying active filters and allowing removal)
+          can be integrated directly or as a separate component.
+          For now, removal is handled by SearchFilters or by changing filter values.
+        */}
       </div>
 
       <div className={styles.resultsSection}>
         {!showInitialSpinner && !error && totalCount > 0 && (
           <div className={styles.resultsHeader || "mb-4 text-sm text-gray-600"}>
             <p className={styles.resultsCount}>
-              {hasActiveFilters 
-                ? `Znaleziono ${totalCount} koktajl${totalCount === 1 ? '' : (totalCount % 10 > 1 && totalCount % 10 < 5 && (totalCount < 10 || totalCount > 20) ? 'e' : 'i')}`
-                : `Wszystkie koktajle (${totalCount})`}
-              {totalPages > 1 && ` - strona ${currentPage} z ${totalPages}`}
+              {hasActiveFilters
+                ? `Found ${totalCount} cocktail${totalCount === 1 ? '' : 's'}`
+                : `All cocktails (${totalCount})`}
+              {totalPages > 1 && ` - page ${currentPage} of ${totalPages}`}
             </p>
           </div>
         )}
@@ -288,7 +295,7 @@ const CocktailsPage: React.FC = () => {
           isFiltering={isFiltering && !showInitialSpinner}
           error={error}
           onRetry={handleRetry}
-          onAddCocktail={handleAddCocktail}
+          onAddCocktail={handleAddCocktail} // Pass this if CocktailList has an "add" button for empty state
         />
 
         {!showInitialSpinner && !error && totalPages > 1 && (

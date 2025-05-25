@@ -65,13 +65,13 @@ const Navbar: React.FC = () => {
           <>
             {/* Dodajemy link "Cocktails" tutaj */}
             <NavLink to="/cocktails" className={getNavLinkClass} onClick={closeMobileMenu}>
-              Cocktails
+              Home
             </NavLink>
             <NavLink to="/add-cocktail" className={getNavLinkClass} onClick={closeMobileMenu}>
               Add Cocktail
             </NavLink>
             <NavLink to="/my-favorites" className={getNavLinkClass} onClick={closeMobileMenu}>
-              My Favorites
+              My Cocktails
             </NavLink>
             <NavLink to="/profile" className={getNavLinkClass} onClick={closeMobileMenu}>
               {user?.username || 'Profile'}

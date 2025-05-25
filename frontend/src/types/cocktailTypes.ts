@@ -32,16 +32,15 @@ export enum UnitEnum {
   L = "l",
   G = "g",
   KG = "kg",
-  TSP = "łyżeczka",
-  TBSP = "łyżka",
+  TSP = "tsp", // teaspoon
+  TBSP = "tbsp", // tablespoon
   OZ = "oz",
   SHOT = "shot",
-  DASH = "kropla",
-  PIECE = "sztuka",
-  SLICE = "plasterek",
-  OTHER = "inna",
+  DASH = "dash",
+  PIECE = "piece",
+  SLICE = "slice",
+  OTHER = "other",
 }
-
 /**
  * Data for an ingredient when creating/updating a cocktail (to match backend's CocktailIngredientData).
  */

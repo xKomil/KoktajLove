@@ -23,7 +23,7 @@ const CocktailCard: React.FC<CocktailCardProps> = ({
   const [currentSrc, setCurrentSrc] = useState<string>('');
   
   // URL dla fallback obrazka - konkretny obrazek koktajlu zamiast placeholder
-  const fallbackImageUrl = 'https://az.przepisy.pl/www-przepisy-pl/www.przepisy.pl/przepisy3ii/img/variants/800x0/koktajl-truskawkowy185615.jpg';
+  const fallbackImageUrl = 'https://img.freepik.com/premium-vector/socktail-mocktail-drink-glass-with-high-stem-alcoholic-nonalcoholic-cocktail-sketch_106796-4466.jpg?w=360';
   const localFallbackUrl = '/assets/default-cocktail.png';
 
   // Inicjalizacja źródła obrazka

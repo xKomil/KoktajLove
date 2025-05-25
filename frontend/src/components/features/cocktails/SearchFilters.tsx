@@ -45,8 +45,8 @@ const SearchFilters: React.FC<SearchFiltersProps> = ({
         {/* Name Search */}
         <div className="space-y-2">
           <Input
-            label="Szukaj po nazwie"
-            placeholder="Wpisz nazwę koktajlu..."
+            label="Search by name"
+            placeholder="Enter cocktail name..."
             value={nameValue}
             onChange={(e) => onNameChange(e.target.value)}
             fullWidth
@@ -57,37 +57,37 @@ const SearchFilters: React.FC<SearchFiltersProps> = ({
         {/* Ingredients Filter */}
         <div className="space-y-2">
           <MultiAutoCompleteSelect<Ingredient>
-            label="Składniki"
-            placeholder="Wybierz składniki..."
+            label="Ingredients"
+            placeholder="Select ingredients..."
             items={availableIngredients}
             selectedItems={selectedIngredients}
             onSelectionChange={onIngredientChange}
             getItemLabel={(item) => item.name}
             getItemValue={(item) => item.id.toString()}
-            noOptionsText="Brak składników"
-            searchPlaceholder="Szukaj składnika..."
+            noOptionsText="No ingredients found"
+            searchPlaceholder="Search ingredient..."
           />
         </div>
 
         {/* Tags Filter */}
         <div className="space-y-2">
           <MultiAutoCompleteSelect<Tag>
-            label="Tagi"
-            placeholder="Wybierz tagi..."
+            label="Tags"
+            placeholder="Select tags..."
             items={availableTags}
             selectedItems={selectedTags}
             onSelectionChange={onTagChange}
             getItemLabel={(item) => item.name}
             getItemValue={(item) => item.id.toString()}
-            noOptionsText="Brak tagów"
-            searchPlaceholder="Szukaj tagu..."
+            noOptionsText="No tags found"
+            searchPlaceholder="Search tag..."
           />
         </div>
 
         {/* Rating Filter */}
         <div className="space-y-2">
           <StarRatingInput
-            label="Minimalna ocena"
+            label="Minimum rating"
             value={currentMinRating}
             onChange={onRatingChange}
             size="md"
@@ -104,13 +104,13 @@ const SearchFilters: React.FC<SearchFiltersProps> = ({
           disabled={!hasActiveFilters || isLoading}
           className="text-gray-600 hover:text-gray-800"
         >
-          Resetuj filtry
+          Reset filters
         </Button>
 
         {isLoading && (
           <div className="flex items-center space-x-2 text-sm text-gray-600">
             <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-            <span>Filtrowanie...</span>
+            <span>Filtering...</span>
           </div>
         )}
       </div>
