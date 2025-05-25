@@ -25,8 +25,6 @@ const AppRoutes: React.FC = () => (
     <Route path="/" element={<MainLayout />}>
       {/* Public Routes */}
       <Route index element={<HomePage />} /> {/* Landing page / business card */}
-      <Route path="cocktails" element={<CocktailsPage />} /> {/* Cocktail list with filters */}
-      <Route path="cocktails/:id" element={<CocktailDetailPage />} />
       <Route path="login" element={<LoginPage />} />
       <Route path="register" element={<RegisterPage />} />
       
@@ -34,6 +32,8 @@ const AppRoutes: React.FC = () => (
       <Route element={<ProtectedRoute />}>
         <Route path="add-cocktail" element={<AddCocktailPage />} />
         <Route path="edit-cocktail/:id" element={<EditCocktailPage />} />
+        <Route path="cocktails" element={<CocktailsPage />} />
+        <Route path="cocktails/:id" element={<CocktailDetailPage />} />
         <Route path="profile" element={<ProfilePage />} />
         <Route path="favorites" element={<MyFavoritesPage />} />
       </Route>
