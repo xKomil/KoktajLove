@@ -42,14 +42,12 @@ export enum UnitEnum {
   OTHER = "inna",
 }
 
-// --- ZMIANY ZACZYNAJĄ SIĘ TUTAJ ---
-
 /**
  * Data for an ingredient when creating/updating a cocktail (to match backend's CocktailIngredientData).
  */
 export interface CocktailIngredientCreateData {
   ingredient_id: number;
-  amount: number; // ZMIANA: z quantity na amount (i typ na number, zakładając, że backend oczekuje int)
+  amount: number;
   unit: UnitEnum;
 }
 
@@ -67,7 +65,7 @@ export interface CocktailBase {
   name: string;
   description: string;
   instructions: string;
-  image_url?: string | null; // Pozwalamy na null
+  image_url?: string | null;
   is_public: boolean;
 }
 
@@ -76,21 +74,18 @@ export interface CocktailBase {
  * This now matches the backend's CocktailCreate schema.
  */
 export interface CocktailCreate extends CocktailBase {
-  ingredients: CocktailIngredientCreateData[]; // Używa nowego typu
-  tags: CocktailTagCreateData[];             // Używa nowego typu
+  ingredients: CocktailIngredientCreateData[];
+  tags: CocktailTagCreateData[];
 }
 
 /**
  * Represents an ingredient as part of detailed cocktail information (matches backend's IngredientInCocktailDetail).
  */
-export interface CocktailIngredientDetail { // Zmieniona nazwa z CocktailIngredient dla jasności
-  ingredient: Ingredient; // Pełny obiekt składnika (lub tylko ID i name, jeśli tak zwraca backend)
-                          // Twój backendowy IngredientInCocktailDetail dziedziczy z IngredientSchema,
-                          // więc powinien mieć wszystkie pola IngredientSchema.
-  amount: number;         // ZMIANA: z quantity na amount
+export interface CocktailIngredientDetail {
+  ingredient: Ingredient;
+  amount: number;
   unit: UnitEnum;
 }
-
 
 /**
  * Represents a cocktail with all its details, including populated ingredients and tags.
@@ -99,17 +94,19 @@ export interface CocktailWithDetails extends CocktailBase {
   id: number;
   created_at: string;
   updated_at: string;
-  average_rating: number | null;
-  total_ratings?: number;
-  ingredients: CocktailIngredientDetail[]; 
+  average_rating: number | null; // Added for rating functionality
+  ratings_count: number;         // Added for rating functionality  
+  ingredients: CocktailIngredientDetail[];
   tags: Tag[];
   owner_id: number;
 }
+
 export type CocktailUpdate = Partial<Omit<CocktailCreate, 'name' | 'description' | 'instructions'> & {
   name?: string;
   description?: string;
   instructions?: string;
 }>;
+
 export interface Rating {
   id: number;
   score: number;
@@ -121,3 +118,14 @@ export interface Rating {
 
 export type RatingCreate = Pick<Rating, 'score' | 'cocktail_id'>;
 export type RatingUpdate = Partial<Pick<Rating, 'score'>>;
+
+/**
+ * Paginated response structure
+ */
+export interface PaginatedResponse<T> {
+  items: T[];
+  total: number;
+  page: number;
+  size: number;
+  pages: number;
+}

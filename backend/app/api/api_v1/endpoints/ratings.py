@@ -1,3 +1,4 @@
+#backend\app\api\api_v1\endpoints\ratings.py
 from typing import List, Any, Optional # Dodano Optional
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session

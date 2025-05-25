@@ -76,6 +76,7 @@
   padding: 0 var(--spacing-lg);
 }
 
+
 /* Results Section */
 .resultsSection {
   max-width: var(--layout-max-width);
@@ -200,6 +201,8 @@
     background: linear-gradient(135deg, var(--color-gray-800) 0%, rgba(31, 41, 55, 0.8) 100%);
     border-top-color: var(--color-gray-700);
   }
+
+  
 }
 
 /* Loading and animation states */

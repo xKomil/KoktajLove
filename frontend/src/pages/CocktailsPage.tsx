@@ -3,7 +3,7 @@ import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import CocktailList from '@/components/features/cocktails/CocktailList';
 import SearchFilters from '@/components/features/cocktails/SearchFilters';
-import ActiveFilters from '@/components/features/cocktails/ActiveFilters';
+// import ActiveFilters from '@/components/features/cocktails/ActiveFilters'; // Zakomentowany lub usunięty import
 import Pagination from '@/components/ui/Pagination/Pagination';
 import Button from '@/components/ui/Button/Button';
 import { getCocktails, CocktailFilters } from '@/services/cocktailService';
@@ -17,12 +17,14 @@ interface FilterState {
   name: string;
   selectedIngredients: Ingredient[];
   selectedTags: Tag[];
+  minRating: number | null;
 }
 
 const INITIAL_FILTERS: FilterState = {
   name: '',
   selectedIngredients: [],
-  selectedTags: []
+  selectedTags: [],
+  minRating: null
 };
 
 const ITEMS_PER_PAGE = 12;
@@ -30,8 +32,7 @@ const ITEMS_PER_PAGE = 12;
 const CocktailsPage: React.FC = () => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-  
-  // State
+
   const [cocktails, setCocktails] = useState<CocktailWithDetails[]>([]);
   const [ingredients, setIngredients] = useState<Ingredient[]>([]);
   const [tags, setTags] = useState<Tag[]>([]);
@@ -43,143 +44,82 @@ const CocktailsPage: React.FC = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
   const [initialDataLoaded, setInitialDataLoaded] = useState(false);
-  
-  // Ref to track if this is the first URL initialization
+
   const isInitialUrlLoad = useRef(true);
-  // Ref to prevent URL updates during initial filter setup
   const isInitializingFromUrl = useRef(false);
 
-  // Debounced search value to avoid too many API calls
   const debouncedSearchName = useDebounce(filters.name, 500);
 
-  // Load initial data (ingredients and tags for filters)
   useEffect(() => {
     const loadInitialData = async () => {
       try {
-        const [ingredientsData, tagsData] = await Promise.all([
-          getIngredients({ size: 1000 }), 
-          getTags({ size: 1000 }) 
-        ]);
-        
-        const ingredientsList = Array.isArray(ingredientsData) ? ingredientsData : ingredientsData.items;
-        const tagsList = Array.isArray(tagsData) ? tagsData : tagsData.items;
-        
-        setIngredients(ingredientsList);
-        setTags(tagsList);
+        const ingredientsResponse = await getIngredients({ size: 1000 });
+        const tagsResponse = await getTags({ size: 1000 });
+        const ingredientsList = Array.isArray(ingredientsResponse) ? ingredientsResponse : ingredientsResponse.items;
+        const tagsList = Array.isArray(tagsResponse) ? tagsResponse : tagsResponse.items;
+        setIngredients(ingredientsList || []);
+        setTags(tagsList || []);
         setInitialDataLoaded(true);
-        console.log('Initial data loaded:', { ingredientsCount: ingredientsList.length, tagsCount: tagsList.length });
       } catch (err) {
         console.error('Failed to load filter data:', err);
         setError(err as Error);
-        setInitialDataLoaded(true); // Still set to true to allow rest of logic to proceed
+        setInitialDataLoaded(true);
       }
     };
-
     loadInitialData();
-  }, []); // Empty dependency array - runs only once
+  }, []);
 
-  // Initialize filters from URL params only ONCE after initial data is loaded
   useEffect(() => {
     if (!initialDataLoaded || !isInitialUrlLoad.current) return;
-
-    console.log("Initializing filters from URL...");
     isInitializingFromUrl.current = true;
-
     const nameParam = searchParams.get('name') || '';
     const ingredientIdsParam = searchParams.get('ingredients');
     const tagIdsParam = searchParams.get('tags');
+    const minRatingParam = searchParams.get('min_rating');
     const pageParam = searchParams.get('page');
-
     const ingredientIds = ingredientIdsParam ? ingredientIdsParam.split(',').map(Number).filter(Boolean) : [];
     const tagIds = tagIdsParam ? tagIdsParam.split(',').map(Number).filter(Boolean) : [];
-    const page = pageParam ? Math.max(1, Number(pageParam)) : 1;
-
-    // Find actual ingredient and tag objects based on IDs from URL
+    const minRatingValue = minRatingParam ? parseInt(minRatingParam, 10) : null;
+    const page = pageParam ? Math.max(1, parseInt(pageParam, 10)) : 1;
     const resolvedIngredients = ingredients.filter(ing => ingredientIds.includes(ing.id));
     const resolvedTags = tags.filter(tag => tagIds.includes(tag.id));
-
-    // Set filters and page from URL parameters
     setFilters({
       name: nameParam,
       selectedIngredients: resolvedIngredients,
-      selectedTags: resolvedTags
+      selectedTags: resolvedTags,
+      minRating: (minRatingValue && minRatingValue >= 1 && minRatingValue <= 5) ? minRatingValue : null,
     });
     setCurrentPage(page);
-    
-    console.log('Filters initialized from URL:', {
-      name: nameParam,
-      ingredientIds,
-      tagIds,
-      selectedIngredients: resolvedIngredients,
-      selectedTags: resolvedTags,
-      page
-    });
-
-    // Mark initial URL load as complete
     isInitialUrlLoad.current = false;
-    
-    // Allow URL updates after initialization
-    setTimeout(() => {
-      isInitializingFromUrl.current = false;
-    }, 0);
-
+    setTimeout(() => { isInitializingFromUrl.current = false; }, 0);
   }, [searchParams, initialDataLoaded, ingredients, tags]);
 
-  // Build API filters from current state
   const apiFilters = useMemo((): CocktailFilters => {
-    const filtersObj: CocktailFilters = {
-      page: currentPage,
-      size: ITEMS_PER_PAGE
-    };
-    
-    if (debouncedSearchName?.trim()) {
-      filtersObj.name = debouncedSearchName.trim();
-    }
-    if (filters.selectedIngredients.length > 0) {
-      filtersObj.ingredient_ids = filters.selectedIngredients.map(ing => ing.id);
-    }
-    if (filters.selectedTags.length > 0) {
-      filtersObj.tag_ids = filters.selectedTags.map(tag => tag.id);
-    }
-    
-    console.log('API Filters constructed:', filtersObj);
+    const filtersObj: CocktailFilters = { page: currentPage, size: ITEMS_PER_PAGE };
+    if (debouncedSearchName?.trim()) filtersObj.name = debouncedSearchName.trim();
+    if (filters.selectedIngredients.length > 0) filtersObj.ingredient_ids = filters.selectedIngredients.map(ing => ing.id);
+    if (filters.selectedTags.length > 0) filtersObj.tag_ids = filters.selectedTags.map(tag => tag.id);
+    if (filters.minRating !== null && filters.minRating > 0) filtersObj.min_avg_rating = filters.minRating;
     return filtersObj;
-  }, [debouncedSearchName, filters.selectedIngredients, filters.selectedTags, currentPage]);
+  }, [debouncedSearchName, filters.selectedIngredients, filters.selectedTags, filters.minRating, currentPage]);
 
-  // Fetch cocktails when apiFilters changes (and initial data is loaded)
   useEffect(() => {
-    if (!initialDataLoaded) {
-      console.log("Skipping fetchCocktails: initial data not loaded");
-      return;
-    }
-
+    if (!initialDataLoaded) return;
     const fetchCocktails = async () => {
-      // Don't show filtering indicator on initial load
-      if (!isLoading) {
-        setIsFiltering(true);
-      }
+      if (!isInitialUrlLoad.current) setIsFiltering(true);
       setError(null);
-      
-      console.log('Fetching cocktails with filters:', apiFilters);
-      
       try {
         const response = await getCocktails(apiFilters);
-        
-        if (Array.isArray(response)) {
-          setCocktails(response);
-          setTotalCount(response.length);
-          setTotalPages(1);
+        if ('items' in response && 'total' in response) {
+          setCocktails(response.items);
+          setTotalCount(response.total);
+          setTotalPages(response.pages ?? Math.ceil(response.total / ITEMS_PER_PAGE));
         } else {
-          const paginatedResponse = response as PaginatedResponse<CocktailWithDetails>;
-          setCocktails(paginatedResponse.items);
-          setTotalCount(paginatedResponse.total);
-          setTotalPages(paginatedResponse.pages ?? Math.ceil(paginatedResponse.total / ITEMS_PER_PAGE));
+          const items = response as unknown as CocktailWithDetails[];
+          setCocktails(items);
+          setTotalCount(items.length);
+          setTotalPages(1);
         }
-        
-        console.log('Cocktails fetched successfully:', { 
-          count: Array.isArray(response) ? response.length : response.items.length,
-          total: Array.isArray(response) ? response.length : response.total
-        });
       } catch (err) {
         console.error('Failed to fetch cocktails:', err);
         setError(err as Error);
@@ -187,200 +127,157 @@ const CocktailsPage: React.FC = () => {
         setTotalCount(0);
         setTotalPages(1);
       } finally {
-        setIsLoading(false); // Initial loading done after first fetch
-        setIsFiltering(false); // Filtering process ends
+        setIsLoading(false);
+        setIsFiltering(false);
       }
     };
-
     fetchCocktails();
   }, [apiFilters, initialDataLoaded]);
 
-  // Update URL when filters or currentPage change (but not during initial URL loading)
   const updateUrl = useCallback((newFilters: FilterState, page: number) => {
-    // Don't update URL during initial loading from URL or if we're still initializing
-    if (isInitializingFromUrl.current) {
-      console.log('Skipping URL update: initializing from URL');
-      return;
-    }
-
+    if (isInitializingFromUrl.current) return;
     const params = new URLSearchParams();
-    
-    if (newFilters.name?.trim()) {
-      params.set('name', newFilters.name.trim());
-    }
-    if (newFilters.selectedIngredients.length > 0) {
-      params.set('ingredients', newFilters.selectedIngredients.map(ing => ing.id).join(','));
-    }
-    if (newFilters.selectedTags.length > 0) {
-      params.set('tags', newFilters.selectedTags.map(tag => tag.id).join(','));
-    }
-    if (page > 1) {
-      params.set('page', page.toString());
-    }
-    
-    // Only update if new params are different from current searchParams
-    const newParamsString = params.toString();
-    const currentParamsString = searchParams.toString();
-    
-    if (newParamsString !== currentParamsString) {
-      setSearchParams(params);
-      console.log('URL updated:', { from: currentParamsString, to: newParamsString });
+    if (newFilters.name?.trim()) params.set('name', newFilters.name.trim());
+    if (newFilters.selectedIngredients.length > 0) params.set('ingredients', newFilters.selectedIngredients.map(ing => ing.id).join(','));
+    if (newFilters.selectedTags.length > 0) params.set('tags', newFilters.selectedTags.map(tag => tag.id).join(','));
+    if (newFilters.minRating !== null && newFilters.minRating > 0) params.set('min_rating', newFilters.minRating.toString());
+    if (page > 1) params.set('page', page.toString());
+    if (params.toString() !== searchParams.toString()) {
+      setSearchParams(params, { replace: true });
     }
   }, [searchParams, setSearchParams]);
 
-  // Filter handlers
   const handleNameChange = useCallback((name: string) => {
     const newFilters = { ...filters, name };
     setFilters(newFilters);
-    if (currentPage !== 1) {
-      setCurrentPage(1);
-      updateUrl(newFilters, 1);
-    } else {
-      updateUrl(newFilters, currentPage);
-    }
-    console.log('Name filter changed to:', name);
-  }, [filters, currentPage, updateUrl]);
+    setCurrentPage(1);
+    updateUrl(newFilters, 1);
+  }, [filters, updateUrl]);
 
   const handleIngredientChange = useCallback((selectedIngredients: Ingredient[]) => {
     const newFilters = { ...filters, selectedIngredients };
     setFilters(newFilters);
-    if (currentPage !== 1) {
-      setCurrentPage(1);
-      updateUrl(newFilters, 1);
-    } else {
-      updateUrl(newFilters, currentPage);
-    }
-    console.log('Ingredient filter changed to:', selectedIngredients.map(ing => ing.name));
-  }, [filters, currentPage, updateUrl]);
+    setCurrentPage(1);
+    updateUrl(newFilters, 1);
+  }, [filters, updateUrl]);
 
   const handleTagChange = useCallback((selectedTags: Tag[]) => {
     const newFilters = { ...filters, selectedTags };
     setFilters(newFilters);
-    if (currentPage !== 1) {
-      setCurrentPage(1);
-      updateUrl(newFilters, 1);
-    } else {
-      updateUrl(newFilters, currentPage);
-    }
-    console.log('Tag filter changed to:', selectedTags.map(tag => tag.name));
-  }, [filters, currentPage, updateUrl]);
+    setCurrentPage(1);
+    updateUrl(newFilters, 1);
+  }, [filters, updateUrl]);
+
+  const handleRatingChange = useCallback((rating: number | null) => {
+    const newFilters = { ...filters, minRating: rating };
+    setFilters(newFilters);
+    setCurrentPage(1);
+    updateUrl(newFilters, 1);
+  }, [filters, updateUrl]);
 
   const handleResetFilters = useCallback(() => {
     setFilters(INITIAL_FILTERS);
     setCurrentPage(1);
-    setSearchParams({}); // Clear all URL params
-    console.log('All filters reset');
+    setSearchParams({}, { replace: true });
   }, [setSearchParams]);
 
-  const handleRemoveFilter = useCallback((type: 'name' | 'ingredient' | 'tag', value?: any) => {
+  const handleRemoveFilter = useCallback((type: 'name' | 'ingredient' | 'tag' | 'rating', value?: any) => {
     let newFilters = { ...filters };
-    
     switch (type) {
       case 'name':
         newFilters.name = '';
         break;
       case 'ingredient':
-        newFilters.selectedIngredients = filters.selectedIngredients.filter(ing => ing.id !== value.id);
+        newFilters.selectedIngredients = filters.selectedIngredients.filter(ing => ing.id !== (value as Ingredient).id);
         break;
       case 'tag':
-        newFilters.selectedTags = filters.selectedTags.filter(tag => tag.id !== value.id);
+        newFilters.selectedTags = filters.selectedTags.filter(tag => tag.id !== (value as Tag).id);
+        break;
+      case 'rating':
+        newFilters.minRating = null;
         break;
     }
-    
     setFilters(newFilters);
-    if (currentPage !== 1) {
-      setCurrentPage(1);
-      updateUrl(newFilters, 1);
-    } else {
-      updateUrl(newFilters, currentPage);
-    }
-    console.log('Filter removed:', { type, value: value?.name || value });
-  }, [filters, currentPage, updateUrl]);
+    setCurrentPage(1);
+    updateUrl(newFilters, 1);
+  }, [filters, updateUrl]);
 
-  // Page handlers
   const handlePageChange = useCallback((page: number) => {
     if (page === currentPage) return;
-    
     setCurrentPage(page);
     updateUrl(filters, page);
     window.scrollTo({ top: 0, behavior: 'smooth' });
-    console.log('Page changed to:', page);
   }, [filters, currentPage, updateUrl]);
 
   const handleRetry = useCallback(() => {
     setError(null);
     setIsLoading(true);
-    // fetchCocktails will be triggered by useEffect when isLoading changes
   }, []);
 
   const handleAddCocktail = useCallback(() => {
     navigate('/add-cocktail');
   }, [navigate]);
 
-  // Computed values
-  const hasActiveFilters = useMemo(() => 
-    filters.name?.trim() || 
-    filters.selectedIngredients.length > 0 || 
-    filters.selectedTags.length > 0,
+  // `hasActiveFilters` nie jest już potrzebne do warunkowego renderowania ActiveFilters,
+  // ale może być przydatne gdzie indziej, np. do decydowania, czy pokazać przycisk "Resetuj" w SearchFilters
+  const hasActiveFilters = useMemo(() =>
+    filters.name?.trim() !== '' ||
+    filters.selectedIngredients.length > 0 ||
+    filters.selectedTags.length > 0 ||
+    filters.minRating !== null,
     [filters]
   );
-  
-  const showInitialSpinner = isLoading && cocktails.length === 0;
+
+  const showInitialSpinner = isLoading && cocktails.length === 0 && !error;
 
   return (
-    <div className={styles.pageContainer}>
-      {/* Header Section */}
-      <div className={styles.header}>
-        <div className={styles.headerContent}>
-          <h1 className={styles.pageTitle}>Odkryj Koktajle</h1>
-          <p className={styles.pageSubtitle}>
-            Przeglądaj naszą kolekcję {totalCount > 0 ? totalCount : ''} przepisów na koktajle
+    <div className={styles.pageContainer || "container mx-auto px-4 py-8"}>
+      <div className={styles.header || "text-center mb-12"}>
+        <div className={styles.headerContent || ""}>
+          <h1 className={styles.pageTitle || "text-4xl font-bold text-gray-800 mb-2"}>
+            Odkryj Koktajle
+          </h1>
+          <p className={styles.pageSubtitle || "text-lg text-gray-600"}>
+            Przeglądaj naszą kolekcję {totalCount > 0 ? `ponad ${totalCount}` : ''} przepisów na koktajle
           </p>
           <Button
             variant="primary"
             onClick={handleAddCocktail}
-            className={styles.addButton}
+            className={styles.addButton || "mt-6"}
           >
-            Dodaj Koktajl
+            Dodaj Nowy Koktajl
           </Button>
         </div>
       </div>
 
-      {/* Filters Section */}
-      <div className={styles.filtersSection}>
+      <div className={styles.filtersSection || "mb-8"}>
         <SearchFilters
           nameValue={filters.name}
           selectedIngredients={filters.selectedIngredients}
           selectedTags={filters.selectedTags}
+          currentMinRating={filters.minRating}
           availableIngredients={ingredients}
           availableTags={tags}
           onNameChange={handleNameChange}
           onIngredientChange={handleIngredientChange}
           onTagChange={handleTagChange}
-          onReset={handleResetFilters}
+          onRatingChange={handleRatingChange}
+          onReset={handleResetFilters} 
           isLoading={isFiltering && !showInitialSpinner}
         />
-        
-        {hasActiveFilters && (
-          <ActiveFilters
-            nameFilter={filters.name}
-            ingredientFilters={filters.selectedIngredients}
-            tagFilters={filters.selectedTags}
-            onRemoveFilter={handleRemoveFilter}
-            onClearAll={handleResetFilters}
-          />
-        )}
+
+        {}
+        {}
       </div>
 
-      {/* Results Section */}
       <div className={styles.resultsSection}>
-        {!showInitialSpinner && !error && (
-          <div className={styles.resultsHeader}>
+        {!showInitialSpinner && !error && totalCount > 0 && (
+          <div className={styles.resultsHeader || "mb-4 text-sm text-gray-600"}>
             <p className={styles.resultsCount}>
               {hasActiveFilters 
-                ? `Znaleziono ${totalCount} koktajl${totalCount === 1 ? '' : (totalCount > 1 && totalCount < 5 ? 'e' : 'i')}${totalPages > 1 ? ` (strona ${currentPage} z ${totalPages})` : ''}`
-                : `Wszystkie koktajle (${totalCount})`
-              }
+                ? `Znaleziono ${totalCount} koktajl${totalCount === 1 ? '' : (totalCount % 10 > 1 && totalCount % 10 < 5 && (totalCount < 10 || totalCount > 20) ? 'e' : 'i')}`
+                : `Wszystkie koktajle (${totalCount})`}
+              {totalPages > 1 && ` - strona ${currentPage} z ${totalPages}`}
             </p>
           </div>
         )}
@@ -388,14 +285,14 @@ const CocktailsPage: React.FC = () => {
         <CocktailList
           cocktails={cocktails}
           isLoading={showInitialSpinner}
+          isFiltering={isFiltering && !showInitialSpinner}
           error={error}
           onRetry={handleRetry}
           onAddCocktail={handleAddCocktail}
         />
 
-        {/* Pagination */}
         {!showInitialSpinner && !error && totalPages > 1 && (
-          <div className={styles.paginationContainer}>
+          <div className={styles.paginationContainer || "mt-8 flex justify-center"}>
             <Pagination
               currentPage={currentPage}
               totalPages={totalPages}

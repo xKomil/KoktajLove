@@ -1,3 +1,4 @@
+# backend\app\models\rating.py
 from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, CheckConstraint
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func

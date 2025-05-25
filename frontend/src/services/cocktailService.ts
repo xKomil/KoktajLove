@@ -1,22 +1,21 @@
 // frontend/src/services/cocktailService.ts
 import apiClient from './apiClient';
-import { 
-  CocktailWithDetails, 
-  CocktailCreate, 
+import {
+  CocktailWithDetails,
+  CocktailCreate,
   CocktailUpdate,
-  PaginatedResponse // If using pagination
+  PaginatedResponse
 } from '@/types/cocktailTypes';
 import { CommonQueryPaginationParams } from '@/types/commonTypes';
 
-
-// Define a type for filter parameters if you have them
+// Define a type for filter parameters
 export interface CocktailFilters extends CommonQueryPaginationParams {
   name?: string;
   tag_ids?: number[];
   ingredient_ids?: number[];
   owner_id?: number;
   is_public?: boolean;
-  // Add other filterable fields as needed
+  min_avg_rating?: number; // Added rating filter
 }
 
 /**
@@ -25,22 +24,13 @@ export interface CocktailFilters extends CommonQueryPaginationParams {
  * @returns A promise that resolves to an array of cocktails or a paginated response.
  */
 export const getCocktails = async (params?: CocktailFilters): Promise<CocktailWithDetails[] | PaginatedResponse<CocktailWithDetails>> => {
-  // If your backend returns a simple array:
-  // const response = await apiClient.get<CocktailWithDetails[]>('/cocktails/', { params });
-  // return response.data;
-
-  // If your backend returns a paginated structure:
   const response = await apiClient.get<PaginatedResponse<CocktailWithDetails>>('/cocktails/', { params });
-  // If the backend doesn't always return PaginatedResponse (e.g. for non-paginated filters)
-  // you might need to check the response structure or always expect one type.
-  // For now, assuming it might be one or the other based on params.
-  // A more robust way is to always expect PaginatedResponse and extract items.
-  // Example: return response.data.items if always paginated.
-  // For now, this example assumes it could be either.
+  
+  // Handle both paginated and non-paginated responses
   if ('items' in response.data && 'total' in response.data) {
     return response.data as PaginatedResponse<CocktailWithDetails>;
   }
-  return response.data as CocktailWithDetails[]; // Fallback if not clearly paginated by structure
+  return response.data as CocktailWithDetails[];
 };
 
 /**
@@ -82,8 +72,3 @@ export const updateCocktail = async (id: number | string, data: CocktailUpdate):
 export const deleteCocktail = async (id: number | string): Promise<void> => {
   await apiClient.delete(`/cocktails/${id}`);
 };
-
-// Add other cocktail-related service functions as needed, e.g.:
-// - searchCocktails
-// - getCocktailsByTags
-// - getCocktailsByIngredients

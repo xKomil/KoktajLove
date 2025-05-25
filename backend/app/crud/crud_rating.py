@@ -1,3 +1,4 @@
+# backend\app\crud\crud_rating.py
 from typing import Optional, List
 from sqlalchemy.orm import Session
 

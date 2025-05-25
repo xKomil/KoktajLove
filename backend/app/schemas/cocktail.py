@@ -1,87 +1,88 @@
-from typing import Optional, List, Annotated
-from pydantic import BaseModel, HttpUrl, Field
+# backend/app/schemas/cocktail.py (fragmenty do aktualizacji)
+
+from typing import Optional, List, Union, Dict, Any
+from pydantic import BaseModel, Field, HttpUrl
 from datetime import datetime
 from enum import Enum
 
-from .user import User as UserSchema
-from .ingredient import Ingredient as IngredientSchema
-from .tag import Tag as TagSchema
+from app.schemas.user import User as UserSchema
+from app.schemas.tag import Tag as TagSchema
 
-# Krok 1: Zdefiniuj Enum dla jednostek
 class UnitEnum(str, Enum):
     ML = "ml"
     L = "l"
-    G = "g"
-    KG = "kg"
-    TSP = "łyżeczka"  # teaspoon
-    TBSP = "łyżka"    # tablespoon
-    OZ = "oz"         # ounce
-    SHOT = "shot"
-    DASH = "kropla"   # dash/kropla
-    PIECE = "sztuka"  # sztuka/kawałek
-    SLICE = "plasterek"
-    OTHER = "inna"    # dla niestandardowych
+    OZ = "oz"
+    TSP = "tsp"
+    TBSP = "tbsp"
+    CUP = "cup"
+    PIECE = "piece"
+    DASH = "dash"
+    DROP = "drop"
+    OTHER = "other"
 
-# Schemat danych dla składnika w koktajlu (przy tworzeniu/aktualizacji)
+class IngredientInCocktailDetail(BaseModel):
+    id: int
+    name: str
+    amount: int
+    unit: UnitEnum
+
 class CocktailIngredientData(BaseModel):
     ingredient_id: int
-    amount: int       # ZMIANA: str na int
-    unit: UnitEnum    # ZMIANA: str na UnitEnum
+    amount: int
+    unit: UnitEnum
 
-# Schemat danych dla tagu w koktajlu (przy tworzeniu/aktualizacji)
 class CocktailTagData(BaseModel):
     tag_id: int
 
+# Podstawowy schemat koktajlu
 class CocktailBase(BaseModel):
-    name: Annotated[str, Field(min_length=3, max_length=100)]
-    description: Optional[Annotated[str, Field(max_length=500)]] = None
-    instructions: Annotated[str, Field(min_length=10)]
+    name: str = Field(..., min_length=1, max_length=200)
+    description: Optional[str] = Field(None, max_length=1000)
+    instructions: str = Field(..., min_length=1)
     image_url: Optional[HttpUrl] = None
     is_public: bool = True
 
 class CocktailCreate(CocktailBase):
-    ingredients: List[CocktailIngredientData] = []
-    tags: List[CocktailTagData] = []
+    ingredients: List[CocktailIngredientData] = Field(..., min_length=1)
+    tags: Optional[List[CocktailTagData]] = None
 
 class CocktailUpdate(BaseModel):
-    name: Optional[Annotated[str, Field(min_length=3, max_length=100)]] = None
-    description: Optional[Annotated[str, Field(max_length=500)]] = None
-    instructions: Optional[Annotated[str, Field(min_length=10)]] = None
+    name: Optional[str] = Field(None, min_length=1, max_length=200)
+    description: Optional[str] = Field(None, max_length=1000)
+    instructions: Optional[str] = Field(None, min_length=1)
     image_url: Optional[HttpUrl] = None
     is_public: Optional[bool] = None
     ingredients: Optional[List[CocktailIngredientData]] = None
     tags: Optional[List[CocktailTagData]] = None
 
-class CocktailInDBBase(CocktailBase):
+# Schemat podstawowego koktajlu (dla prostych odpowiedzi)
+class Cocktail(CocktailBase):
     id: int
     user_id: int
     created_at: datetime
     updated_at: Optional[datetime] = None
     
-    class Config:
-        from_attributes = True
+    model_config = {"from_attributes": True}
 
-class Cocktail(CocktailInDBBase):
-    pass
-
-# Schemat dla składnika zwracanego w szczegółach koktajlu (z amount i unit)
-class IngredientInCocktailDetail(IngredientSchema):
-    amount: int       # ZMIANA: str na int
-    unit: UnitEnum    # ZMIANA: str na UnitEnum
-
-# Schemat odpowiedzi dla koktajlu z pełnymi szczegółami
-class CocktailWithDetails(CocktailInDBBase):
+# ZAKTUALIZOWANY schemat z detalami koktajlu - ZAWIERA ŚREDNIĄ OCENĘ
+class CocktailWithDetails(CocktailBase):
+    id: int
+    user_id: int
+    created_at: datetime
+    updated_at: Optional[datetime] = None
     author: UserSchema
-    ingredients: List[IngredientInCocktailDetail] = []
-    tags: List[TagSchema] = []
+    ingredients: List[IngredientInCocktailDetail]
+    tags: List[TagSchema]
+    # NOWE POLA - średnia ocena i liczba ocen
+    average_rating: Optional[float] = Field(default=None, description="Średnia ocena koktajlu")
+    ratings_count: int = Field(default=0, description="Liczba ocen dla koktajlu")
+    
+    model_config = {"from_attributes": True}
 
-# NOWY SCHEMAT - Paginowana odpowiedź dla koktajli
+# Schemat odpowiedzi z paginacją
 class PaginatedCocktailResponse(BaseModel):
     items: List[CocktailWithDetails]
     total: int
     page: int
     size: int
     pages: int
-    
-    class Config:
-        from_attributes = True

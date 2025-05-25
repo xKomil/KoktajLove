@@ -1,7 +1,6 @@
-#\backend\app\crud\crud_cocktail.py
 from typing import Optional, List, Union, Dict, Any
 from sqlalchemy.orm import Session, joinedload, selectinload
-from sqlalchemy import select, delete, and_, distinct, func
+from sqlalchemy import select, delete, and_, distinct, func, case, text
 import math
 
 # Importy modeli
@@ -9,6 +8,7 @@ from app.models.cocktail import Cocktail, cocktail_ingredient_association, cockt
 from app.models.ingredient import Ingredient
 from app.models.tag import Tag
 from app.models.user import User
+from app.models.rating import Rating
 
 # Importy schematów
 from app.schemas.cocktail import (
@@ -20,7 +20,7 @@ from app.schemas.tag import Tag as TagSchema
 
 class CRUDCocktail:
 
-    def _build_cocktail_with_details(self, db: Session, cocktail_orm: Cocktail) -> Optional[CocktailWithDetails]:
+    def _build_cocktail_with_details(self, db: Session, cocktail_orm: Cocktail, avg_rating=None, ratings_count=None) -> Optional[CocktailWithDetails]:
         if not cocktail_orm:
             return None
 
@@ -70,22 +70,38 @@ class CRUDCocktail:
             updated_at=cocktail_orm.updated_at,
             author=author_pydantic,
             ingredients=ingredients_details,
-            tags=tags_pydantic
+            tags=tags_pydantic,
+            # NOWE POLA - średnia ocena i liczba ocen
+            average_rating=round(float(avg_rating), 2) if avg_rating is not None else None,
+            ratings_count=int(ratings_count) if ratings_count is not None else 0
         )
 
     def get_cocktail(self, db: Session, cocktail_id: int) -> Optional[CocktailWithDetails]:
-        cocktail_orm = (
-            db.query(Cocktail)
+        # Zapytanie z obliczeniem średniej oceny i liczby ocen dla pojedynczego koktajlu
+        stmt = (
+            select(
+                Cocktail,
+                func.avg(Rating.rating_value).label('avg_rating'),
+                func.count(Rating.id).label('ratings_count')
+            )
+            .outerjoin(Rating, Cocktail.id == Rating.cocktail_id)
             .options(
                 joinedload(Cocktail.author),
                 selectinload(Cocktail.tags)
             )
-            .filter(Cocktail.id == cocktail_id)
-            .first()
+            .where(Cocktail.id == cocktail_id)
+            .group_by(Cocktail.id)
         )
-        if not cocktail_orm:
+        
+        result = db.execute(stmt).first()
+        if not result:
             return None
-        return self._build_cocktail_with_details(db, cocktail_orm)
+            
+        cocktail_orm = result[0]
+        avg_rating = result[1]
+        ratings_count = result[2]
+        
+        return self._build_cocktail_with_details(db, cocktail_orm, avg_rating, ratings_count)
 
     def get_cocktails(
         self, 
@@ -93,6 +109,7 @@ class CRUDCocktail:
         name: Optional[str] = None,
         ingredient_ids: Optional[List[int]] = None,
         tag_ids: Optional[List[int]] = None,
+        min_avg_rating: Optional[float] = None,  # NOWY PARAMETR
         page: int = 1,
         size: int = 12,
         user_id: Optional[int] = None
@@ -105,6 +122,7 @@ class CRUDCocktail:
             name: Nazwa koktajlu (częściowe dopasowanie, nieczułe na wielkość liter)
             ingredient_ids: Lista ID składników (koktajl musi zawierać WSZYSTKIE)
             tag_ids: Lista ID tagów (koktajl musi zawierać WSZYSTKIE)
+            min_avg_rating: Minimalna średnia ocena koktajlu (1-5)
             page: Numer strony (zaczyna od 1)
             size: Liczba elementów na stronie
             user_id: ID użytkownika (opcjonalne filtrowanie po prywatnych koktajlach)
@@ -113,89 +131,116 @@ class CRUDCocktail:
             Dict zawierający items, total, page, size, pages
         """
         
-        # Bazowe zapytanie z joinami dla optymalizacji
+        # Bazowe zapytanie z obliczeniem średniej oceny i liczby ocen
         base_query = (
-            db.query(Cocktail)
+            select(
+                Cocktail,
+                func.avg(Rating.rating_value).label('avg_rating'),
+                func.count(Rating.id).label('ratings_count')
+            )
+            .outerjoin(Rating, Cocktail.id == Rating.cocktail_id)
             .options(
                 joinedload(Cocktail.author),
                 selectinload(Cocktail.tags)
             )
         )
         
+        # Lista warunków WHERE
+        where_conditions = []
+        
         # Filtr publiczności - jeśli nie ma user_id, pokaż tylko publiczne
         if user_id is None:
-            base_query = base_query.filter(Cocktail.is_public == True)
+            where_conditions.append(Cocktail.is_public == True)
         else:
             # Jeśli jest user_id, pokaż publiczne + prywatne tego użytkownika
-            base_query = base_query.filter(
+            where_conditions.append(
                 (Cocktail.is_public == True) | (Cocktail.user_id == user_id)
             )
         
         # Filtrowanie po nazwie
         if name and name.strip():
-            base_query = base_query.filter(
+            where_conditions.append(
                 Cocktail.name.ilike(f"%{name.strip()}%")
             )
         
         # Filtrowanie po składnikach - koktajl musi zawierać WSZYSTKIE podane składniki
         if ingredient_ids and len(ingredient_ids) > 0:
-            # Używamy subquery z GROUP BY i HAVING
             ingredient_subquery = (
-                db.query(cocktail_ingredient_association.c.cocktail_id)
-                .filter(cocktail_ingredient_association.c.ingredient_id.in_(ingredient_ids))
+                select(cocktail_ingredient_association.c.cocktail_id)
+                .where(cocktail_ingredient_association.c.ingredient_id.in_(ingredient_ids))
                 .group_by(cocktail_ingredient_association.c.cocktail_id)
                 .having(func.count(distinct(cocktail_ingredient_association.c.ingredient_id)) == len(ingredient_ids))
-                .subquery()
             )
-            base_query = base_query.filter(Cocktail.id.in_(
-                select(ingredient_subquery.c.cocktail_id)
-            ))
+            where_conditions.append(Cocktail.id.in_(ingredient_subquery))
         
         # Filtrowanie po tagach - koktajl musi zawierać WSZYSTKIE podane tagi
         if tag_ids and len(tag_ids) > 0:
-            # Analogicznie do składników
             tag_subquery = (
-                db.query(cocktail_tag_association.c.cocktail_id)
-                .filter(cocktail_tag_association.c.tag_id.in_(tag_ids))
+                select(cocktail_tag_association.c.cocktail_id)
+                .where(cocktail_tag_association.c.tag_id.in_(tag_ids))
                 .group_by(cocktail_tag_association.c.cocktail_id)
                 .having(func.count(distinct(cocktail_tag_association.c.tag_id)) == len(tag_ids))
-                .subquery()
             )
-            base_query = base_query.filter(Cocktail.id.in_(
-                select(tag_subquery.c.cocktail_id)
-            ))
+            where_conditions.append(Cocktail.id.in_(tag_subquery))
+        
+        # Zastosuj warunki WHERE
+        if where_conditions:
+            base_query = base_query.where(and_(*where_conditions))
+        
+        # Grupowanie po ID koktajlu
+        base_query = base_query.group_by(Cocktail.id)
+        
+        # FILTROWANIE PO MINIMALNEJ ŚREDNIEJ OCENIE
+        if min_avg_rating is not None and min_avg_rating > 0:
+            # Użyj HAVING do filtrowania po obliczonej średniej ocenie
+            # COALESCE zapewnia, że koktajle bez ocen będą miały średnią 0
+            base_query = base_query.having(
+                func.coalesce(func.avg(Rating.rating_value), 0.0) >= min_avg_rating
+            )
         
         # Oblicz całkowitą liczbę wyników (przed paginacją)
-        total_count = base_query.count()
+        # Potrzebujemy osobnego zapytania do liczenia, bo GROUP BY komplikuje count()
+        count_query = select(func.count()).select_from(
+            base_query.subquery()
+        )
+        total_count = db.execute(count_query).scalar()
         
         # Oblicz liczbę stron
         total_pages = math.ceil(total_count / size) if total_count > 0 else 1
         
-        # Zastosuj paginację
+        # Zastosuj paginację i sortowanie
         skip = (page - 1) * size
-        cocktails_orm_list = (
+        final_query = (
             base_query
             .order_by(Cocktail.created_at.desc())
             .offset(skip)
             .limit(size)
-            .all()
         )
+        
+        # Wykonaj zapytanie
+        results = db.execute(final_query).all()
         
         # Przekształć na CocktailWithDetails
         cocktail_details_list = []
-        if cocktails_orm_list:
-            cocktail_details_list = [
-                self._build_cocktail_with_details(db, cocktail_orm) 
-                for cocktail_orm in cocktails_orm_list
-                if cocktail_orm is not None
-            ]
+        for result in results:
+            cocktail_orm = result[0]
+            avg_rating = result[1]
+            ratings_count = result[2]
+            
+            cocktail_detail = self._build_cocktail_with_details(
+                db, cocktail_orm, avg_rating, ratings_count
+            )
+            if cocktail_detail:
+                cocktail_details_list.append(cocktail_detail)
             
         print(f"--- CRUD get_cocktails RECEIVED ---")
         print(f"Name: {name}")
-        print(f"Ingredient IDs: {ingredient_ids}") # <--- WAŻNE
-        print(f"Tag IDs: {tag_ids}")             # <--- WAŻNE
+        print(f"Ingredient IDs: {ingredient_ids}")
+        print(f"Tag IDs: {tag_ids}")
+        print(f"Min Avg Rating: {min_avg_rating}")  # NOWY LOG
         print(f"Page: {page}, Size: {size}")
         print(f"User ID: {user_id}")
+        print(f"Total results: {total_count}")
         
         return {
             "items": cocktail_details_list,

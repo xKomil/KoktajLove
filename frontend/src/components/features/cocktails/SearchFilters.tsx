@@ -1,20 +1,21 @@
-// frontend/src/components/features/cocktails/SearchFilters.tsx
 import React from 'react';
 import Input from '@/components/ui/Input/Input';
 import Button from '@/components/ui/Button/Button';
 import MultiAutoCompleteSelect from '@/components/ui/MultiAutoCompleteSelect/MultiAutoCompleteSelect';
+import StarRatingInput from '@/components/ui/StarRatingInput/StarRatingInput';
 import { Ingredient, Tag } from '@/types/cocktailTypes';
-import styles from './SearchFilters.module.css';
 
 interface SearchFiltersProps {
   nameValue: string;
   selectedIngredients: Ingredient[];
   selectedTags: Tag[];
+  currentMinRating: number | null;
   availableIngredients: Ingredient[];
   availableTags: Tag[];
   onNameChange: (value: string) => void;
   onIngredientChange: (ingredients: Ingredient[]) => void;
   onTagChange: (tags: Tag[]) => void;
+  onRatingChange: (rating: number | null) => void;
   onReset: () => void;
   isLoading?: boolean;
 }
@@ -23,36 +24,38 @@ const SearchFilters: React.FC<SearchFiltersProps> = ({
   nameValue,
   selectedIngredients,
   selectedTags,
+  currentMinRating,
   availableIngredients,
   availableTags,
   onNameChange,
   onIngredientChange,
   onTagChange,
+  onRatingChange,
   onReset,
   isLoading = false
 }) => {
-  const hasActiveFilters = nameValue || 
-    selectedIngredients.length > 0 || 
-    selectedTags.length > 0;
+  const hasActiveFilters = nameValue ||
+    selectedIngredients.length > 0 ||
+    selectedTags.length > 0 ||
+    currentMinRating !== null;
 
   return (
-    <div className={styles.container}>
-      <div className={styles.filtersGrid}>
+    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {/* Name Search */}
-        <div className={styles.filterGroup}>
+        <div className="space-y-2">
           <Input
             label="Szukaj po nazwie"
             placeholder="Wpisz nazwę koktajlu..."
             value={nameValue}
             onChange={(e) => onNameChange(e.target.value)}
-            startIcon="🔍"
             fullWidth
-            className={styles.searchInput}
+            className="w-full"
           />
         </div>
 
         {/* Ingredients Filter */}
-        <div className={styles.filterGroup}>
+        <div className="space-y-2">
           <MultiAutoCompleteSelect<Ingredient>
             label="Składniki"
             placeholder="Wybierz składniki..."
@@ -63,12 +66,12 @@ const SearchFilters: React.FC<SearchFiltersProps> = ({
             getItemValue={(item) => item.id.toString()}
             noOptionsText="Brak składników"
             searchPlaceholder="Szukaj składnika..."
-            className={styles.multiSelect}
+            className="w-full"
           />
         </div>
 
         {/* Tags Filter */}
-        <div className={styles.filterGroup}>
+        <div className="space-y-2">
           <MultiAutoCompleteSelect<Tag>
             label="Tagi"
             placeholder="Wybierz tagi..."
@@ -79,26 +82,37 @@ const SearchFilters: React.FC<SearchFiltersProps> = ({
             getItemValue={(item) => item.id.toString()}
             noOptionsText="Brak tagów"
             searchPlaceholder="Szukaj tagu..."
-            className={styles.multiSelect}
+            className="w-full"
+          />
+        </div>
+
+        {/* Rating Filter */}
+        <div className="space-y-2">
+          <StarRatingInput
+            label="Minimalna ocena"
+            value={currentMinRating}
+            onChange={onRatingChange}
+            size="md"
+            className="w-full"
           />
         </div>
       </div>
 
       {/* Action Buttons */}
-      <div className={styles.actionButtons}>
+      <div className="flex items-center justify-between mt-6 pt-4 border-t border-gray-100">
         <Button
           variant="ghost"
           onClick={onReset}
           disabled={!hasActiveFilters || isLoading}
-          className={styles.resetButton}
+          className="text-gray-600 hover:text-gray-800"
         >
           Resetuj filtry
         </Button>
-        
+
         {isLoading && (
-          <div className={styles.loadingIndicator}>
-            <span className={styles.loadingSpinner}>⟳</span>
-            Filtrowanie...
+          <div className="flex items-center space-x-2 text-sm text-gray-600">
+            <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+            <span>Filtrowanie...</span>
           </div>
         )}
       </div>
