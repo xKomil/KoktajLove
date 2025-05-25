@@ -1,0 +1,310 @@
+/* frontend/src/components/ui/MultiAutoCompleteSelect/MultiAutoCompleteSelect.module.css */
+.container {
+  position: relative;
+  width: 100%;
+}
+
+.label {
+  display: block;
+  color: var(--color-gray-700);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  margin-bottom: var(--spacing-1);
+}
+
+.inputContainer {
+  position: relative;
+  min-height: 2.5rem;
+  background-color: var(--color-white);
+  border: 1px solid var(--color-gray-300);
+  border-radius: var(--border-radius-base);
+  padding: var(--spacing-1);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--spacing-1);
+  transition: all var(--transition-base);
+  cursor: text;
+}
+
+.inputContainer:hover {
+  border-color: var(--color-gray-400);
+}
+
+.inputContainer:focus-within {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px var(--color-primary-light);
+}
+
+.hasError {
+  border-color: var(--color-danger);
+}
+
+.hasError:focus-within {
+  border-color: var(--color-danger);
+  box-shadow: 0 0 0 2px var(--color-danger-light);
+}
+
+.disabled {
+  background-color: var(--color-gray-100);
+  border-color: var(--color-gray-200);
+  cursor: not-allowed;
+}
+
+.disabled:hover {
+  border-color: var(--color-gray-200);
+}
+
+/* Selected items */
+.selectedItems {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-1);
+  flex: 1;
+  min-width: 0;
+}
+
+.selectedItem {
+  display: inline-flex;
+  align-items: center;
+  background-color: var(--color-primary-light);
+  color: var(--color-primary-dark);
+  padding: var(--spacing-1) var(--spacing-2);
+  border-radius: var(--border-radius-sm);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  gap: var(--spacing-1);
+  max-width: 200px;
+}
+
+.selectedItemLabel {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.removeButton {
+  background: none;
+  border: none;
+  color: var(--color-primary-dark);
+  cursor: pointer;
+  padding: 0;
+  margin: 0;
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  font-size: 14px;
+  line-height: 1;
+  transition: all var(--transition-base);
+}
+
+.removeButton:hover {
+  background-color: var(--color-primary-dark);
+  color: var(--color-white);
+}
+
+.removeButton:focus {
+  outline: none;
+  background-color: var(--color-primary-dark);
+  color: var(--color-white);
+}
+
+/* Search input */
+.searchInput {
+  border: none;
+  outline: none;
+  background: transparent;
+  flex: 1;
+  min-width: 120px;
+  padding: var(--spacing-1);
+  font-size: var(--font-size-base);
+  color: var(--color-gray-900);
+}
+
+.searchInput::placeholder {
+  color: var(--color-gray-500);
+}
+
+.searchInput:disabled {
+  cursor: not-allowed;
+  color: var(--color-gray-500);
+}
+
+/* Dropdown button */
+.dropdownButton {
+  background: none;
+  border: none;
+  color: var(--color-gray-500);
+  cursor: pointer;
+  padding: var(--spacing-1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-base);
+  border-radius: var(--border-radius-sm);
+}
+
+.dropdownButton:hover {
+  color: var(--color-gray-700);
+  background-color: var(--color-gray-100);
+}
+
+.dropdownButton:focus {
+  outline: none;
+  color: var(--color-primary);
+}
+
+.dropdownButton.open {
+  color: var(--color-primary);
+  transform: rotate(180deg);
+}
+
+.dropdownButton:disabled {
+  cursor: not-allowed;
+  color: var(--color-gray-400);
+}
+
+.dropdownButton:disabled:hover {
+  background-color: transparent;
+}
+
+/* Dropdown list */
+.dropdownList {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  background-color: var(--color-white);
+  border: 1px solid var(--color-gray-300);
+  border-radius: var(--border-radius-base);
+  box-shadow: var(--shadow-lg);
+  max-height: 200px;
+  overflow-y: auto;
+  margin: 0;
+  padding: var(--spacing-1);
+  list-style: none;
+  margin-top: var(--spacing-1);
+}
+
+.dropdownItem {
+  padding: var(--spacing-2) var(--spacing-3);
+  cursor: pointer;
+  border-radius: var(--border-radius-sm);
+  font-size: var(--font-size-base);
+  color: var(--color-gray-900);
+  transition: all var(--transition-base);
+  word-break: break-word;
+}
+
+.dropdownItem:hover,
+.dropdownItem.focused {
+  background-color: var(--color-primary-light);
+  color: var(--color-primary-dark);
+}
+
+.noOptions {
+  padding: var(--spacing-2) var(--spacing-3);
+  color: var(--color-gray-500);
+  font-style: italic;
+  font-size: var(--font-size-sm);
+  text-align: center;
+}
+
+/* Bottom text */
+.bottomText {
+  min-height: 20px;
+  font-size: var(--font-size-sm);
+  margin-top: var(--spacing-1);
+}
+
+.helperText {
+  color: var(--color-gray-600);
+}
+
+.error {
+  color: var(--color-danger);
+}
+
+/* Scrollbar styling for dropdown */
+.dropdownList::-webkit-scrollbar {
+  width: 6px;
+}
+
+.dropdownList::-webkit-scrollbar-track {
+  background: var(--color-gray-100);
+  border-radius: 3px;
+}
+
+.dropdownList::-webkit-scrollbar-thumb {
+  background: var(--color-gray-400);
+  border-radius: 3px;
+}
+
+.dropdownList::-webkit-scrollbar-thumb:hover {
+  background: var(--color-gray-500);
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  .selectedItem {
+    max-width: 150px;
+  }
+  
+  .searchInput {
+    min-width: 80px;
+  }
+  
+  .dropdownList {
+    max-height: 160px;
+  }
+}
+
+/* Dark mode */
+@media (prefers-color-scheme: dark) {
+  .label {
+    color: var(--color-gray-300);
+  }
+  
+  .inputContainer {
+    background-color: var(--color-gray-800);
+    border-color: var(--color-gray-700);
+  }
+  
+  .inputContainer:hover {
+    border-color: var(--color-gray-600);
+  }
+  
+  .disabled {
+    background-color: var(--color-gray-900);
+    border-color: var(--color-gray-800);
+  }
+  
+  .searchInput {
+    color: var(--color-gray-100);
+  }
+  
+  .searchInput::placeholder {
+    color: var(--color-gray-400);
+  }
+  
+  .dropdownList {
+    background-color: var(--color-gray-800);
+    border-color: var(--color-gray-700);
+  }
+  
+  .dropdownItem {
+    color: var(--color-gray-100);
+  }
+  
+  .noOptions {
+    color: var(--color-gray-400);
+  }
+  
+  .helperText {
+    color: var(--color-gray-400);
+  }
+}

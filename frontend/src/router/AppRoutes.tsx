@@ -9,6 +9,7 @@ import MainLayout from '@/components/layout/MainLayout/MainLayout';
 import HomePage from '@/pages/HomePage';
 import LoginPage from '@/pages/LoginPage';
 import RegisterPage from '@/pages/RegisterPage';
+import CocktailsPage from '@/pages/CocktailsPage';
 import CocktailDetailPage from '@/pages/CocktailDetailPage';
 import AddCocktailPage from '@/pages/AddCocktailPage';
 import EditCocktailPage from '@/pages/EditCocktailPage';
@@ -19,31 +20,27 @@ import NotFoundPage from '@/pages/NotFoundPage';
 // Protected Route
 import ProtectedRoute from './ProtectedRoute';
 
-// A list of all available cocktails (could be same as HomePage or a dedicated page)
-const AllCocktailsPage = () => <HomePage />; // Example: HomePage lists all public cocktails
-
 const AppRoutes: React.FC = () => (
   <Routes>
-    <Route element={<MainLayout />}>
+    <Route path="/" element={<MainLayout />}>
       {/* Public Routes */}
-      <Route path="/" element={<HomePage />} />
-      <Route path="/cocktails" element={<AllCocktailsPage />} /> {/* For a general cocktail listing */}
-      <Route path="/login" element={<LoginPage />} />
-      <Route path="/register" element={<RegisterPage />} />
-      <Route path="/cocktail/:cocktailId" element={<CocktailDetailPage />} />
+      <Route index element={<HomePage />} /> {/* Landing page / business card */}
+      <Route path="cocktails" element={<CocktailsPage />} /> {/* Cocktail list with filters */}
+      <Route path="cocktails/:id" element={<CocktailDetailPage />} />
+      <Route path="login" element={<LoginPage />} />
+      <Route path="register" element={<RegisterPage />} />
       
       {/* Protected Routes */}
       <Route element={<ProtectedRoute />}>
-        <Route path="/add-cocktail" element={<AddCocktailPage />} />
-        <Route path="/profile" element={<ProfilePage />} />
-        {/* <Route path="/profile/edit" element={<EditProfilePage />} /> Placeholder */}
-        <Route path="/my-favorites" element={<MyFavoritesPage />} />
-        <Route path="/edit-cocktail/:cocktailId" element={<EditCocktailPage />} />
+        <Route path="add-cocktail" element={<AddCocktailPage />} />
+        <Route path="edit-cocktail/:id" element={<EditCocktailPage />} />
+        <Route path="profile" element={<ProfilePage />} />
+        <Route path="favorites" element={<MyFavoritesPage />} />
       </Route>
-
+      
       {/* Not Found */}
-      <Route path="/not-found" element={<NotFoundPage />} />
-      <Route path="*" element={<Navigate to="/not-found" replace />} />
+      <Route path="404" element={<NotFoundPage />} />
+      <Route path="*" element={<Navigate to="/404" replace />} />
     </Route>
   </Routes>
 );

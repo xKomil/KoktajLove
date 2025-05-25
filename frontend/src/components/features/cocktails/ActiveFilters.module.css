@@ -1,0 +1,176 @@
+/* frontend/src/components/features/cocktails/ActiveFilters.module.css */
+.container {
+  background-color: var(--color-gray-50);
+  border: 1px solid var(--color-gray-200);
+  border-radius: var(--border-radius-base);
+  padding: var(--spacing-4);
+  margin-bottom: var(--spacing-4);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--spacing-3);
+  gap: var(--spacing-3);
+}
+
+.title {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-gray-700);
+  margin: 0;
+}
+
+.clearAllButton {
+  flex-shrink: 0;
+  font-size: var(--font-size-sm);
+  color: var(--color-danger);
+  border-color: var(--color-danger);
+}
+
+.clearAllButton:hover {
+  background-color: var(--color-danger);
+  color: var(--color-white);
+  border-color: var(--color-danger);
+}
+
+.filtersContainer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-3);
+}
+
+.filterGroup {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+}
+
+.filterLabel {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-gray-600);
+}
+
+.filterItems {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-2);
+}
+
+.filterItem {
+  display: inline-flex;
+  align-items: center;
+  background-color: var(--color-primary-light);
+  color: var(--color-primary-dark);
+  padding: var(--spacing-1) var(--spacing-2);
+  border-radius: var(--border-radius-sm);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  gap: var(--spacing-2);
+  border: 1px solid var(--color-primary);
+  max-width: 250px;
+}
+
+.filterValue {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1;
+  min-width: 0;
+}
+
+.removeButton {
+  background: none;
+  border: none;
+  color: var(--color-primary-dark);
+  cursor: pointer;
+  padding: 0;
+  margin: 0;
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  font-size: 16px;
+  line-height: 1;
+  transition: all var(--transition-base);
+  flex-shrink: 0;
+}
+
+.removeButton:hover {
+  background-color: var(--color-primary-dark);
+  color: var(--color-white);
+}
+
+.removeButton:focus {
+  outline: none;
+  background-color: var(--color-primary-dark);
+  color: var(--color-white);
+  box-shadow: 0 0 0 2px var(--color-primary-light);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-2);
+  }
+  
+  .filterGroup {
+    gap: var(--spacing-1);
+  }
+  
+  .filterItem {
+    max-width: 200px;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: var(--spacing-3);
+  }
+  
+  .filtersContainer {
+    gap: var(--spacing-2);
+  }
+  
+  .filterItems {
+    gap: var(--spacing-1);
+  }
+  
+  .filterItem {
+    max-width: 160px;
+    padding: var(--spacing-1);
+  }
+}
+
+/* Dark mode */
+@media (prefers-color-scheme: dark) {
+  .container {
+    background-color: var(--color-gray-800);
+    border-color: var(--color-gray-700);
+  }
+  
+  .title {
+    color: var(--color-gray-300);
+  }
+  
+  .filterLabel {
+    color: var(--color-gray-400);
+  }
+  
+  .clearAllButton {
+    color: var(--color-danger-light);
+    border-color: var(--color-danger-light);
+  }
+  
+  .clearAllButton:hover {
+    background-color: var(--color-danger);
+    color: var(--color-white);
+    border-color: var(--color-danger);
+  }
+}

@@ -1,65 +1,181 @@
 // frontend/src/pages/HomePage.tsx
-import React, { useEffect, useState } from 'react';
-import CocktailList from '@/components/features/cocktails/CocktailList';
-import * as cocktailService from '@/services/cocktailService';
-// Usuń import PaginatedResponse, jeśli nie jest używany explicite jako typ
-// import { CocktailWithDetails, PaginatedResponse } from '@/types';
-import { CocktailWithDetails } from '@/types'; // PaginatedResponse będzie znany przez TypeScript z serwisu
+import React from 'react';
+import Button from '@/components/ui/Button/Button';
+import FeatureCard from '@/components/ui/FeatureCard/FeatureCard';
+import CategoryCard from '@/components/ui/CategoryCard/CategoryCard';
 import styles from './PageStyles.module.css';
-import Spinner from '@/components/ui/Spinner/Spinner';
+
+const SearchIcon = () => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <circle cx="11" cy="11" r="8"/>
+    <path d="m21 21-4.35-4.35"/>
+  </svg>
+);
+
+const BookIcon = () => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+    <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+  </svg>
+);
+
+const HeartIcon = () => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.29 1.51 4.04 3 5.5l7 7 7-7z"/>
+  </svg>
+);
 
 const HomePage: React.FC = () => {
-  const [cocktails, setCocktails] = useState<CocktailWithDetails[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
+  const features = [
+    {
+      icon: <BookIcon />,
+      title: "Bogata Baza Przepisów",
+      description: "Tysiące inspirujących przepisów na koktajle na każdą okazję - od klasycznych po nowoczesne kreacje."
+    },
+    {
+      icon: <SearchIcon />,
+      title: "Intuicyjne Wyszukiwanie",
+      description: "Znajdź idealny koktajl w kilka sekund dzięki zaawansowanym filtrom i kategoryzacji."
+    },
+    {
+      icon: <HeartIcon />,
+      title: "Twoje Listy Ulubionych",
+      description: "Zapisuj i organizuj przepisy, które kochasz. Twórz własne kolekcje na różne okazje."
+    }
+  ];
 
-  useEffect(() => {
-    const fetchCocktails = async () => {
-      setIsLoading(true);
-      setError(null);
-      try {
-        const params: cocktailService.CocktailFilters = { is_public: true };
-        // Typ `responseData` zostanie wywnioskowany przez TS jako
-        // CocktailWithDetails[] | PaginatedResponse<CocktailWithDetails>
-        // na podstawie tego, co zwraca cocktailService.getCocktails
-        const responseData = await cocktailService.getCocktails(params);
-        
-        if (responseData && typeof responseData === 'object' && 'items' in responseData && 'total' in responseData) {
-          setCocktails(responseData.items);
-        } else if (Array.isArray(responseData)) {
-          setCocktails(responseData);
-        } else {
-          console.warn("Otrzymano nieoczekiwany format danych dla koktajli:", responseData);
-          setCocktails([]);
-        }
-
-      } catch (err: any) {
-        console.error('Failed to fetch cocktails:', err);
-        setError(err);
-        setCocktails([]);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchCocktails();
-  }, []);
+  const categories = [
+    {
+      name: "Klasyki",
+      description: "Timeless cocktails that never go out of style",
+      imageGradient: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+      link: "/cocktails?category=classic"
+    },
+    {
+      name: "Tropikalne",
+      description: "Escape to paradise with exotic flavors",
+      imageGradient: "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)",
+      link: "/cocktails?category=tropical"
+    },
+    {
+      name: "Bezalkoholowe",
+      description: "Delicious mocktails for everyone",
+      imageGradient: "linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)",
+      link: "/cocktails?category=non-alcoholic"
+    },
+    {
+      name: "Na Imprezę",
+      description: "Perfect drinks for celebrations",
+      imageGradient: "linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)",
+      link: "/cocktails?category=party"
+    }
+  ];
 
   return (
     <div className={styles.pageContainer}>
-      <h1 className={styles.pageTitle}>Welcome to KoktajLOVE!</h1>
-      <p className={styles.pageSubtitle}>Discover and share amazing cocktail recipes.</p>
-      
-      {isLoading && <div className={styles.centeredMessage}><Spinner /> <p>Loading cocktails...</p></div>}
-      {error && <p className={`${styles.centeredMessage} ${styles.error}`}>Failed to load cocktails: {error.message}</p>}
-      
-      {!isLoading && !error && cocktails.length === 0 && (
-        <p className={styles.centeredMessage}>No cocktails found. Why not add one?</p>
-      )}
+      {/* Hero Section */}
+      <section className={styles.heroSection}>
+        <div className={styles.heroContent}>
+          <h1 className={styles.heroTitle}>
+            Odkryj świat smaków z <span className={styles.brandName}>KoktajLOVE</span>!
+          </h1>
+          <p className={styles.heroSubtitle}>
+            Największa społeczność miłośników koktajli w Polsce. Znajdź inspirację, 
+            dziel się przepisami i twórz niezapomniane smaki.
+          </p>
+          <div className={styles.heroActions}>
+            <Button 
+              as="link" 
+              to="/cocktails" 
+              variant="primary" 
+              size="lg"
+              className={styles.primaryCta}
+            >
+              Przeglądaj Koktajle
+            </Button>
+            <Button 
+              as="link" 
+              to="/register" 
+              variant="secondary" 
+              size="lg"
+            >
+              Dołącz do Nas
+            </Button>
+          </div>
+        </div>
+        <div className={styles.heroVisual}>
+          <div className={styles.heroGradientBg}></div>
+        </div>
+      </section>
 
-      {!isLoading && !error && cocktails.length > 0 && (
-        <CocktailList cocktails={cocktails} isLoading={false} error={null} />
-      )}
+      {/* Features Section */}
+      <section className={styles.featuresSection}>
+        <div className={styles.sectionHeader}>
+          <h2 className={styles.sectionTitle}>Poznaj możliwości KoktajLOVE</h2>
+          <p className={styles.sectionSubtitle}>
+            Wszystko czego potrzebujesz, aby odkrywać i tworzyć wspaniałe koktajle
+          </p>
+        </div>
+        <div className={styles.featuresGrid}>
+          {features.map((feature, index) => (
+            <FeatureCard
+              key={index}
+              icon={feature.icon}
+              title={feature.title}
+              description={feature.description}
+            />
+          ))}
+        </div>
+      </section>
+
+      {/* Categories Section */}
+      <section className={styles.categoriesSection}>
+        <div className={styles.sectionHeader}>
+          <h2 className={styles.sectionTitle}>Eksploruj kategorie</h2>
+          <p className={styles.sectionSubtitle}>
+            Znajdź koktajle idealne na każdą okazję
+          </p>
+        </div>
+        <div className={styles.categoriesGrid}>
+          {categories.map((category, index) => (
+            <CategoryCard
+              key={index}
+              name={category.name}
+              description={category.description}
+              imageGradient={category.imageGradient}
+              link={category.link}
+            />
+          ))}
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className={styles.ctaSection}>
+        <div className={styles.ctaContent}>
+          <h2 className={styles.ctaTitle}>Gotowy zacząć swoją przygodę?</h2>
+          <p className={styles.ctaSubtitle}>
+            Dołącz do tysięcy użytkowników, którzy już odkrywają świat koktajli z KoktajLOVE
+          </p>
+          <div className={styles.ctaActions}>
+            <Button 
+              as="link" 
+              to="/register" 
+              variant="primary" 
+              size="lg"
+            >
+              Stwórz Konto za Darmo
+            </Button>
+            <Button 
+              as="link" 
+              to="/cocktails/add" 
+              variant="secondary" 
+              size="lg"
+            >
+              Podziel się Swoim Przepisem
+            </Button>
+          </div>
+        </div>
+      </section>
     </div>
   );
 };

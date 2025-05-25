@@ -1,0 +1,187 @@
+/* frontend/src/components/features/cocktails/SearchFilters.module.css */
+
+.container {
+  background: white;
+  border-radius: var(--border-radius-lg);
+  padding: var(--spacing-xl);
+  box-shadow: var(--shadow-lg);
+  border: 1px solid var(--color-gray-200);
+  margin-bottom: var(--spacing-lg);
+  position: relative;
+  overflow: hidden;
+}
+
+.container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--color-primary) 0%, var(--color-secondary) 100%);
+}
+
+.filtersGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--spacing-lg);
+  margin-bottom: var(--spacing-lg);
+}
+
+.filterGroup {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.searchInput {
+  position: relative;
+}
+
+.multiSelect {
+  min-height: 60px;
+}
+
+/* Action Buttons */
+.actionButtons {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: var(--spacing-lg);
+  border-top: 1px solid var(--color-gray-200);
+  gap: var(--spacing-md);
+}
+
+.resetButton {
+  min-width: 140px;
+  transition: all var(--transition-normal);
+}
+
+.resetButton:hover:not(:disabled) {
+  background-color: var(--color-gray-100);
+  transform: translateY(-1px);
+}
+
+.resetButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Loading Indicator */
+.loadingIndicator {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  color: var(--color-gray-600);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+}
+
+.loadingSpinner {
+  display: inline-block;
+  animation: spin 1s linear infinite;
+  font-size: 1.2em;
+  color: var(--color-primary);
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .filtersGrid {
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: var(--spacing-md);
+  }
+  
+  .container {
+    padding: var(--spacing-lg);
+  }
+}
+
+@media (max-width: 768px) {
+  .filtersGrid {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-lg);
+  }
+  
+  .actionButtons {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--spacing-md);
+  }
+  
+  .loadingIndicator {
+    justify-content: center;
+  }
+  
+  .container {
+    padding: var(--spacing-md);
+    margin-bottom: var(--spacing-md);
+  }
+}
+
+@media (max-width: 480px) {
+  .filtersGrid {
+    gap: var(--spacing-md);
+  }
+  
+  .container {
+    padding: var(--spacing-sm);
+    border-radius: var(--border-radius-md);
+  }
+  
+  .actionButtons {
+    padding-top: var(--spacing-md);
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .container {
+    background: var(--color-gray-800);
+    border-color: var(--color-gray-700);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.2);
+  }
+  
+  .actionButtons {
+    border-top-color: var(--color-gray-700);
+  }
+  
+  .loadingIndicator {
+    color: var(--color-gray-300);
+  }
+  
+  .resetButton:hover:not(:disabled) {
+    background-color: var(--color-gray-700);
+  }
+}
+
+/* Focus and accessibility improvements */
+.container:focus-within {
+  box-shadow: var(--shadow-xl), 0 0 0 2px var(--color-primary-light);
+  transform: translateY(-1px);
+  transition: all var(--transition-normal);
+}
+
+/* Animation for smooth appearance */
+.container {
+  animation: slideInDown 0.4s ease-out;
+}
+
+@keyframes slideInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
