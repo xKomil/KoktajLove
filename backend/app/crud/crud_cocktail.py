@@ -9,6 +9,7 @@ from app.models.ingredient import Ingredient
 from app.models.tag import Tag
 from app.models.user import User
 from app.models.rating import Rating
+from app import models
 
 # Importy schematów
 from app.schemas.cocktail import (
@@ -17,6 +18,7 @@ from app.schemas.cocktail import (
 )
 from app.schemas.user import User as UserSchema
 from app.schemas.tag import Tag as TagSchema
+from app import schemas
 
 class CRUDCocktail:
 
@@ -249,6 +251,76 @@ class CRUDCocktail:
             "size": size,
             "pages": total_pages
         }
+
+    def get_cocktails_by_user(
+        self, 
+        db: Session, 
+        user_id: int, 
+        skip: int = 0, 
+        limit: int = 10,
+        include_private: bool = False
+    ) -> List[CocktailWithDetails]:
+        """
+        Pobiera koktajle stworzone przez konkretnego użytkownika.
+        
+        Args:
+            db: Sesja bazy danych
+            user_id: ID użytkownika, którego koktajle chcemy pobrać
+            skip: Liczba rekordów do pominięcia (paginacja)
+            limit: Maksymalna liczba rekordów do zwrócenia
+            include_private: Czy uwzględnić prywatne koktajle (True jeśli to właściciel profilu)
+        
+        Returns:
+            Lista koktajli z pełnymi detalami (CocktailWithDetails)
+        """
+        
+        # Bazowe zapytanie z obliczeniem średniej oceny i liczby ocen
+        base_query = (
+            select(
+                Cocktail,
+                func.avg(Rating.rating_value).label('avg_rating'),
+                func.count(Rating.id).label('ratings_count')
+            )
+            .outerjoin(Rating, Cocktail.id == Rating.cocktail_id)
+            .options(
+                joinedload(Cocktail.author),
+                selectinload(Cocktail.tags)
+            )
+            .where(Cocktail.user_id == user_id)
+        )
+        
+        # Jeśli nie uwzględniamy prywatnych, filtruj tylko publiczne
+        if not include_private:
+            base_query = base_query.where(Cocktail.is_public == True)
+        
+        # Grupowanie po ID koktajlu
+        base_query = base_query.group_by(Cocktail.id)
+        
+        # Paginacja i sortowanie
+        final_query = (
+            base_query
+            .order_by(Cocktail.created_at.desc())
+            .offset(skip)
+            .limit(limit)
+        )
+        
+        # Wykonaj zapytanie
+        results = db.execute(final_query).all()
+        
+        # Przekształć na CocktailWithDetails
+        cocktail_details_list = []
+        for result in results:
+            cocktail_orm = result[0]
+            avg_rating = result[1]
+            ratings_count = result[2]
+            
+            cocktail_detail = self._build_cocktail_with_details(
+                db, cocktail_orm, avg_rating, ratings_count
+            )
+            if cocktail_detail:
+                cocktail_details_list.append(cocktail_detail)
+        
+        return cocktail_details_list
 
     def create_cocktail(self, db: Session, cocktail_in: CocktailCreate, user_id: int) -> CocktailWithDetails:
         db_cocktail_data = cocktail_in.model_dump(exclude={"ingredients", "tags"})

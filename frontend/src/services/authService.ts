@@ -1,50 +1,36 @@
 // frontend/src/services/authService.ts
 import apiClient from './apiClient';
-import { LoginCredentials, RegisterData, User, TokenResponse } from '@/types/authTypes';
+import { LoginCredentials, RegisterData, User, TokenResponse, UserUpdate, PasswordChangeData } from '@/types/authTypes';
 
-interface LoginApiResponse { // Zmień na rzeczywistą odpowiedź z twojego backendu
+interface LoginApiResponse {
   access_token: string;
   token_type: string;
-  // user?: User; // Czy backend zwraca usera przy logowaniu w tym samym endpoincie?
-                 // Zgodnie z twoim auth.py, endpoint /login zwraca tylko schemas.Token,
-                 // więc User musiałby być pobrany osobno przez /me.
 }
 
-// Interfejs dla danych, które faktycznie wysyłamy do endpointu /login
-// który oczekuje OAuth2PasswordRequestForm
 interface OAuth2LoginData {
   username: string;
   password: string;
-  grant_type?: string; // opcjonalne
-  scope?: string;      // opcjonalne
-  // client_id i client_secret, jeśli są potrzebne
+  grant_type?: string;
+  scope?: string;
 }
 
 export const loginUser = async (credentials: LoginCredentials): Promise<{ token: string; user: User }> => {
-  // Przygotuj dane w formacie x-www-form-urlencoded
   const formData = new URLSearchParams();
   formData.append('username', credentials.username);
   formData.append('password', credentials.password);
-  // formData.append('grant_type', 'password'); // Możesz dodać, jeśli backend tego wymaga jawnie
 
   const response = await apiClient.post<LoginApiResponse>(
     '/auth/login',
-    formData, // Wysyłamy obiekt URLSearchParams
+    formData,
     {
       headers: {
-        'Content-Type': 'application/x-www-form-urlencoded', // Jawnie ustawiamy nagłówek
+        'Content-Type': 'application/x-www-form-urlencoded',
       },
     }
   );
 
-  // UWAGA: Twój backendowy endpoint /login zwraca tylko token (schemas.Token).
-  // Aby uzyskać dane użytkownika, musisz wywołać endpoint /me po udanym logowaniu.
   const token = response.data.access_token;
-
-  // Po uzyskaniu tokenu, pobierz dane użytkownika
-  // Upewnij się, że apiClient automatycznie dodaje nowy token do nagłówków kolejnych żądań
-  // (co powinien robić, jeśli interceptor jest dobrze skonfigurowany i AuthContext aktualizuje token w localStorage)
-  const loggedInUser = await getCurrentUser(token); // Potrzebujemy funkcji getCurrentUser z tokenem
+  const loggedInUser = await getCurrentUser(token);
 
   return { token, user: loggedInUser };
 };
@@ -61,8 +47,7 @@ export const registerUser = async (data: RegisterData): Promise<User> => {
 
 /**
  * Fetches the current authenticated user's data.
- * @param token - Opcjonalny token, jeśli chcemy go przekazać jawnie
- *                (apiClient powinien go sam wziąć z localStorage, jeśli tam jest)
+ * @param token - Optional token, if we want to pass it explicitly
  * @returns A promise that resolves to the current user's data.
  */
 export const getCurrentUser = async (token?: string): Promise<User> => {
@@ -71,21 +56,57 @@ export const getCurrentUser = async (token?: string): Promise<User> => {
     const response = await apiClient.get<User>('/users/me', config);
     return response.data;
   } catch (error: any) {
-    console.error("Błąd podczas getCurrentUser:", error); // Cały obiekt błędu
-    if (error.response && error.response.data) { // Sprawdź czy error.response.data istnieje
-      console.error("Odpowiedź błędu z serwera (getCurrentUser), error.response.data:", error.response.data); // <--- TO JEST KLUCZOWE
+    console.error("Błąd podczas getCurrentUser:", error);
+    if (error.response && error.response.data) {
+      console.error("Odpowiedź błędu z serwera (getCurrentUser), error.response.data:", error.response.data);
     }
     throw error;
   }
 };
+
+/**
+ * Updates the current user's profile information.
+ * @param data - The profile data to update
+ * @returns A promise that resolves to the updated user data
+ */
+export const updateUserProfile = async (data: UserUpdate): Promise<User> => {
+  try {
+    const response = await apiClient.put<User>('/users/me', data);
+    return response.data;
+  } catch (error: any) {
+    console.error("Błąd podczas updateUserProfile:", error);
+    if (error.response && error.response.data) {
+      console.error("Odpowiedź błędu z serwera (updateUserProfile):", error.response.data);
+    }
+    throw error;
+  }
+};
+
+/**
+ * Changes the current user's password.
+ * @param data - Current and new password data
+ * @returns A promise that resolves when password is successfully changed
+ */
+export const changePassword = async (data: PasswordChangeData): Promise<void> => {
+  try {
+    await apiClient.put('/users/me', {
+      current_password: data.current_password,
+      new_password: data.new_password
+    });
+  } catch (error: any) {
+    console.error("Błąd podczas changePassword:", error);
+    if (error.response && error.response.data) {
+      console.error("Odpowiedź błędu z serwera (changePassword):", error.response.data);
+    }
+    throw error;
+  }
+};
+
 /**
  * (Optional) Refreshes the JWT token if your backend supports it.
  * @param refreshToken - The refresh token.
  * @returns A promise that resolves to the new token data.
  */
 export const refreshToken = async (/* refreshToken: string */): Promise<TokenResponse> => {
-  // This is a placeholder. Your backend might have a different endpoint or mechanism.
-  // const response = await apiClient.post<TokenResponse>('/auth/refresh-token', { refresh_token: refreshToken });
-  // return response.data;
   throw new Error('Refresh token functionality not implemented yet.');
 };

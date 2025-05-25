@@ -2,7 +2,7 @@
 import React, { createContext, useState, useEffect, ReactNode, useCallback } from 'react';
 import { User } from '@/types/authTypes';
 import * as storage from '@/utils/localStorage';
-import * as authService from '@/services/authService'; // For fetching user on token refresh
+import * as authService from '@/services/authService';
 
 // Keys for localStorage
 const TOKEN_KEY = 'koktajlove_authToken';
@@ -11,11 +11,12 @@ const USER_KEY = 'koktajlove_userData';
 interface AuthContextType {
   user: User | null;
   token: string | null;
-  isLoading: boolean; // For initial session loading
+  isLoading: boolean;
   isAuthenticated: boolean;
   login: (jwtToken: string, userData: User) => void;
   logout: () => void;
-  // updateUser: (updatedUserData: Partial<User>) => void; // Optional: if user data can change
+  updateUser: (updatedUserData: User) => void; // For updating user data after profile changes
+  refreshUserData: () => Promise<void>; // For refreshing user data from server
 }
 
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -23,7 +24,7 @@ export const AuthContext = createContext<AuthContextType | undefined>(undefined)
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true); // True until initial auth check is done
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const initializeAuth = async () => {
@@ -33,25 +34,19 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
       if (storedToken) {
         setToken(storedToken);
-        // Optionally, verify token with backend and fetch fresh user data
-        // This is good practice in case user details (like roles) have changed
-        // or if the token is stale/invalidated on the server.
-        if (!storedUser) { // If user data is not in LS, try to fetch it
-            try {
-                // This assumes your apiClient is set up to use the token from localStorage
-                // or you might need to pass it explicitly if this runs before apiClient is fully configured.
-                // For simplicity, let's assume apiClient will pick up the token if set by setToken.
-                const currentUser = await authService.getCurrentUser(); // Needs a service to get current user
-                storedUser = currentUser;
-                storage.setItem(USER_KEY, currentUser);
-            } catch (error) {
-                console.warn('Failed to fetch current user with stored token, logging out:', error);
-                storage.removeItem(TOKEN_KEY);
-                storage.removeItem(USER_KEY);
-                setToken(null);
-                setUser(null);
-                // No return here, allow setIsLoading(false) to run
-            }
+        
+        if (!storedUser) {
+          try {
+            const currentUser = await authService.getCurrentUser();
+            storedUser = currentUser;
+            storage.setItem(USER_KEY, currentUser);
+          } catch (error) {
+            console.warn('Failed to fetch current user with stored token, logging out:', error);
+            storage.removeItem(TOKEN_KEY);
+            storage.removeItem(USER_KEY);
+            setToken(null);
+            setUser(null);
+          }
         }
         setUser(storedUser);
       }
@@ -73,19 +68,25 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     storage.removeItem(USER_KEY);
     setToken(null);
     setUser(null);
-    // Optionally: redirect to login page or clear other app state
   }, []);
 
-  // const updateUser = useCallback((updatedUserData: Partial<User>) => {
-  //   setUser(prevUser => {
-  //     if (prevUser) {
-  //       const newUser = { ...prevUser, ...updatedUserData };
-  //       storage.setItem(USER_KEY, newUser);
-  //       return newUser;
-  //     }
-  //     return null;
-  //   });
-  // }, []);
+  const updateUser = useCallback((updatedUserData: User) => {
+    setUser(updatedUserData);
+    storage.setItem(USER_KEY, updatedUserData);
+  }, []);
+
+  const refreshUserData = useCallback(async () => {
+    if (token) {
+      try {
+        const freshUserData = await authService.getCurrentUser();
+        updateUser(freshUserData);
+      } catch (error) {
+        console.error('Failed to refresh user data:', error);
+        // Optionally logout if token is invalid
+        logout();
+      }
+    }
+  }, [token, updateUser, logout]);
 
   const isAuthenticated = !!token && !!user;
 
@@ -96,7 +97,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     isAuthenticated,
     login,
     logout,
-    // updateUser,
+    updateUser,
+    refreshUserData,
   };
 
   return (

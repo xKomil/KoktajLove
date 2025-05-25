@@ -10,8 +10,12 @@ export interface User {
   username: string;
   is_active: boolean;
   is_superuser: boolean;
-  profile_picture_url?: string | null; // Optional field
-  // Add other fields like first_name, last_name, created_at, etc., as needed
+  bio?: string | null;
+  avatar_url?: string | null;
+  created_at: string; // ISO date string
+  updated_at: string; // ISO date string
+  // Deprecated field - keeping for backward compatibility
+  profile_picture_url?: string | null;
 }
 
 /**
@@ -29,7 +33,8 @@ export interface RegisterData {
   email: string;
   password: string;
   username: string;
-  // You might add other fields like first_name, last_name if they are part of registration
+  bio?: string;
+  avatar_url?: string;
 }
 
 /**
@@ -46,13 +51,28 @@ export interface TokenResponse {
  * Data for updating a user's profile.
  * All fields are optional as it's a partial update.
  */
-export type UserUpdate = Partial<Omit<User, 'id' | 'is_active' | 'is_superuser' | 'email' >> & {
-  // Email might be updatable but often requires a separate verification process.
-  // Password updates should usually go through a dedicated "change password" endpoint.
-  email?: string; 
-  // current_password?: string; // Often required for sensitive changes like email or password
-  // new_password?: string;
-};
+export interface UserProfileUpdate {
+  username?: string;
+  email?: string;
+  bio?: string;
+  avatar_url?: string;
+}
+
+/**
+ * Data for changing user's password.
+ */
+export interface PasswordChangeData {
+  current_password: string;
+  new_password: string;
+}
+
+/**
+ * Combined update payload that includes both profile and password updates.
+ */
+export interface UserUpdate extends UserProfileUpdate {
+  current_password?: string;
+  new_password?: string;
+}
 
 /**
  * If you use pagination for listing users (e.g., in an admin panel).

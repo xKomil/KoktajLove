@@ -1,21 +1,32 @@
 // frontend/src/components/features/profile/ProfileDetails.tsx
-import React, { useState } from 'react'; // Dodaj useState
+import React, { useState } from 'react';
 import { User } from '@/types/authTypes';
 import styles from './ProfileDetails.module.css';
 import Spinner from '@/components/ui/Spinner/Spinner';
+// import Button from '@/components/ui/Button/Button'; // Uncomment when you have this component
 
 interface ProfileDetailsProps {
   user: User | null;
   isLoading: boolean;
   error?: string | null;
+  onEditClick?: () => void; // Optional callback for edit button
 }
 
-const ProfileDetails: React.FC<ProfileDetailsProps> = ({ user, isLoading, error }) => {
-  // Stan do śledzenia, czy wystąpił błąd ładowania oryginalnego obrazka
+const ProfileDetails: React.FC<ProfileDetailsProps> = ({ 
+  user, 
+  isLoading, 
+  error, 
+  onEditClick 
+}) => {
   const [imageError, setImageError] = useState(false);
 
   if (isLoading) {
-    return <div className={styles.loading}><Spinner /> <p>Loading profile...</p></div>;
+    return (
+      <div className={styles.loading}>
+        <Spinner />
+        <p>Loading profile...</p>
+      </div>
+    );
   }
 
   if (error) {
@@ -27,30 +38,34 @@ const ProfileDetails: React.FC<ProfileDetailsProps> = ({ user, isLoading, error 
   }
 
   const defaultProfilePicUrl = 'https://www.mkm.szczecin.pl/images/default-avatar.svg?id=26d9452357b428b99ab97f2448b5d803';
-  // Możesz też przygotować lokalny obrazek zastępczy
-  // const localFallbackImageUrl = '/assets/default-avatar.png'; // Upewnij się, że ścieżka jest poprawna i plik istnieje w public/assets
-
-  // Wybierz URL obrazka: jeśli jest błąd z user.profile_picture_url, użyj defaultProfilePicUrl
-  // Jeśli nie ma user.profile_picture_url, również użyj defaultProfilePicUrl
-  const imageUrlToDisplay = 
-    imageError || !user.profile_picture_url 
-      ? defaultProfilePicUrl 
-      : user.profile_picture_url;
+  
+  // Use avatar_url first, then fallback to profile_picture_url for backwards compatibility
+  const userAvatarUrl = user.avatar_url || user.profile_picture_url;
+  
+  const imageUrlToDisplay = imageError || !userAvatarUrl 
+    ? defaultProfilePicUrl 
+    : userAvatarUrl;
 
   const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
-    // Jeśli oryginalny obrazek (user.profile_picture_url) nie załadował się, ustaw flagę błędu.
-    // To spowoduje, że imageUrlToDisplay przełączy się na defaultProfilePicUrl.
-    if (!imageError && e.currentTarget.src === user.profile_picture_url) {
-      console.warn(`Błąd ładowania obrazka profilowego: ${user.profile_picture_url}. Używam domyślnego.`);
+    if (!imageError && userAvatarUrl && e.currentTarget.src === userAvatarUrl) {
+      console.warn(`Błąd ładowania obrazka profilowego: ${userAvatarUrl}. Używam domyślnego.`);
       setImageError(true);
     } else if (e.currentTarget.src === defaultProfilePicUrl) {
-      // Jeśli nawet domyślny obrazek (defaultProfilePicUrl) nie załadował się,
-      // aby uniknąć pętli, nie rób nic więcej lub ustaw jakiś bardzo prosty placeholder.
-      // Możesz też np. ukryć <img> lub pokazać inicjały.
       console.error(`Nie można załadować nawet domyślnego obrazka: ${defaultProfilePicUrl}.`);
-      // Opcjonalnie: e.currentTarget.style.display = 'none'; // Ukryj obrazek, jeśli oba zawiodą
-      // Lub ustaw jakiś inny, bardzo prosty fallback, np. z data URI lub lokalny
-      // e.currentTarget.src = localFallbackImageUrl; // Jeśli masz lokalny
+    }
+  };
+
+  const formatDate = (dateString: string) => {
+    try {
+      return new Date(dateString).toLocaleDateString('pl-PL', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    } catch {
+      return dateString;
     }
   };
 
@@ -61,23 +76,40 @@ const ProfileDetails: React.FC<ProfileDetailsProps> = ({ user, isLoading, error 
           src={imageUrlToDisplay}
           alt={`${user.username}'s profile`}
           className={styles.profilePicture}
-          onError={handleImageError} // Użyj nowej funkcji obsługi błędu
+          onError={handleImageError}
         />
-        <h2 className={styles.username}>{user.username}</h2>
+        <div className={styles.profileInfo}>
+          <h2 className={styles.username}>{user.username}</h2>
+          {user.bio && (
+            <p className={styles.bio}>{user.bio}</p>
+          )}
+          {onEditClick && (
+            <button 
+              onClick={onEditClick}
+              className={styles.editButton}
+              type="button"
+            >
+              Edit Profile
+            </button>
+          )}
+        </div>
       </div>
+      
       <dl className={styles.detailsGrid}>
         <dt>Email:</dt>
         <dd>{user.email}</dd>
-        <dt>User ID:</dt>
-        <dd>{user.id}</dd>
-        <dt>Active:</dt>
-        <dd>{user.is_active ? 'Yes' : 'No'}</dd>
+        
+        
+        
         {user.is_superuser && (
           <>
             <dt>Role:</dt>
-            <dd>Administrator</dd>
+            <dd className={styles.roleAdmin}>Administrator</dd>
           </>
         )}
+        
+        <dt>Member Since:</dt>
+        <dd>{formatDate(user.created_at)}</dd>
       </dl>
     </div>
   );

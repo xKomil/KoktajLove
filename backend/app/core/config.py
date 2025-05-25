@@ -28,29 +28,6 @@ class Settings(BaseSettings):
     FIRST_SUPERUSER_USERNAME: Optional[str] = None
     FIRST_SUPERUSER_PASSWORD: Optional[str] = None
 
-    # @field_validator("BACKEND_CORS_ORIGINS", mode='before')
-    # @classmethod
-    # def assemble_cors_origins(cls, v: Any) -> List[str] | List[AnyHttpUrl]:
-    #     if isinstance(v, str):
-    #         # Jeśli string nie jest listą JSON, np. "http://localhost:3000,http://127.0.0.1:3000"
-    #         if not v.startswith("[") and "," in v:
-    #             return [item.strip() for item in v.split(",")]
-    #         # Jeśli string jest pojedynczym URL-em
-    #         elif not v.startswith("["):
-    #              return [v.strip()]
-    #     # Jeśli v jest już listą (np. z domyślnej wartości lub poprawnie sparsowanego .env)
-    #     # lub jeśli .env zawierał string w formacie JSON listy, BaseSettings go sparsuje
-    #     if isinstance(v, list):
-    #         return v
-    #     # Dla pewności można dodać obsługę stringa w formacie JSON listy
-    #     if isinstance(v, str) and v.startswith("[") and v.endswith("]"):
-    #         try:
-    #             import json
-    #             return json.loads(v)
-    #         except json.JSONDecodeError:
-    #             raise ValueError("BACKEND_CORS_ORIGINS string is not a valid JSON list")
-    #     raise ValueError("BACKEND_CORS_ORIGINS must be a list of URLs or a comma-separated string of URLs")
-
     class Config:
         env_file = ".env"
         env_file_encoding = 'utf-8'

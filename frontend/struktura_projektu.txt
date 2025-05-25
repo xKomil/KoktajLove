@@ -35,11 +35,12 @@ frontend/
 │   │   │   │   ├── RatingStars.tsx
 │   │   │   │   ├── SearchFilters.module.css
 │   │   │   │   └── SearchFilters.tsx
-│   │   │   └── profile/
-│   │   │       ├── ProfileDetails.module.css
-│   │   │       ├── ProfileDetails.tsx
-│   │   │       ├── UserCocktailList.module.css
-│   │   │       └── UserCocktailList.tsx
+│   │   │   ├── profile/
+│   │   │   │   ├── ProfileDetails.module.css
+│   │   │   │   ├── ProfileDetails.tsx
+│   │   │   │   ├── UserCocktailList.module.css
+│   │   │   │   └── UserCocktailList.tsx
+│   │   │   └── ratings/
 │   │   ├── layout/
 │   │   │   ├── Footer/
 │   │   │   │   ├── Footer.module.css
