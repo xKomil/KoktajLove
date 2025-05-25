@@ -1,7 +1,10 @@
-// CocktailCard.tsx - Poprawiona wersja z nowym fallback obrazkiem
+// CocktailCard.tsx - Zoptymalizowana wersja z pełną funkcjonalnością i obsługą ulubionych
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
+import { Heart } from 'lucide-react';
 import { CocktailWithDetails, Tag } from '@/types/cocktailTypes';
+import { useAuth } from '@/hooks/useAuth';
+import * as favoriteService from '@/services/favoriteService';
 import RatingStars from './RatingStars';
 import Button from '@/components/ui/Button/Button';
 import styles from './CocktailCard.module.css';
@@ -19,14 +22,18 @@ const CocktailCard: React.FC<CocktailCardProps> = ({
   onCardClick,
   className = ''
 }) => {
+  const { isAuthenticated } = useAuth();
   const [imageState, setImageState] = useState<'loading' | 'loaded' | 'error'>('loading');
   const [currentSrc, setCurrentSrc] = useState<string>('');
+  const [isFavorite, setIsFavorite] = useState<boolean>(false);
+  const [isTogglingFavorite, setIsTogglingFavorite] = useState<boolean>(false);
+  const [favoriteError, setFavoriteError] = useState<string | null>(null);
   
-  // URL dla fallback obrazka - konkretny obrazek koktajlu zamiast placeholder
+  // Fallback images
   const fallbackImageUrl = 'https://img.freepik.com/premium-vector/socktail-mocktail-drink-glass-with-high-stem-alcoholic-nonalcoholic-cocktail-sketch_106796-4466.jpg?w=360';
   const localFallbackUrl = '/assets/default-cocktail.png';
 
-  // Inicjalizacja źródła obrazka
+  // Initialize image source
   useEffect(() => {
     if (cocktail.image_url && cocktail.image_url.trim() !== '') {
       setCurrentSrc(cocktail.image_url);
@@ -37,31 +44,50 @@ const CocktailCard: React.FC<CocktailCardProps> = ({
     }
   }, [cocktail.id, cocktail.image_url, fallbackImageUrl]);
 
-  // Obsługa błędów ładowania obrazka
+  // Check if cocktail is favorite when component mounts or auth status changes
+  useEffect(() => {
+    const checkFavoriteStatus = async () => {
+      if (!isAuthenticated) {
+        setIsFavorite(false);
+        return;
+      }
+
+      try {
+        const response = await favoriteService.isCocktailFavorite(cocktail.id);
+        setIsFavorite(response.is_favorite);
+        setFavoriteError(null);
+      } catch (error) {
+        console.warn('Failed to check favorite status:', error);
+        setIsFavorite(false);
+        // Don't set error for this, as it's not critical
+      }
+    };
+
+    checkFavoriteStatus();
+  }, [cocktail.id, isAuthenticated]);
+
+  // Handle image loading errors with fallback chain
   const handleImageError = useCallback(() => {
     if (currentSrc === cocktail.image_url) {
-      // Pierwszy fallback - obrazek truskawkowego koktajlu
       console.warn(`Failed to load original image: ${cocktail.image_url}`);
       setCurrentSrc(fallbackImageUrl);
     } else if (currentSrc === fallbackImageUrl) {
-      // Drugi fallback - lokalny obrazek (jeśli istnieje)
       console.warn('Failed to load fallback image, trying local fallback');
       setCurrentSrc(localFallbackUrl);
     } else {
-      // Ostateczny fallback nie zadziałał - pokaż placeholder div
       console.error('All image sources failed to load');
       setImageState('error');
     }
   }, [currentSrc, cocktail.image_url, fallbackImageUrl, localFallbackUrl]);
 
-  // Obsługa pomyślnego załadowania obrazka
+  // Handle successful image load
   const handleImageLoad = useCallback(() => {
     setImageState('loaded');
   }, []);
 
-  // Obsługa kliknięcia w kartę
+  // Handle card click
   const handleCardClick = useCallback((e: React.MouseEvent) => {
-    // Zapobiegaj propagacji jeśli kliknięto w button
+    // Prevent propagation if clicked on button or link
     if ((e.target as HTMLElement).closest('button, a')) {
       return;
     }
@@ -71,7 +97,7 @@ const CocktailCard: React.FC<CocktailCardProps> = ({
     }
   }, [onCardClick, cocktail]);
 
-  // Obsługa klawiatury dla dostępności
+  // Handle keyboard navigation for accessibility
   const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
@@ -81,11 +107,47 @@ const CocktailCard: React.FC<CocktailCardProps> = ({
     }
   }, [onCardClick, cocktail]);
 
-  // Przygotowanie opisu z intelligent truncation
+  // Handle toggle favorite
+  const handleToggleFavorite = useCallback(async () => {
+    if (!isAuthenticated || isTogglingFavorite) {
+      return;
+    }
+
+    setIsTogglingFavorite(true);
+    setFavoriteError(null);
+
+    try {
+      if (isFavorite) {
+        await favoriteService.removeCocktailFromFavorites(cocktail.id);
+        setIsFavorite(false);
+      } else {
+        await favoriteService.addCocktailToFavorites(cocktail.id);
+        setIsFavorite(true);
+      }
+    } catch (error: any) {
+      console.error('Error toggling favorite:', error);
+      
+      // Set user-friendly error message
+      let errorMessage = 'Wystąpił błąd podczas aktualizacji ulubionych.';
+      if (error.response?.status === 404) {
+        errorMessage = 'Koktajl nie został znaleziony.';
+      } else if (error.response?.status === 400) {
+        errorMessage = error.response.data?.detail || 'Nieprawidłowe żądanie.';
+      }
+      
+      setFavoriteError(errorMessage);
+      
+      // Clear error after 3 seconds
+      setTimeout(() => setFavoriteError(null), 3000);
+    } finally {
+      setIsTogglingFavorite(false);
+    }
+  }, [isAuthenticated, isTogglingFavorite, isFavorite, cocktail.id]);
+
+  // Prepare description with intelligent truncation
   const truncateDescription = (text: string, maxLength: number = 120): string => {
     if (text.length <= maxLength) return text;
     
-    // Znajdź ostatnią spację przed limitem
     const truncated = text.substring(0, maxLength);
     const lastSpace = truncated.lastIndexOf(' ');
     
@@ -94,13 +156,25 @@ const CocktailCard: React.FC<CocktailCardProps> = ({
       : truncated + '...';
   };
 
-  const description = cocktail.description || "No description available.";
+  const description = cocktail.description || "Brak opisu koktajlu.";
   const displayDescription = truncateDescription(description);
 
-  // Ograniczenie tagów do wyświetlenia
+  // Limit tags display
   const maxVisibleTags = 3;
   const visibleTags = cocktail.tags?.slice(0, maxVisibleTags) || [];
   const remainingTagsCount = (cocktail.tags?.length || 0) - maxVisibleTags;
+
+  // Rating display logic
+  const hasRating = cocktail.average_rating !== null && cocktail.average_rating !== undefined;
+  const ratingsCount = cocktail.ratings_count || 0;
+
+  // Format ratings count with proper Polish declension
+  const formatRatingsCount = (count: number): string => {
+    if (count === 0) return 'Brak ocen';
+    if (count === 1) return '1 ocena';
+    if (count >= 2 && count <= 4) return `${count} oceny`;
+    return `${count} ocen`;
+  };
 
   return (
     <article 
@@ -109,26 +183,56 @@ const CocktailCard: React.FC<CocktailCardProps> = ({
       onKeyDown={handleKeyDown}
       tabIndex={onCardClick ? 0 : -1}
       role={onCardClick ? "button" : undefined}
-      aria-label={`Cocktail: ${cocktail.name}`}
+      aria-label={`Koktajl: ${cocktail.name}`}
     >
-      {/* Badge dla nowych koktajli */}
+      {/* New cocktail badge */}
       {showNewBadge && (
-        <div className={styles.newBadge} aria-label="New cocktail">
-          NEW
+        <div className={styles.newBadge} aria-label="Nowy koktajl">
+          NOWOŚĆ
         </div>
       )}
 
-      {/* Kontener obrazka */}
+      {/* Favorite button - only for authenticated users */}
+      {isAuthenticated && (
+        <button
+          className={`${styles.favoriteButton} ${isFavorite ? styles.favoriteActive : ''} ${isTogglingFavorite ? styles.favoriteLoading : ''}`}
+          onClick={(e) => {
+            e.stopPropagation();
+            handleToggleFavorite();
+          }}
+          disabled={isTogglingFavorite}
+          aria-label={isFavorite ? "Usuń z ulubionych" : "Dodaj do ulubionych"}
+          aria-pressed={isFavorite}
+          title={isFavorite ? "Usuń z ulubionych" : "Dodaj do ulubionych"}
+        >
+          <Heart 
+            size={20} 
+            fill={isFavorite ? "currentColor" : "none"} 
+            className={styles.heartIcon}
+          />
+          {isTogglingFavorite && <div className={styles.favoriteSpinner} />}
+        </button>
+      )}
+
+      {/* Error message for favorite operations */}
+      {favoriteError && (
+        <div className={styles.favoriteError} role="alert">
+          {favoriteError}
+        </div>
+      )}
+
+      {/* Image container */}
       <div className={styles.imageContainer}>
         {imageState === 'error' ? (
-          <div className={styles.imagePlaceholder} role="img" aria-label="Image not available">
-            🍹 Image not available
+          <div className={styles.imagePlaceholder} role="img" aria-label="Obrazek niedostępny">
+            🍹
+            <span>Brak zdjęcia</span>
           </div>
         ) : (
           <>
             <img
               src={currentSrc || fallbackImageUrl}
-              alt={`${cocktail.name} cocktail`}
+              alt={`Koktajl ${cocktail.name}`}
               className={styles.image}
               onError={handleImageError}
               onLoad={handleImageLoad}
@@ -140,36 +244,49 @@ const CocktailCard: React.FC<CocktailCardProps> = ({
         )}
       </div>
 
-      {/* Główna treść */}
+      {/* Main content */}
       <div className={styles.content}>
+        {/* Cocktail name */}
         <h3 className={styles.name}>
           {cocktail.name}
         </h3>
 
+        {/* Description */}
         <p className={styles.description}>
           {displayDescription}
         </p>
 
-        {/* Metadata (rating, tagi) */}
+        {/* Metadata section */}
         <div className={styles.metadata}>
-          {/* Rating */}
-          {(cocktail.average_rating !== undefined && cocktail.average_rating !== null) && (
-            <div className={styles.ratingContainer}>
-              <RatingStars 
-                rating={cocktail.average_rating} 
-                readOnly 
-                size="small"
-                aria-label={`Rating: ${cocktail.average_rating} out of 5 stars`}
-              />
-              <span className={styles.ratingText} aria-hidden="true">
-                ({cocktail.average_rating.toFixed(1)})
-              </span>
-            </div>
-          )}
+          {/* Rating section */}
+          <div className={styles.ratingSection}>
+            {hasRating && ratingsCount > 0 ? (
+              <div className={styles.ratingContainer}>
+                <RatingStars 
+                  rating={cocktail.average_rating!} 
+                  readOnly 
+                  size="small"
+                  aria-label={`Ocena: ${cocktail.average_rating!.toFixed(1)} z 5 gwiazdek`}
+                />
+                <span className={styles.ratingText}>
+                  ({cocktail.average_rating!.toFixed(1)})
+                </span>
+                <span className={styles.ratingsCount}>
+                  {formatRatingsCount(ratingsCount)}
+                </span>
+              </div>
+            ) : (
+              <div className={styles.noRatingContainer}>
+                <span className={styles.noRatingText}>
+                  {formatRatingsCount(ratingsCount)}
+                </span>
+              </div>
+            )}
+          </div>
 
-          {/* Tagi */}
+          {/* Tags section */}
           {visibleTags.length > 0 && (
-            <div className={styles.tagsContainer} role="list" aria-label="Cocktail tags">
+            <div className={styles.tagsContainer} role="list" aria-label="Tagi koktajlu">
               {visibleTags.map((tag: Tag) => (
                 <span 
                   key={tag.id} 
@@ -184,7 +301,7 @@ const CocktailCard: React.FC<CocktailCardProps> = ({
                 <span 
                   className={styles.tag}
                   role="listitem"
-                  title={`${remainingTagsCount} more tags`}
+                  title={`Jeszcze ${remainingTagsCount} ${remainingTagsCount === 1 ? 'tag' : remainingTagsCount <= 4 ? 'tagi' : 'tagów'}`}
                 >
                   +{remainingTagsCount}
                 </span>
@@ -193,17 +310,17 @@ const CocktailCard: React.FC<CocktailCardProps> = ({
           )}
         </div>
 
-        {/* Przycisk akcji */}
+        {/* Action button */}
         <div className={styles.actionContainer}>
           <Button
             as="link"
-            to={`/cocktail/${cocktail.id}`}
+            to={`/cocktails/${cocktail.id}`}
             variant="primary"
             size="sm"
             className={styles.detailsButton}
-            aria-label={`View details for ${cocktail.name}`}
+            aria-label={`Zobacz szczegóły koktajlu ${cocktail.name}`}
           >
-            View Details
+            Zobacz Szczegóły
           </Button>
         </div>
       </div>

@@ -1,12 +1,19 @@
-from typing import List, Any, Optional # Dodano Optional
+# app/api/v1/favorites.py - Dodanie nowego endpointu sprawdzania statusu
+from typing import List, Any, Optional
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
+from pydantic import BaseModel
 
 from app import crud, models, schemas
 from app.dependencies import get_db, get_current_active_user
-from app.schemas.cocktail import CocktailWithDetails # Potrzebne dla read_my_favorite_cocktails_details
+from app.schemas.cocktail import CocktailWithDetails
 
 router = APIRouter()
+
+# Schema dla odpowiedzi sprawdzania statusu ulubionego
+class FavoriteStatusResponse(BaseModel):
+    is_favorite: bool
+    cocktail_id: int
 
 @router.post("/", response_model=schemas.Favorite, status_code=status.HTTP_201_CREATED)
 def add_cocktail_to_favorites(
@@ -15,7 +22,7 @@ def add_cocktail_to_favorites(
     favorite_in: schemas.FavoriteCreate,
     current_user: models.User = Depends(get_current_active_user)
 ):
-    cocktail_to_favorite_orm = db.query(models.Cocktail).get(favorite_in.cocktail_id) # <<<--- POPRAWKA
+    cocktail_to_favorite_orm = db.query(models.Cocktail).get(favorite_in.cocktail_id)
     if not cocktail_to_favorite_orm:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Koktajl nie znaleziony.")
 
@@ -37,7 +44,7 @@ def remove_cocktail_from_favorites(
     cocktail_id: int,
     current_user: models.User = Depends(get_current_active_user)
 ):
-    cocktail_to_check_orm = db.query(models.Cocktail).get(cocktail_id) # <<<--- POPRAWKA
+    cocktail_to_check_orm = db.query(models.Cocktail).get(cocktail_id)
     if not cocktail_to_check_orm:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Koktajl (do usunięcia z ulubionych) nie znaleziony.")
 
@@ -45,7 +52,6 @@ def remove_cocktail_from_favorites(
     if not deleted_favorite:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Koktajl nie znaleziony w ulubionych tego użytkownika.")
     return deleted_favorite
-
 
 @router.get("/my-favorites", response_model=List[schemas.Favorite])
 def read_my_favorites(
@@ -57,23 +63,46 @@ def read_my_favorites(
     favorites = crud.favorite.get_user_favorites(db, user_id=current_user.id, skip=skip, limit=limit)
     return favorites
 
-@router.get("/my-favorites/cocktails", response_model=List[CocktailWithDetails]) # Poprawiony response_model
+@router.get("/my-favorites/cocktails", response_model=List[CocktailWithDetails])
 def read_my_favorite_cocktails_details(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(get_current_active_user),
     skip: int = 0,
-    limit: int = 100 # Rozważ, czy paginacja ma sens tutaj, czy zawsze zwracać wszystkie ulubione
+    limit: int = 100
 ):
     user_favorites_orm = crud.favorite.get_user_favorites(db, user_id=current_user.id, skip=skip, limit=limit)
-    
-    detailed_cocktails: List[CocktailWithDetails] = [] # Użyj zaimportowanego CocktailWithDetails
+        
+    detailed_cocktails: List[CocktailWithDetails] = []
     if not user_favorites_orm:
         return []
-        
+            
     for fav_orm in user_favorites_orm:
-        # crud.cocktail.get_cocktail zwraca już obiekt Pydantic CocktailWithDetails
         cocktail_details = crud.cocktail.get_cocktail(db, fav_orm.cocktail_id)
         if cocktail_details:
-            detailed_cocktails.append(cocktail_details) 
-            
+            detailed_cocktails.append(cocktail_details)
+                 
     return detailed_cocktails
+
+# NOWY ENDPOINT - Sprawdzanie statusu ulubionego koktajlu
+@router.get("/cocktail/{cocktail_id}/status", response_model=FavoriteStatusResponse)
+def check_cocktail_favorite_status(
+    *,
+    db: Session = Depends(get_db),
+    cocktail_id: int,
+    current_user: models.User = Depends(get_current_active_user)
+):
+    """
+    Sprawdza, czy określony koktajl jest w ulubionych aktualnie zalogowanego użytkownika.
+    """
+    # Najpierw sprawdź, czy koktajl w ogóle istnieje
+    cocktail_orm = db.query(models.Cocktail).get(cocktail_id)
+    if not cocktail_orm:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Koktajl nie znaleziony.")
+    
+    # Sprawdź, czy koktajl jest w ulubionych użytkownika
+    existing_favorite = crud.favorite.get_favorite(db, user_id=current_user.id, cocktail_id=cocktail_id)
+    
+    return FavoriteStatusResponse(
+        is_favorite=existing_favorite is not None,
+        cocktail_id=cocktail_id
+    )

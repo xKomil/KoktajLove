@@ -1,4 +1,5 @@
 import React, { useState, useCallback, KeyboardEvent } from 'react';
+import { Star } from 'lucide-react';
 import styles from './RatingStars.module.css';
 
 interface RatingStarsProps {
@@ -7,7 +8,7 @@ interface RatingStarsProps {
   onRatingChange?: (newRating: number) => void;
   readOnly?: boolean;
   size?: 'small' | 'medium' | 'large';
-  showTooltip?: boolean; // Opcjonalne tooltips z tekstem oceny
+  showTooltip?: boolean;
 }
 
 const RatingStars: React.FC<RatingStarsProps> = ({
@@ -78,21 +79,16 @@ const RatingStars: React.FC<RatingStarsProps> = ({
 
   const currentRating = hoverRating || rating;
 
-  // SVG Star Component
-  const StarIcon: React.FC<{ filled: boolean; focused: boolean }> = ({ filled, focused }) => (
-    <svg
-      viewBox="0 0 24 24"
-      className={`${styles.starIcon} ${filled ? styles.filled : styles.empty} ${focused ? styles.focused : ''}`}
-    >
-      <path
-        d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"
-        fill={filled ? 'currentColor' : 'none'}
-        stroke="currentColor"
-        strokeWidth="1"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
+  // Determine star fill state
+  const getStarFillState = (starIndex: number): 'empty' | 'partial' | 'full' => {
+    const starValue = starIndex + 1;
+    if (currentRating >= starValue) {
+      return 'full';
+    } else if (currentRating > starIndex && currentRating < starValue) {
+      return 'partial';
+    }
+    return 'empty';
+  };
 
   return (
     <div
@@ -109,22 +105,37 @@ const RatingStars: React.FC<RatingStarsProps> = ({
     >
       {[...Array(maxRating)].map((_, i) => {
         const starValue = i + 1;
-        const isFilled = starValue <= currentRating;
+        const fillState = getStarFillState(i);
         const isFocused = !readOnly && starValue === focusedIndex;
         
         return (
           <button
             key={starValue}
             type="button"
-            className={`${styles.starButton} ${isFilled ? styles.filledStar : styles.emptyStar}`}
+            className={`${styles.starButton} ${styles[fillState]} ${isFocused ? styles.focused : ''}`}
             onMouseOver={() => handleMouseOver(starValue)}
             onClick={() => handleClick(starValue)}
             disabled={readOnly}
             aria-label={readOnly ? undefined : `Oceń ${starValue} ${starValue === 1 ? 'gwiazdkę' : 'gwiazdek'}`}
             title={showTooltip ? getTooltipText(starValue) : undefined}
-            tabIndex={-1} // Nawigacja przez container
+            tabIndex={-1} // Navigation through container
           >
-            <StarIcon filled={isFilled} focused={isFocused} />
+            <Star 
+              className={styles.starIcon}
+              fill={fillState === 'full' ? 'currentColor' : fillState === 'partial' ? 'url(#partialFill)' : 'none'}
+              strokeWidth={1.5}
+            />
+            {/* SVG gradient for partial stars */}
+            {fillState === 'partial' && (
+              <svg width="0" height="0" style={{ position: 'absolute' }}>
+                <defs>
+                  <linearGradient id="partialFill" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset={`${(currentRating % 1) * 100}%`} stopColor="currentColor" />
+                    <stop offset={`${(currentRating % 1) * 100}%`} stopColor="transparent" />
+                  </linearGradient>
+                </defs>
+              </svg>
+            )}
           </button>
         );
       })}
