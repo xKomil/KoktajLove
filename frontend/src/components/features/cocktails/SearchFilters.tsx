@@ -66,7 +66,6 @@ const SearchFilters: React.FC<SearchFiltersProps> = ({
             getItemValue={(item) => item.id.toString()}
             noOptionsText="Brak składników"
             searchPlaceholder="Szukaj składnika..."
-            className="w-full"
           />
         </div>
 
@@ -82,7 +81,6 @@ const SearchFilters: React.FC<SearchFiltersProps> = ({
             getItemValue={(item) => item.id.toString()}
             noOptionsText="Brak tagów"
             searchPlaceholder="Szukaj tagu..."
-            className="w-full"
           />
         </div>
 
