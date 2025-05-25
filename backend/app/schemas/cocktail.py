@@ -1,7 +1,7 @@
 from typing import Optional, List, Annotated
 from pydantic import BaseModel, HttpUrl, Field
 from datetime import datetime
-from enum import Enum # <--- NOWY IMPORT
+from enum import Enum
 
 from .user import User as UserSchema
 from .ingredient import Ingredient as IngredientSchema
@@ -13,20 +13,20 @@ class UnitEnum(str, Enum):
     L = "l"
     G = "g"
     KG = "kg"
-    TSP = "łyżeczka" # teaspoon
-    TBSP = "łyżka"   # tablespoon
-    OZ = "oz"        # ounce
+    TSP = "łyżeczka"  # teaspoon
+    TBSP = "łyżka"    # tablespoon
+    OZ = "oz"         # ounce
     SHOT = "shot"
-    DASH = "kropla" # dash/kropla
-    PIECE = "sztuka" # sztuka/kawałek
+    DASH = "kropla"   # dash/kropla
+    PIECE = "sztuka"  # sztuka/kawałek
     SLICE = "plasterek"
-    OTHER = "inna"   # dla niestandardowych
+    OTHER = "inna"    # dla niestandardowych
 
 # Schemat danych dla składnika w koktajlu (przy tworzeniu/aktualizacji)
 class CocktailIngredientData(BaseModel):
     ingredient_id: int
-    amount: int # <--- ZMIANA: str na int
-    unit: UnitEnum # <--- ZMIANA: str na UnitEnum
+    amount: int       # ZMIANA: str na int
+    unit: UnitEnum    # ZMIANA: str na UnitEnum
 
 # Schemat danych dla tagu w koktajlu (przy tworzeniu/aktualizacji)
 class CocktailTagData(BaseModel):
@@ -57,7 +57,7 @@ class CocktailInDBBase(CocktailBase):
     user_id: int
     created_at: datetime
     updated_at: Optional[datetime] = None
-
+    
     class Config:
         from_attributes = True
 
@@ -66,11 +66,22 @@ class Cocktail(CocktailInDBBase):
 
 # Schemat dla składnika zwracanego w szczegółach koktajlu (z amount i unit)
 class IngredientInCocktailDetail(IngredientSchema):
-    amount: int # <--- ZMIANA: str na int
-    unit: UnitEnum # <--- ZMIANA: str na UnitEnum
+    amount: int       # ZMIANA: str na int
+    unit: UnitEnum    # ZMIANA: str na UnitEnum
 
 # Schemat odpowiedzi dla koktajlu z pełnymi szczegółami
 class CocktailWithDetails(CocktailInDBBase):
     author: UserSchema
     ingredients: List[IngredientInCocktailDetail] = []
     tags: List[TagSchema] = []
+
+# NOWY SCHEMAT - Paginowana odpowiedź dla koktajli
+class PaginatedCocktailResponse(BaseModel):
+    items: List[CocktailWithDetails]
+    total: int
+    page: int
+    size: int
+    pages: int
+    
+    class Config:
+        from_attributes = True

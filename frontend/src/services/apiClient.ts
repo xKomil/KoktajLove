@@ -10,6 +10,28 @@ const apiClient = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
+  // Konfiguracja serializacji parametrów URL dla poprawnej obsługi tablic
+  paramsSerializer: {
+    serialize: (params) => {
+      const searchParams = new URLSearchParams();
+      
+      Object.entries(params).forEach(([key, value]) => {
+        if (Array.isArray(value)) {
+          // Dla tablic: generujemy ingredient_ids=1&ingredient_ids=2
+          value.forEach(item => {
+            if (item !== null && item !== undefined) {
+              searchParams.append(key, String(item));
+            }
+          });
+        } else if (value !== null && value !== undefined) {
+          // Dla pojedynczych wartości
+          searchParams.append(key, String(value));
+        }
+      });
+      
+      return searchParams.toString();
+    }
+  }
 });
 
 // Request Interceptor: Adds the auth token to requests if available
@@ -19,6 +41,13 @@ apiClient.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+    
+    // Debug: logowanie parametrów URL dla weryfikacji
+    if (config.params) {
+      console.log('Request params:', config.params);
+      console.log('Serialized URL will be handled by custom serializer');
+    }
+    
     return config;
   },
   (error) => {

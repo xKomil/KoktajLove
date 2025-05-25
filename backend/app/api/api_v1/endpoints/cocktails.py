@@ -1,11 +1,14 @@
 from typing import List, Any, Optional
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 
 from app import crud, models, schemas
 from app.dependencies import get_db, get_current_active_user
-from app.schemas.cocktail import CocktailWithDetails, CocktailCreate, CocktailUpdate, Cocktail as CocktailSchema
+from app.schemas.cocktail import (
+    CocktailWithDetails, CocktailCreate, CocktailUpdate, 
+    Cocktail as CocktailSchema, PaginatedCocktailResponse
+)
 
 router = APIRouter()
 
@@ -40,16 +43,56 @@ def create_cocktail(
         print(f"Błąd podczas tworzenia koktajlu: {type(e).__name__} - {e}")
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Wystąpił wewnętrzny błąd serwera podczas tworzenia koktajlu.")
 
-
-@router.get("/", response_model=List[CocktailWithDetails])
+@router.get("/", response_model=PaginatedCocktailResponse)
 def read_cocktails(
     db: Session = Depends(get_db),
-    skip: int = 0,
-    limit: int = 100,
+    name: Optional[str] = Query(None, description="Nazwa koktajlu (częściowe dopasowanie)"),
+    ingredient_ids: Optional[List[int]] = Query(None, description="Lista ID składników (koktajl musi zawierać wszystkie)"),
+    tag_ids: Optional[List[int]] = Query(None, description="Lista ID tagów (koktajl musi zawierać wszystkie)"),
+    page: int = Query(1, ge=1, description="Numer strony"),
+    size: int = Query(12, ge=1, le=100, description="Liczba elementów na stronie"),
+    current_user: Optional[models.User] = Depends(get_current_active_user)
 ):
-    cocktails_details_list = crud.cocktail.get_cocktails(db, skip=skip, limit=limit)
-    return cocktails_details_list
-
+    """
+    Pobiera listę koktajli z możliwością filtrowania i paginacji.
+    
+    - **name**: Filtruje koktajle po nazwie (częściowe dopasowanie, nieczułe na wielkość liter)
+    - **ingredient_ids**: Lista ID składników - koktajl musi zawierać WSZYSTKIE podane składniki
+    - **tag_ids**: Lista ID tagów - koktajl musi zawierać WSZYSTKIE podane tagi  
+    - **page**: Numer strony (domyślnie 1)
+    - **size**: Liczba koktajli na stronie (domyślnie 12, maksymalnie 100)
+    
+    Zwraca koktajle publiczne oraz prywatne koktajle zalogowanego użytkownika (jeśli jest zalogowany).
+    """
+    
+    try:
+        # Przekaż user_id tylko jeśli użytkownik jest zalogowany
+        user_id = current_user.id if current_user else None
+        print(f"--- ENDPOINT read_cocktails RECEIVED ---")
+        print(f"Name: {name}")
+        print(f"Ingredient IDs: {ingredient_ids}") # <--- WAŻNE
+        print(f"Tag IDs: {tag_ids}")             # <--- WAŻNE
+        print(f"Page: {page}, Size: {size}")
+        print(f"User ID (from current_user): {user_id}")
+        
+        result = crud.cocktail.get_cocktails(
+            db=db,
+            name=name,
+            ingredient_ids=ingredient_ids,
+            tag_ids=tag_ids,
+            page=page,
+            size=size,
+            user_id=user_id
+        )
+        
+        return PaginatedCocktailResponse(**result)
+        
+    except Exception as e:
+        print(f"Błąd podczas pobierania koktajli: {type(e).__name__} - {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, 
+            detail="Wystąpił błąd podczas pobierania koktajli."
+        )
 
 @router.get("/{cocktail_id}", response_model=CocktailWithDetails)
 def read_cocktail(
@@ -67,7 +110,6 @@ def read_cocktail(
             
     return cocktail_details
 
-
 @router.put("/{cocktail_id}", response_model=CocktailWithDetails)
 def update_cocktail(
     *,
@@ -76,7 +118,7 @@ def update_cocktail(
     cocktail_in: CocktailUpdate,
     current_user: models.User = Depends(get_current_active_user)
 ):
-    db_cocktail_orm = db.query(models.Cocktail).get(cocktail_id) # Bezpośrednie pobranie obiektu ORM
+    db_cocktail_orm = db.query(models.Cocktail).get(cocktail_id)
     if not db_cocktail_orm:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Koktajl nie znaleziony.")
     if db_cocktail_orm.user_id != current_user.id:
@@ -107,7 +149,6 @@ def update_cocktail(
         print(f"Błąd podczas aktualizacji koktajlu: {type(e).__name__} - {e}")
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Wystąpił wewnętrzny błąd serwera podczas aktualizacji koktajlu.")
 
-
 @router.delete("/{cocktail_id}", response_model=CocktailSchema)
 def delete_cocktail(
     *,
@@ -115,7 +156,7 @@ def delete_cocktail(
     cocktail_id: int,
     current_user: models.User = Depends(get_current_active_user)
 ):
-    db_cocktail_orm = db.query(models.Cocktail).get(cocktail_id) # Bezpośrednie pobranie obiektu ORM
+    db_cocktail_orm = db.query(models.Cocktail).get(cocktail_id)
     if not db_cocktail_orm:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Koktajl nie znaleziony.")
 
