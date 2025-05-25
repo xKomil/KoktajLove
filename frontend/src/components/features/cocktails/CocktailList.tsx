@@ -1,27 +1,34 @@
 // frontend/src/components/features/cocktails/CocktailList.tsx
 import React from 'react';
-import { CocktailWithDetails } from '@/types/cocktailTypes';
-import CocktailCard from './CocktailCard';
-import Spinner from '@/components/ui/Spinner/Spinner';
-import Button from '@/components/ui/Button/Button';
-import styles from './CocktailList.module.css';
+import { CocktailWithDetails } from '@/types/cocktailTypes'; // Type definition for cocktail data
+import CocktailCard from './CocktailCard'; // Component to display individual cocktail cards
+import Spinner from '@/components/ui/Spinner/Spinner'; // UI component for loading indication
+import Button from '@/components/ui/Button/Button'; // UI component for buttons
+import styles from './CocktailList.module.css'; // CSS module for styling
 
+/**
+ * Interface for the CocktailList component's props.
+ */
 interface CocktailListProps {
-  cocktails: CocktailWithDetails[];
-  isLoading: boolean;
-  error: Error | null;
-  onRetry?: () => void;
-  onAddCocktail?: () => void;
+  cocktails: CocktailWithDetails[]; // Array of cocktail data to display
+  isLoading: boolean; // Flag indicating if the list is currently loading
+  error: Error | null; // Error object if fetching data failed, null otherwise
+  onRetry?: () => void; // Optional callback function to retry fetching data
+  onAddCocktail?: () => void; // Optional callback function to navigate to add cocktail page or open a modal
 }
 
-const CocktailList: React.FC<CocktailListProps> = ({ 
-  cocktails, 
-  isLoading, 
-  error, 
+/**
+ * CocktailList component.
+ * Displays a list of cocktails, or loading/error/empty states.
+ */
+const CocktailList: React.FC<CocktailListProps> = ({
+  cocktails,
+  isLoading,
+  error,
   onRetry,
-  onAddCocktail 
+  onAddCocktail
 }) => {
-  // Stan ładowania
+  // Loading state
   if (isLoading) {
     return (
       <div className={styles.listContainer}>
@@ -30,35 +37,36 @@ const CocktailList: React.FC<CocktailListProps> = ({
             <Spinner size="lg" color="var(--color-primary)" />
           </div>
           <p className={styles.loadingText}>
-            Ładowanie koktajli...
+            Loading cocktails...
           </p>
         </div>
       </div>
     );
   }
 
-  // Stan błędu
+  // Error state
   if (error) {
     return (
       <div className={styles.listContainer}>
         <div className={`${styles.statusMessageContainer} ${styles.errorContainer}`}>
-          {/* Ikona błędu - można zastąpić rzeczywistą ikoną */}
+          {/* Error Icon - can be replaced with an actual icon component */}
           <div className={styles.errorIcon}>
             ⚠️
           </div>
           <h3 className={styles.errorTitle}>
-            Ups! Coś poszło nie tak
+            Oops! Something went wrong
           </h3>
           <p className={styles.errorMessage}>
-            Nie udało się załadować listy koktajli. {error.message}
+            Failed to load the cocktail list. {error.message}
           </p>
+          {/* Display retry button if onRetry callback is provided */}
           {onRetry && (
-            <Button 
-              variant="outline-primary" 
+            <Button
+              variant="outline-primary"
               onClick={onRetry}
               className={styles.actionButton}
             >
-              Spróbuj ponownie
+              Try Again
             </Button>
           )}
         </div>
@@ -66,28 +74,29 @@ const CocktailList: React.FC<CocktailListProps> = ({
     );
   }
 
-  // Stan braku danych
+  // Empty state (no cocktails found)
   if (!cocktails || cocktails.length === 0) {
     return (
       <div className={styles.listContainer}>
         <div className={`${styles.statusMessageContainer} ${styles.emptyContainer}`}>
-          {/* Ikona pustej listy - można zastąpić rzeczywistą ikoną */}
+          {/* Empty List Icon - can be replaced with an actual icon component */}
           <div className={styles.emptyIcon}>
             🍸
           </div>
           <h3 className={styles.emptyTitle}>
-            Brak koktajli
+            No Cocktails Found
           </h3>
           <p className={styles.emptyMessage}>
-            Nie znaleziono żadnych koktajli. Może czas dodać pierwszy do kolekcji?
+            No cocktails were found. Maybe it's time to add the first one to your collection?
           </p>
+          {/* Display "Add Cocktail" button if onAddCocktail callback is provided */}
           {onAddCocktail && (
-            <Button 
-              variant="primary" 
+            <Button
+              variant="primary"
               onClick={onAddCocktail}
               className={styles.actionButton}
             >
-              Dodaj koktajl
+              Add Cocktail
             </Button>
           )}
         </div>
@@ -95,7 +104,7 @@ const CocktailList: React.FC<CocktailListProps> = ({
     );
   }
 
-  // Renderowanie listy koktajli
+  // Render the list of cocktails
   return (
     <div className={styles.listContainer}>
       {cocktails.map((cocktail) => (

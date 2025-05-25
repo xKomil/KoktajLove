@@ -1,82 +1,122 @@
 // frontend/src/services/ratingService.ts
 import apiClient from './apiClient';
-import { Rating, RatingCreate, RatingUpdate } from '@/types/cocktailTypes'; // Assuming Rating types are in cocktailTypes
+import { Rating, RatingCreate, RatingUpdate } from '@/types/cocktailTypes';
 
 /**
- * Submits or updates a rating for a cocktail.
- * @param cocktailId - The ID of the cocktail being rated.
- * @param score - The rating score (e.g., 1-5).
- * @returns A promise that resolves to the created or updated rating.
+ * Tworzy nową ocenę dla koktajlu.
+ * @param data - Dane do utworzenia oceny (score to rating_value w backend)
+ * @returns Promise z utworzoną oceną
  */
-export const rateCocktail = async (cocktailId: number | string, score: number): Promise<Rating> => {
-  // The backend might use a POST to /cocktails/{cocktailId}/ratings or a general /ratings endpoint.
-  // Adjust the endpoint and payload (RatingCreate) as needed.
-  const payload: RatingCreate = { score, cocktail_id: Number(cocktailId) }; // cocktail_id might be implicit from URL
-  const response = await apiClient.post<Rating>(`/cocktails/${cocktailId}/rate`, payload);
+export const createRating = async (data: { 
+  cocktail_id: number; 
+  score: number; 
+  comment?: string 
+}): Promise<Rating> => {
+  const payload: RatingCreate = {
+    cocktail_id: data.cocktail_id,
+    rating_value: data.score, // Mapowanie z frontend 'score' na backend 'rating_value'
+    comment: data.comment
+  };
+
+  const response = await apiClient.post<Rating>('/ratings/', payload);
   return response.data;
 };
 
 /**
- * Fetches all ratings for a specific cocktail.
- * @param cocktailId - The ID of the cocktail.
- * @returns A promise that resolves to an array of ratings for the cocktail.
+ * Pobiera ocenę danego użytkownika dla konkretnego koktajlu.
+ * Używa endpointu /user-cocktail-rating/ z query params.
+ * @param cocktailId - ID koktajlu
+ * @param userId - ID użytkownika (opcjonalne, może być pobierane z tokena)
+ * @returns Promise z oceną użytkownika lub null jeśli nie istnieje
  */
-export const getRatingsForCocktail = async (cocktailId: number | string): Promise<Rating[]> => {
-  const response = await apiClient.get<Rating[]>(`/cocktails/${cocktailId}/ratings`);
-  return response.data;
-};
-
-/**
- * Fetches a specific rating by its ID (if ratings have their own IDs and endpoint).
- * @param ratingId - The ID of the rating.
- * @returns A promise that resolves to the rating details.
- */
-export const getRatingById = async (ratingId: number | string): Promise<Rating> => {
-  const response = await apiClient.get<Rating>(`/ratings/${ratingId}`); // Example endpoint
-  return response.data;
-};
-
-/**
- * Updates an existing rating.
- * @param ratingId - The ID of the rating to update.
- *   (Or cocktailId if user can only have one rating per cocktail, then use rateCocktail/PUT)
- * @param data - The data to update the rating with (e.g., new score).
- * @returns A promise that resolves to the updated rating.
- */
-export const updateRating = async (ratingId: number | string, data: RatingUpdate): Promise<Rating> => {
-  const response = await apiClient.put<Rating>(`/ratings/${ratingId}`, data); // Example endpoint
-  return response.data;
-};
-
-/**
- * Deletes a rating.
- * @param ratingId - The ID of the rating to delete.
- *   (Or cocktailId if user wants to remove their rating for a cocktail)
- * @returns A promise that resolves when the rating is deleted.
- */
-export const deleteRating = async (ratingId: number | string): Promise<void> => {
-  await apiClient.delete(`/ratings/${ratingId}`); // Example endpoint
-};
-
-/**
- * Fetches the rating given by a specific user for a specific cocktail.
- * @param userId - The ID of the user.
- * @param cocktailId - The ID of the cocktail.
- * @returns A promise that resolves to the user's rating for that cocktail, or null/error if not found.
- */
-export const getUserRatingForCocktail = async (userId: number | string, cocktailId: number | string): Promise<Rating | null> => {
+export const getUserRatingForCocktail = async (
+  cocktailId: number, 
+  userId?: number
+): Promise<Rating | null> => {
   try {
-    const response = await apiClient.get<Rating | null>(`/ratings/user-cocktail-rating/`, {
-      params: { // Przekazujemy jako parametry zapytania
-        user_id: userId,
-        cocktail_id: cocktailId
-      }
+    const params: any = { cocktail_id: cocktailId };
+    
+    // Jeśli userId zostało przekazane, dodaj je do parametrów
+    // W przeciwnym razie backend użyje current_user z tokena
+    if (userId !== undefined) {
+      params.user_id = userId;
+    }
+
+    const response = await apiClient.get<Rating | null>('/ratings/user-cocktail-rating/', {
+      params
     });
+
     return response.data;
   } catch (error: any) {
     if (error.response && error.response.status === 404) {
-      return null; // No rating found for this user and cocktail
+      return null; // Brak oceny dla tego użytkownika i koktajlu
     }
-    throw error; // Re-throw other errors
+    throw error; // Rzuć dalej inne błędy
   }
+};
+
+/**
+ * Aktualizuje istniejącą ocenę (używając jej ID).
+ * @param ratingId - ID oceny do aktualizacji
+ * @param data - Dane do aktualizacji (score i/lub comment)
+ * @returns Promise z zaktualizowaną oceną
+ */
+export const updateRating = async (
+  ratingId: number, 
+  data: { score?: number; comment?: string }
+): Promise<Rating> => {
+  const payload: RatingUpdate = {};
+  
+  // Mapowanie z frontend 'score' na backend 'rating_value'
+  if (data.score !== undefined) {
+    payload.rating_value = data.score;
+  }
+  
+  if (data.comment !== undefined) {
+    payload.comment = data.comment;
+  }
+
+  const response = await apiClient.put<Rating>(`/ratings/${ratingId}`, payload);
+  return response.data;
+};
+
+/**
+ * Usuwa ocenę.
+ * @param ratingId - ID oceny do usunięcia
+ * @returns Promise<void>
+ */
+export const deleteRating = async (ratingId: number): Promise<void> => {
+  await apiClient.delete(`/ratings/${ratingId}`);
+};
+
+/**
+ * Pobiera wszystkie oceny dla danego koktajlu.
+ * @param cocktailId - ID koktajlu
+ * @param params - Opcjonalne parametry paginacji
+ * @returns Promise z listą ocen dla koktajlu
+ */
+export const getRatingsForCocktail = async (
+  cocktailId: number, 
+  params?: { skip?: number; limit?: number }
+): Promise<Rating[]> => {
+  const queryParams = {
+    skip: params?.skip || 0,
+    limit: params?.limit || 10
+  };
+
+  const response = await apiClient.get<Rating[]>(`/ratings/cocktail/${cocktailId}`, {
+    params: queryParams
+  });
+  
+  return response.data;
+};
+
+/**
+ * DODATKOWO: Pobiera konkretną ocenę po ID (jeśli potrzebne)
+ * @param ratingId - ID oceny
+ * @returns Promise z oceną
+ */
+export const getRatingById = async (ratingId: number): Promise<Rating> => {
+  const response = await apiClient.get<Rating>(`/ratings/${ratingId}`);
+  return response.data;
 };

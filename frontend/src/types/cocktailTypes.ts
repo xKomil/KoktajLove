@@ -94,7 +94,8 @@ export interface CocktailWithDetails extends CocktailBase {
   created_at: string;
   updated_at: string;
   average_rating: number | null; // Added for rating functionality
-  ratings_count: number;         // Added for rating functionality  
+  ratings_count: number;         // Added for rating functionality
+  
   ingredients: CocktailIngredientDetail[];
   tags: Tag[];
   owner_id: number;
@@ -108,15 +109,23 @@ export type CocktailUpdate = Partial<Omit<CocktailCreate, 'name' | 'description'
 
 export interface Rating {
   id: number;
-  score: number;
+  rating_value: number;
   cocktail_id: number;
   user_id: number;
   created_at: string;
-  updated_at: string;
+  updated_at: string | null;
 }
 
-export type RatingCreate = Pick<Rating, 'score' | 'cocktail_id'>;
-export type RatingUpdate = Partial<Pick<Rating, 'score'>>;
+export interface RatingCreate {
+  cocktail_id: number;
+  rating_value: number;
+  comment?: string;
+}
+
+export interface RatingUpdate {
+  rating_value?: number; 
+  comment?: string;
+}
 
 /**
  * Paginated response structure

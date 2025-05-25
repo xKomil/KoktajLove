@@ -72,9 +72,11 @@ frontend/
 │   │   │   ├── Pagination/
 │   │   │   │   ├── Pagination.module.css
 │   │   │   │   └── Pagination.tsx
-│   │   │   └── Spinner/
-│   │   │       ├── Spinner.module.css
-│   │   │       └── Spinner.tsx
+│   │   │   ├── Spinner/
+│   │   │   │   ├── Spinner.module.css
+│   │   │   │   └── Spinner.tsx
+│   │   │   └── StarRatingInput/
+│   │   │       └── StarRatingInput.tsx
 │   │   └── utils/
 │   │       └── FocusTrap.tsx
 │   ├── contexts/
@@ -93,7 +95,9 @@ frontend/
 │   │   ├── EditCocktailPage.tsx
 │   │   ├── HomePage.tsx
 │   │   ├── LoginPage.tsx
+│   │   ├── MyFavoritesPage.module.css
 │   │   ├── MyFavoritesPage.tsx
+│   │   ├── NotFoundPage.module.css
 │   │   ├── NotFoundPage.tsx
 │   │   ├── PageStyles.module.css
 │   │   ├── ProfilePage.tsx
