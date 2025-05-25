@@ -77,6 +77,9 @@ const CocktailForm: React.FC<CocktailFormProps> = ({ cocktail, onSubmitSuccess }
   const [availableTags, setAvailableTags] = useState<Tag[]>([]);
   const [formError, setFormError] = useState<string | null>(null);
 
+  // URL validation pattern
+  const urlPattern = /^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)$/;
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -102,7 +105,7 @@ const CocktailForm: React.FC<CocktailFormProps> = ({ cocktail, onSubmitSuccess }
         }
       } catch (error) {
         console.error('Failed to fetch ingredients or tags', error);
-        setFormError('Could not load necessary data for the form.');
+        setFormError('Unable to load form data. Please refresh the page and try again.');
       }
     };
     fetchData();
@@ -186,21 +189,32 @@ const CocktailForm: React.FC<CocktailFormProps> = ({ cocktail, onSubmitSuccess }
         navigate(`/cocktail/${savedCocktail.id}`);
       }
     } catch (error: any) {
-      console.error('Pełny obiekt błędu (Failed to save cocktail):', error);
-      let displayMessage = 'An error occurred while saving the cocktail.';
-      if (error.response && error.response.data && error.response.data.detail) {
+      console.error('Failed to save cocktail:', error);
+      
+      let displayMessage = 'An error occurred while saving the cocktail. Please try again.';
+      
+      // Handle server validation errors (422)
+      if (error.response?.status === 422 && error.response.data?.detail) {
         const detail = error.response.data.detail;
-        console.error(">>> WAŻNE: Dane błędu 422 (Failed to save cocktail):", error.response.data);
+        
         if (typeof detail === 'string') {
           displayMessage = detail;
         } else if (Array.isArray(detail)) {
-          displayMessage = detail.map((err: any) => `${err.loc.join('.')} - ${err.msg}`).join('; ');
-        } else {
-          displayMessage = 'An unexpected error occurred with the server response.';
+          // Extract meaningful error messages from validation details
+          const errorMessages = detail
+            .map((err: any) => err.msg || 'Invalid field data')
+            .filter((msg, index, array) => array.indexOf(msg) === index) // Remove duplicates
+            .join('. ');
+          displayMessage = errorMessages || 'Please check your form data and try again.';
         }
+      } else if (error.response?.status === 409) {
+        displayMessage = 'A cocktail with this name already exists. Please choose a different name.';
+      } else if (error.response?.status >= 500) {
+        displayMessage = 'Server error occurred. Please try again later.';
       } else if (error.message) {
-        displayMessage = error.message;
+        displayMessage = `Failed to save cocktail: ${error.message}`;
       }
+      
       setFormError(displayMessage);
     }
   };
@@ -220,7 +234,21 @@ const CocktailForm: React.FC<CocktailFormProps> = ({ cocktail, onSubmitSuccess }
           id="name" 
           label="Name"
           placeholder="Enter cocktail name..."
-          {...register('name', { required: 'Name is required' })} 
+          {...register('name', { 
+            required: 'Cocktail name is required',
+            minLength: {
+              value: 3,
+              message: 'Cocktail name must be at least 3 characters long'
+            },
+            maxLength: {
+              value: 100,
+              message: 'Cocktail name cannot exceed 100 characters'
+            },
+            pattern: {
+              value: /^[a-zA-Z0-9\s\-'&.()]+$/,
+              message: 'Cocktail name contains invalid characters'
+            }
+          })} 
           error={errors.name?.message}
         />
       </div>
@@ -230,7 +258,17 @@ const CocktailForm: React.FC<CocktailFormProps> = ({ cocktail, onSubmitSuccess }
         <textarea 
           id="description" 
           placeholder="Describe your cocktail..."
-          {...register('description', { required: 'Description is required' })} 
+          {...register('description', { 
+            required: 'Please provide a description of your cocktail',
+            minLength: {
+              value: 10,
+              message: 'Description must be at least 10 characters long'
+            },
+            maxLength: {
+              value: 500,
+              message: 'Description cannot exceed 500 characters'
+            }
+          })} 
         />
         {errors.description && <p className={styles.errorMessage} role="alert">{errors.description.message}</p>}
       </div>
@@ -240,7 +278,17 @@ const CocktailForm: React.FC<CocktailFormProps> = ({ cocktail, onSubmitSuccess }
         <textarea 
           id="instructions" 
           placeholder="How to make this cocktail..."
-          {...register('instructions', { required: 'Instructions are required' })} 
+          {...register('instructions', { 
+            required: 'Please provide instructions on how to make the cocktail',
+            minLength: {
+              value: 20,
+              message: 'Instructions must be at least 20 characters long'
+            },
+            maxLength: {
+              value: 1000,
+              message: 'Instructions cannot exceed 1000 characters'
+            }
+          })} 
         />
         {errors.instructions && <p className={styles.errorMessage} role="alert">{errors.instructions.message}</p>}
       </div>
@@ -251,7 +299,15 @@ const CocktailForm: React.FC<CocktailFormProps> = ({ cocktail, onSubmitSuccess }
           type="url" 
           label="Image URL (optional)"
           placeholder="https://example.com/image.jpg"
-          {...register('image_url')} 
+          {...register('image_url', {
+            validate: (value) => {
+              if (!value || value.trim() === '') return true; // Optional field
+              if (!urlPattern.test(value)) {
+                return 'Please enter a valid URL (must start with http:// or https://)';
+              }
+              return true;
+            }
+          })} 
           error={errors.image_url?.message}
         />
       </div>
@@ -271,39 +327,85 @@ const CocktailForm: React.FC<CocktailFormProps> = ({ cocktail, onSubmitSuccess }
               <Controller
                 name={`ingredients.${index}.ingredient_id`}
                 control={control}
-                rules={{ required: 'Ingredient is required' }}
+                rules={{ 
+                  required: 'Please select an ingredient',
+                  validate: (value) => {
+                    if (!value || value === '') {
+                      return 'Please select an ingredient';
+                    }
+                    return true;
+                  }
+                }}
                 render={({ field: controllerField }) => (
-                  <select {...controllerField}>
-                    <option value="">Select Ingredient</option>
-                    {availableIngredients.map(ing => (
-                      <option key={ing.id} value={String(ing.id)}>{ing.name}</option>
-                    ))}
-                  </select>
+                  <div>
+                    <select {...controllerField}>
+                      <option value="">Select Ingredient</option>
+                      {availableIngredients.map(ing => (
+                        <option key={ing.id} value={String(ing.id)}>{ing.name}</option>
+                      ))}
+                    </select>
+                    {errors.ingredients?.[index]?.ingredient_id && (
+                      <p className={styles.errorMessage} role="alert">
+                        {errors.ingredients[index]?.ingredient_id?.message}
+                      </p>
+                    )}
+                  </div>
                 )}
               />
-              <Input
-                type="number"
-                step="1"
-                placeholder="Amount"
-                {...register(`ingredients.${index}.quantity`, { 
-                  required: 'Amount is required', 
-                  valueAsNumber: false,
-                  validate: value => {
+              <div>
+                <Input
+                  type="number"
+                  step="1"
+                  min="1"
+                  placeholder="Amount"
+                  {...register(`ingredients.${index}.quantity`, { 
+                    required: 'Amount is required',
+                    validate: (value) => {
                       const num = parseInt(value, 10);
-                      return !isNaN(num) && num > 0 || "Amount must be greater than 0";
-                  }
-                })}
-              />
+                      if (isNaN(num)) {
+                        return 'Amount must be a valid number';
+                      }
+                      if (num <= 0) {
+                        return 'Amount must be greater than 0';
+                      }
+                      if (num > 9999) {
+                        return 'Amount cannot exceed 9999';
+                      }
+                      return true;
+                    }
+                  })}
+                />
+                {errors.ingredients?.[index]?.quantity && (
+                  <p className={styles.errorMessage} role="alert">
+                    {errors.ingredients[index]?.quantity?.message}
+                  </p>
+                )}
+              </div>
               <Controller
                 name={`ingredients.${index}.unit`}
                 control={control}
-                rules={{ required: 'Unit is required' }}
+                rules={{ 
+                  required: 'Please select a unit',
+                  validate: (value) => {
+                    if (!Object.values(UnitEnum).includes(value)) {
+                      return 'Please select a valid unit';
+                    }
+                    return true;
+                  }
+                }}
                 render={({ field: controllerField }) => (
-                  <select {...controllerField}>
-                    {Object.values(UnitEnum).map(unit => (
-                      <option key={unit} value={unit}>{unit}</option>
-                    ))}
-                  </select>
+                  <div>
+                    <select {...controllerField}>
+                      {Object.values(UnitEnum).map(unit => (
+                        <option key={unit} value={unit}>{unit}</option>
+                      ))}
+                    </select>
+                    {errors.ingredients?.[index]?.unit && (
+                      <p className={styles.errorMessage} role="alert">
+                        {errors.ingredients[index]?.unit?.message}
+                      </p>
+                    )}
+                  </div>
                 )}
               />
               <Button 
@@ -311,6 +413,8 @@ const CocktailForm: React.FC<CocktailFormProps> = ({ cocktail, onSubmitSuccess }
                 onClick={() => remove(index)} 
                 variant="danger" 
                 size="sm"
+                disabled={fields.length === 1}
+                title={fields.length === 1 ? "At least one ingredient is required" : "Remove ingredient"}
               >
                 Remove
               </Button>
@@ -318,29 +422,7 @@ const CocktailForm: React.FC<CocktailFormProps> = ({ cocktail, onSubmitSuccess }
           ))}
         </div>
         
-        {/* Błędy dla ingredients */}
-        {errors.ingredients && Array.isArray(errors.ingredients) && (
-          errors.ingredients.map((itemError, index) => {
-            if (!itemError) return null;
-
-            const ingredientIdMsg = (itemError.ingredient_id as FieldError)?.message;
-            const quantityMsg = (itemError.quantity as FieldError)?.message;
-            const unitMsg = (itemError.unit as FieldError)?.message;
-            const rootMsg = (itemError as FieldError)?.message;
-
-            if (ingredientIdMsg || quantityMsg || unitMsg || rootMsg) {
-              return (
-                <div key={`error-ing-${index}`} className={styles.errorMessage}>
-                  {ingredientIdMsg && <p role="alert">Ingredient: {ingredientIdMsg}</p>}
-                  {quantityMsg && <p role="alert">Quantity: {quantityMsg}</p>}
-                  {unitMsg && <p role="alert">Unit: {unitMsg}</p>}
-                  {rootMsg && !ingredientIdMsg && !quantityMsg && !unitMsg && <p role="alert">{rootMsg}</p>}
-                </div>
-              );
-            }
-            return null;
-          })
-        )}
+        {/* General ingredients validation error */}
         {errors.ingredients && !Array.isArray(errors.ingredients) && (errors.ingredients as FieldError)?.message && (
             <div className={styles.errorMessage} role="alert">
                 <p>{(errors.ingredients as FieldError).message}</p>
