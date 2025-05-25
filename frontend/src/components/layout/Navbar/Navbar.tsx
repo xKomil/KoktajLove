@@ -1,11 +1,11 @@
-// Navbar.tsx - Znacznie ulepszona wersja
+// Navbar.tsx - Kolejna modyfikacja
 import React, { useState, useEffect } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import styles from './Navbar.module.css';
 
 const Navbar: React.FC = () => {
-  const { user, logout, isLoading } = useAuth();
+  const { user, logout, isLoading, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -17,29 +17,26 @@ const Navbar: React.FC = () => {
 
   const closeMobileMenu = () => setIsMobileMenuOpen(false);
 
-  // Close mobile menu on escape key
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === 'Escape') setIsMobileMenuOpen(false);
     };
-
     if (isMobileMenuOpen) {
       document.addEventListener('keydown', handleEscape);
       return () => document.removeEventListener('keydown', handleEscape);
     }
   }, [isMobileMenuOpen]);
 
-  const getNavLinkClass = ({ isActive }: { isActive: boolean }) => 
+  const getNavLinkClass = ({ isActive }: { isActive: boolean }) =>
     `${styles.navLink} ${isActive ? styles.active : ''}`;
 
   return (
     <nav className={styles.navbar} role="navigation" aria-label="Main navigation">
-      <Link to="/" className={styles.logo} aria-label="KoktajLOVE - Home">
+      <Link to={isAuthenticated ? "/cocktails" : "/"} className={styles.logo} aria-label="KoktajLOVE">
         <span className={styles.logoText}>KoktajLOVE</span>
         <span className={styles.logoIcon}>🍹</span>
       </Link>
 
-      {/* Mobile menu button */}
       <button
         className={styles.mobileMenuButton}
         onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -52,20 +49,24 @@ const Navbar: React.FC = () => {
         <span className={styles.hamburger}></span>
       </button>
 
-      {/* Navigation links */}
-      <div 
+      <div
         className={`${styles.navLinks} ${isMobileMenuOpen ? styles.mobileMenuOpen : ''}`}
         id="mobile-menu"
       >
-        <NavLink to="/" className={getNavLinkClass} onClick={closeMobileMenu} end>
-          Home
-        </NavLink>
-        <NavLink to="/cocktails" className={getNavLinkClass} onClick={closeMobileMenu}>
-          Cocktails
-        </NavLink>
-        
-        {!isLoading && user && (
+        {!isLoading && !isAuthenticated && (
+          <NavLink to="/" className={getNavLinkClass} onClick={closeMobileMenu} end>
+            Home
+          </NavLink>
+        )}
+
+        {/* === POCZĄTEK ZMIANY === */}
+        {/* Link "Cocktails" jest teraz częścią bloku dla zalogowanych użytkowników */}
+        {!isLoading && isAuthenticated && (
           <>
+            {/* Dodajemy link "Cocktails" tutaj */}
+            <NavLink to="/cocktails" className={getNavLinkClass} onClick={closeMobileMenu}>
+              Cocktails
+            </NavLink>
             <NavLink to="/add-cocktail" className={getNavLinkClass} onClick={closeMobileMenu}>
               Add Cocktail
             </NavLink>
@@ -73,10 +74,10 @@ const Navbar: React.FC = () => {
               My Favorites
             </NavLink>
             <NavLink to="/profile" className={getNavLinkClass} onClick={closeMobileMenu}>
-              Profile
+              {user?.username || 'Profile'}
             </NavLink>
-            <button 
-              onClick={handleLogout} 
+            <button
+              onClick={handleLogout}
               className={`${styles.navLink} ${styles.logoutButton}`}
               aria-label="Logout from account"
             >
@@ -84,8 +85,9 @@ const Navbar: React.FC = () => {
             </button>
           </>
         )}
-        
-        {!isLoading && !user && (
+        {/* === KONIEC ZMIANY === */}
+
+        {!isLoading && !isAuthenticated && (
           <>
             <NavLink to="/login" className={getNavLinkClass} onClick={closeMobileMenu}>
               Login
@@ -97,10 +99,9 @@ const Navbar: React.FC = () => {
         )}
       </div>
 
-      {/* Mobile menu overlay */}
       {isMobileMenuOpen && (
-        <div 
-          className={styles.mobileOverlay} 
+        <div
+          className={styles.mobileOverlay}
           onClick={closeMobileMenu}
           aria-hidden="true"
         />

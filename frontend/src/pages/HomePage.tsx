@@ -49,25 +49,25 @@ const HomePage: React.FC = () => {
       name: "Klasyki",
       description: "Timeless cocktails that never go out of style",
       imageGradient: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-      link: "/cocktails?"
+      link: "/login"
     },
     {
       name: "Tropikalne",
       description: "Escape to paradise with exotic flavors",
       imageGradient: "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)",
-      link: "/cocktails?"
+      link: "/login"
     },
     {
       name: "Bezalkoholowe",
       description: "Delicious mocktails for everyone",
       imageGradient: "linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)",
-      link: "/cocktails?"
+      link: "/login"
     },
     {
       name: "Na Imprezę",
       description: "Perfect drinks for celebrations",
       imageGradient: "linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)",
-      link: "/cocktails?"
+      link: "/login"
     }
   ];
 
