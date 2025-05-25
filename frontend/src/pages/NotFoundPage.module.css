@@ -1,0 +1,50 @@
+/* frontend/src/pages/NotFoundPage.module.css */
+
+.notFoundContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 70vh; /* Lub inna wartość, aby wycentrować na stronie */
+  text-align: center;
+  padding: 20px;
+}
+
+.title {
+  font-size: 3rem; /* Duży tytuł dla 404 */
+  color: #000000; /* Czarny kolor tekstu */
+  margin-bottom: 1rem;
+}
+
+.message {
+  font-size: 1.2rem;
+  color: #333333; /* Ciemnoszary, prawie czarny, dla lepszego kontrastu niż czysty czarny */
+  margin-bottom: 0.8rem;
+}
+
+.linkMessage {
+  font-size: 1rem;
+  color: #555555; /* Trochę jaśniejszy szary */
+  margin-top: 1.5rem;
+}
+
+.homeLink {
+  color: var(--color-primary, #007bff); /* Użyj zmiennej CSS dla koloru głównego, jeśli masz, inaczej domyślny niebieski */
+  text-decoration: none;
+  font-weight: bold;
+  border-bottom: 2px solid transparent;
+  transition: color 0.2s ease-in-out, border-bottom-color 0.2s ease-in-out;
+}
+
+.homeLink:hover,
+.homeLink:focus {
+  color: var(--color-primary-dark, #0056b3); /* Ciemniejszy odcień koloru głównego przy najechaniu */
+  border-bottom-color: var(--color-primary-dark, #0056b3);
+}
+
+/* Opcjonalnie: Jeśli chcesz używać ikony */
+.icon {
+  font-size: 5rem; /* Duża ikona */
+  color: #cccccc; /* Jasnoszary dla ikony */
+  margin-bottom: 1.5rem;
+}
