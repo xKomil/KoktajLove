@@ -4,7 +4,7 @@
   --star-size: 1.2rem;
   --star-gap: 0.125rem;
   --star-color-empty: var(--color-gray-300);
-  --star-color-filled: var(--color-warning, #fadb14);
+  --star-color-filled: #764ba2; /* Updated fallback color from gradient */
   --star-color-hover: var(--color-warning-light, #ffd93d);
   --star-color-focus: var(--color-primary, #1976d2);
   --transition-duration: var(--transition-fast, 0.15s);
@@ -86,6 +86,7 @@
 .starIcon {
   width: 100%;
   height: 100%;
+  display: inline-block; /* Added for gradient support */
   transition: all var(--transition-duration) ease;
   filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
 }
@@ -105,12 +106,25 @@
 }
 
 .filledStar .starIcon.filled {
-  color: var(--star-color-filled);
-  filter: drop-shadow(0 2px 4px rgba(250, 219, 20, 0.3));
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  filter: drop-shadow(0 2px 4px rgba(118, 75, 162, 0.3));
 }
 
 /* Hover effects for interactive mode */
-.interactive .starButton:not(:disabled):hover .starIcon {
+.interactive .starButton:not(:disabled):hover .starIcon.filled {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  filter: brightness(1.1) drop-shadow(0 2px 6px rgba(118, 75, 162, 0.4));
+}
+
+.interactive .starButton:not(:disabled):hover .starIcon:not(.filled) {
   color: var(--star-color-hover);
   filter: drop-shadow(0 2px 6px rgba(255, 217, 61, 0.4));
 }
@@ -121,17 +135,13 @@
   filter: drop-shadow(0 2px 6px var(--focus-ring-color));
 }
 
-/* Gradient effect for premium look */
-.filledStar .starIcon.filled {
-  background: linear-gradient(
-    135deg,
-    var(--star-color-filled) 0%,
-    var(--color-warning-dark, #d4b106) 100%
-  );
+.filledStar .starIcon.focused {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
   color: transparent;
+  filter: brightness(1.05) drop-shadow(0 2px 6px rgba(118, 75, 162, 0.4));
 }
 
 /* Alternative: Use solid fill if gradient doesn't work properly */
@@ -139,7 +149,19 @@
   .filledStar .starIcon.filled {
     background: none;
     -webkit-text-fill-color: initial;
-    color: var(--star-color-filled);
+    color: #764ba2; /* Updated fallback color */
+  }
+  
+  .interactive .starButton:not(:disabled):hover .starIcon.filled {
+    background: none;
+    -webkit-text-fill-color: initial;
+    color: #764ba2;
+  }
+  
+  .filledStar .starIcon.focused {
+    background: none;
+    -webkit-text-fill-color: initial;
+    color: #764ba2;
   }
 }
 
@@ -148,7 +170,8 @@
   transition: 
     color var(--transition-duration) ease,
     filter var(--transition-duration) ease,
-    transform var(--transition-duration) ease;
+    transform var(--transition-duration) ease,
+    background var(--transition-duration) ease;
 }
 
 /* Enhanced hover effect for the whole rating when interactive */
@@ -162,7 +185,12 @@
 }
 
 .readOnly .filledStar .starIcon.filled {
-  filter: drop-shadow(0 1px 3px rgba(250, 219, 20, 0.2));
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  filter: drop-shadow(0 1px 3px rgba(118, 75, 162, 0.2));
 }
 
 /* Responsive adjustments */
@@ -190,8 +218,24 @@
     color: var(--color-gray-600, #666);
   }
   
-  .filled {
-    color: var(--color-warning-dark, #b8860b);
+  .filled,
+  .filledStar .starIcon.filled {
+    background: none;
+    -webkit-text-fill-color: initial;
+    color: #764ba2; /* Solid color for high contrast */
+  }
+  
+  .readOnly .filledStar .starIcon.filled {
+    background: none;
+    -webkit-text-fill-color: initial;
+    color: #764ba2;
+  }
+  
+  .interactive .starButton:not(:disabled):hover .starIcon.filled,
+  .filledStar .starIcon.focused {
+    background: none;
+    -webkit-text-fill-color: initial;
+    color: #764ba2;
   }
 }
 

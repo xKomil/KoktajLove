@@ -1,0 +1,213 @@
+KoktajLove/
+├── .gitignore
+├── LICENSE
+├── README.md
+├── backend/
+│   ├── .env
+│   ├── .env.example
+│   ├── .gitignore
+│   ├── alembic/
+│   │   ├── README
+│   │   ├── env.py
+│   │   ├── script.py.mako
+│   │   └── versions/
+│   │       ├── 3c60abac42be_change_cocktail_ingredient_amount_to_.py
+│   │       ├── 867b73a2fb96_initial_migration_create_tables.py
+│   │       ├── a29be19d9d88_add_unique_constraint_to_cocktail_name.py
+│   │       └── eaf14a1ae534_change_cocktail_ingredient_amount_to_.py
+│   ├── alembic.ini
+│   ├── app/
+│   │   ├── __init__.py
+│   │   ├── api/
+│   │   │   ├── __init__.py
+│   │   │   └── api_v1/
+│   │   │       ├── __init__.py
+│   │   │       ├── api.py
+│   │   │       └── endpoints/
+│   │   │           ├── __init__.py
+│   │   │           ├── auth.py
+│   │   │           ├── cocktails.py
+│   │   │           ├── favorites.py
+│   │   │           ├── ingredients.py
+│   │   │           ├── ratings.py
+│   │   │           ├── tags.py
+│   │   │           └── users.py
+│   │   ├── core/
+│   │   │   ├── __init__.py
+│   │   │   ├── config.py
+│   │   │   └── security.py
+│   │   ├── crud/
+│   │   │   ├── __init__.py
+│   │   │   ├── crud_cocktail.py
+│   │   │   ├── crud_favorite.py
+│   │   │   ├── crud_ingredient.py
+│   │   │   ├── crud_rating.py
+│   │   │   ├── crud_tag.py
+│   │   │   └── crud_user.py
+│   │   ├── db/
+│   │   │   ├── __init__.py
+│   │   │   ├── base_class.py
+│   │   │   └── session.py
+│   │   ├── dependencies.py
+│   │   ├── main.py
+│   │   ├── models/
+│   │   │   ├── __init__.py
+│   │   │   ├── cocktail.py
+│   │   │   ├── favorite.py
+│   │   │   ├── ingredient.py
+│   │   │   ├── rating.py
+│   │   │   ├── tag.py
+│   │   │   └── user.py
+│   │   └── schemas/
+│   │       ├── __init__.py
+│   │       ├── cocktail.py
+│   │       ├── favorite.py
+│   │       ├── ingredient.py
+│   │       ├── rating.py
+│   │       ├── tag.py
+│   │       ├── token.py
+│   │       └── user.py
+│   ├── koktajlove.db
+│   └── requirements.txt
+└── frontend/
+    ├── .gitignore
+    ├── README.md
+    ├── eslint.config.js
+    ├── index.html
+    ├── package-lock.json
+    ├── package.json
+    ├── public/
+    │   ├── assets/
+    │   │   └── cocktail-1869860_1280.jpg
+    │   └── vite.svg
+    ├── src/
+    │   ├── .env
+    │   ├── .env.example
+    │   ├── App.tsx
+    │   ├── assets/
+    │   │   └── react.svg
+    │   ├── components/
+    │   │   ├── features/
+    │   │   │   ├── auth/
+    │   │   │   │   ├── LoginForm.module.css
+    │   │   │   │   ├── LoginForm.tsx
+    │   │   │   │   ├── RegisterForm.module.css
+    │   │   │   │   └── RegisterForm.tsx
+    │   │   │   ├── cocktails/
+    │   │   │   │   ├── ActiveFilters.module.css
+    │   │   │   │   ├── ActiveFilters.tsx
+    │   │   │   │   ├── CocktailCard.module.css
+    │   │   │   │   ├── CocktailCard.tsx
+    │   │   │   │   ├── CocktailForm.module.css
+    │   │   │   │   ├── CocktailForm.tsx
+    │   │   │   │   ├── CocktailList.module.css
+    │   │   │   │   ├── CocktailList.tsx
+    │   │   │   │   ├── RatingStars.module.css
+    │   │   │   │   ├── RatingStars.tsx
+    │   │   │   │   ├── SearchFilters.module.css
+    │   │   │   │   └── SearchFilters.tsx
+    │   │   │   ├── profile/
+    │   │   │   │   ├── ChangePasswordForm.module.css
+    │   │   │   │   ├── ChangePasswordForm.tsx
+    │   │   │   │   ├── EditProfileForm.module.css
+    │   │   │   │   ├── EditProfileForm.tsx
+    │   │   │   │   ├── ProfileDetails.module.css
+    │   │   │   │   ├── ProfileDetails.tsx
+    │   │   │   │   ├── UserCocktailList.module.css
+    │   │   │   │   └── UserCocktailList.tsx
+    │   │   │   └── ratings/
+    │   │   ├── layout/
+    │   │   │   ├── Footer/
+    │   │   │   │   ├── Footer.module.css
+    │   │   │   │   └── Footer.tsx
+    │   │   │   ├── MainLayout/
+    │   │   │   │   ├── MainLayout.module.css
+    │   │   │   │   └── MainLayout.tsx
+    │   │   │   └── Navbar/
+    │   │   │       ├── Navbar.module.css
+    │   │   │       └── Navbar.tsx
+    │   │   ├── ui/
+    │   │   │   ├── Button/
+    │   │   │   │   ├── Button.module.css
+    │   │   │   │   └── Button.tsx
+    │   │   │   ├── CategoryCard/
+    │   │   │   │   ├── CategoryCard.module.css
+    │   │   │   │   └── CategoryCard.tsx
+    │   │   │   ├── FeatureCard/
+    │   │   │   │   ├── FeatureCard.module.css
+    │   │   │   │   └── FeatureCard.tsx
+    │   │   │   ├── Input/
+    │   │   │   │   ├── Input.module.css
+    │   │   │   │   └── Input.tsx
+    │   │   │   ├── Modal/
+    │   │   │   │   ├── Modal.module.css
+    │   │   │   │   └── Modal.tsx
+    │   │   │   ├── MultiAutoCompleteSelect/
+    │   │   │   │   ├── MultiAutoCompleteSelect.module.css
+    │   │   │   │   └── MultiAutoCompleteSelect.tsx
+    │   │   │   ├── Pagination/
+    │   │   │   │   ├── Pagination.module.css
+    │   │   │   │   └── Pagination.tsx
+    │   │   │   ├── Spinner/
+    │   │   │   │   ├── Spinner.module.css
+    │   │   │   │   └── Spinner.tsx
+    │   │   │   └── StarRatingInput/
+    │   │   │       └── StarRatingInput.tsx
+    │   │   └── utils/
+    │   │       └── FocusTrap.tsx
+    │   ├── contexts/
+    │   │   └── AuthContext.tsx
+    │   ├── hooks/
+    │   │   ├── useApi.ts
+    │   │   ├── useAuth.ts
+    │   │   ├── useDebounce.ts
+    │   │   └── useProfile.ts
+    │   ├── main.tsx
+    │   ├── pages/
+    │   │   ├── AddCocktailPage.tsx
+    │   │   ├── CocktailDetailPage.module.css
+    │   │   ├── CocktailDetailPage.tsx
+    │   │   ├── CocktailsPage.module.css
+    │   │   ├── CocktailsPage.tsx
+    │   │   ├── EditCocktailPage.tsx
+    │   │   ├── HomePage.tsx
+    │   │   ├── LoginPage.tsx
+    │   │   ├── MyFavoritesPage.module.css
+    │   │   ├── MyFavoritesPage.tsx
+    │   │   ├── NotFoundPage.module.css
+    │   │   ├── NotFoundPage.tsx
+    │   │   ├── PageStyles.module.css
+    │   │   ├── ProfilePage.tsx
+    │   │   └── RegisterPage.tsx
+    │   ├── router/
+    │   │   ├── AppRoutes.tsx
+    │   │   └── ProtectedRoute.tsx
+    │   ├── services/
+    │   │   ├── apiClient.ts
+    │   │   ├── authService.ts
+    │   │   ├── cocktailService.ts
+    │   │   ├── favoriteService.ts
+    │   │   ├── ingredientService.ts
+    │   │   ├── ratingService.ts
+    │   │   ├── tagService.ts
+    │   │   └── userService.ts
+    │   ├── styles/
+    │   │   ├── global.css
+    │   │   ├── theme.css
+    │   │   └── variables.css
+    │   ├── types/
+    │   │   ├── authTypes.ts
+    │   │   ├── cocktailTypes.ts
+    │   │   ├── commonTypes.ts
+    │   │   └── index.ts
+    │   ├── utils/
+    │   │   ├── helpers.ts
+    │   │   └── localStorage.ts
+    │   └── vite-env.d.ts
+    ├── tsconfig.app.json
+    ├── tsconfig.json
+    ├── tsconfig.node.json
+    ├── tsconfig.tsbuildinfo
+    ├── vite.config.d.ts
+    ├── vite.config.d.ts.map
+    └── vite.config.ts

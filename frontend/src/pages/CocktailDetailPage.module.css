@@ -1,120 +1,591 @@
 /* frontend/src/pages/CocktailDetailPage.module.css */
 .cocktailDetailContainer {
-  /* Styles for overall container */
-  background-color: #fff;
+  max-width: 1200px;
+  margin: 0 auto;
   padding: 2rem;
-  border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-}
-.header { 
-  display: flex; 
-  justify-content: space-between; 
-  align-items: center; 
-  margin-bottom: 1.5rem; 
-  border-bottom: 1px solid #eee;
-  padding-bottom: 1rem;
-}
-.name { 
-  font-size: 2.5rem; 
-  color: #333; 
-  margin: 0;
-}
-.ownerActions button { 
-  margin-left: 0.5rem; 
-}
-.mainContent { 
-  display: grid; 
-  grid-template-columns: 1fr; 
-  gap: 2rem; 
-}
-@media (min-width: 768px) { 
-  .mainContent { 
-    grid-template-columns: minmax(250px, 300px) 1fr; 
-  } 
-}
-.imageContainer {
-  /* Styles for image container */
-}
-.image { 
-  width: 100%; 
-  height: auto;
-  max-height: 400px;
-  object-fit: cover;
-  border-radius: 8px; 
-  box-shadow: 0 4px 8px rgba(0,0,0,0.1); 
-}
-.info {
-  /* Styles for info section */
-}
-.description { 
-  font-size: 1.1rem; 
-  color: #555; 
-  margin-bottom: 1.5rem; 
-  line-height: 1.6;
-}
-.ratingSection, .userInteractionSection, .userRatingSection { 
-  margin-bottom: 1.5rem; 
-}
-.userInteractionSection { 
-  display: flex; 
-  flex-wrap: wrap;
-  align-items: center; 
-  gap: 1rem; 
-  margin-top: 1rem; 
-  padding: 1rem;
-  background-color: #f9f9f9;
-  border-radius: 4px;
-}
-.userRatingSection h4, .ratingSection h4 {
-  margin-bottom: 0.5rem;
-  font-size: 1rem;
-  color: #444;
-}
-.favoriteButton {
-  /* Styles for favorite button */
-}
-.ingredientList { 
-  list-style: disc; 
-  padding-left: 20px; 
-  margin-bottom: 1.5rem; 
-}
-.ingredientList li {
-  margin-bottom: 0.25rem;
-}
-.instructions { 
-  white-space: pre-wrap; /* Preserve formatting */ 
-  margin-bottom: 1.5rem; 
-  background-color: #fdfdfd;
-  padding: 1rem;
-  border: 1px solid #eee;
-  border-radius: 4px;
-  line-height: 1.7;
-}
-.tagList { 
-  display: flex; 
-  flex-wrap: wrap; 
-  gap: 0.5rem; 
-  margin-bottom: 1.5rem; 
-}
-.tag { 
-  background-color: #e9ecef; 
-  color: #495057;
-  padding: 0.25rem 0.75rem; 
-  border-radius: 15px; 
-  font-size: 0.9rem; 
-}
-.metaInfo { 
-  font-size: 0.85rem; 
-  color: #777; 
-  margin-top: 1.5rem; 
-  text-align: right;
-  border-top: 1px solid #eee;
-  padding-top: 0.75rem;
+  min-height: 100vh;
 }
 
-h4 {
-    font-size: 1.2rem;
-    color: #333;
-    margin-top: 1.5rem;
-    margin-bottom: 0.75rem;
+/* Loading and error states */
+.loadingContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: 4rem 2rem;
+  text-align: center;
+}
+
+.errorContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+}
+
+.errorMessage {
+  text-align: center;
+  background: rgba(248, 113, 113, 0.1);
+  border: 2px solid rgba(248, 113, 113, 0.2);
+  border-radius: 16px;
+  padding: 2rem;
+  max-width: 500px;
+  backdrop-filter: blur(10px);
+}
+
+.errorMessage h2 {
+  color: #dc2626;
+  margin-bottom: 1rem;
+}
+
+.errorMessage p {
+  color: #7f1d1d;
+  margin-bottom: 1.5rem;
+}
+
+.notFoundContainer {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: #64748b;
+}
+
+.notFoundContainer h2 {
+  color: #374151;
+  margin-bottom: 1rem;
+}
+
+/* Main Container */
+.cocktailDetailContainer {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.95) 100%);
+  border-radius: 24px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Header Section */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 2px solid rgba(156, 163, 175, 0.1);
+}
+ 
+.titleSection {
+  flex: 1;
+}
+
+.cocktailName {
+  font-size: 2.5rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 0.5rem;
+  line-height: 1.2;
+}
+
+.authorInfo {
+  color: #64748b;
+  font-size: 1.1rem;
+  margin: 0;
+}
+
+.authorName {
+  font-weight: 600;
+  color: #4f46e5;
+}
+
+.ownerActions {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.mainContent {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 3rem;
+  margin-bottom: 3rem;
+}
+
+/* Image container */
+.imageContainer {
+  position: sticky;
+  top: 5rem;
+  height: fit-content;
+}
+
+.cocktailImage {
+  width: 100%;
+  height: auto;
+  max-height: 500px;
+  object-fit: cover;
+  border-radius: 1rem;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  transition: transform 0.2s ease-in-out;
+}
+
+.cocktailImage:hover {
+  transform: scale(1.05);
+}
+
+.infoContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+/* Section Styling */
+.description,
+.averageRatingSection,
+.userInteractionSection,
+.ingredientsSection,
+.instructionsSection,
+.tagsSection {
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: 16px;
+  padding: 1.5rem;
+  border: 1px solid rgba(3, 3, 3, 0.5);
+  backdrop-filter: blur(5px);
+  transition: all 0.3s ease;
+}
+
+.description:hover,
+.averageRatingSection:hover,
+.userInteractionSection:hover,
+.ingredientsSection:hover,
+.instructionsSection:hover,
+.tagsSection:hover {
+  background: rgba(255, 255, 255, 0.9);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+}
+
+.description h3,
+.averageRatingSection h3,
+.ingredientsSection h3,
+.instructionsSection h3,
+.tagsSection h3 {
+  color: #000000;
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  border-bottom: 2px solid rgba(156, 163, 175, 0.1);
+  padding-bottom: 0.5rem;
+}
+
+.description p,
+.averageRatingSectionp,
+.ingredientsSection p,
+.instructionsSection p,
+.tagsSection p {
+  color: #000000;
+}
+
+/* Rating Sections */
+.ratingDisplay {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.ratingText {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #374151;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.ratingsCount {
+  color: #000000;
+  font-weight: 400;
+  margin-left: 0.5rem;
+}
+
+.noRating {
+  color: #6b7280;
+  font-style: italic;
+  margin: 0;
+}
+
+/* Enhanced rating display styling */
+.averageRatingSection .ratingDisplay {
+  background: rgba(118, 75, 162, 0.05);
+  border: 1px solid rgba(118, 75, 162, 0.1);
+  border-radius: 12px;
+  padding: 1rem;
+  margin-top: 0.5rem;
+}
+
+.averageRating {
+  font-size: 1.3rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-left: 0.5rem;
+}
+
+/* User Interaction Section */
+.userInteractionSection {
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.05) 0%, rgba(168, 85, 247, 0.05) 100%);
+  border: 2px solid rgba(99, 102, 241, 0.1);
+}
+
+.userRatingSection h4 {
+  color: #4f46e5;
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.ratingControls { 
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+  color: rgba(255, 217, 0, 0.849);
+}
+
+
+.userRatingDisplay {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: rgba(55, 43, 68, 0.05);
+  border: 1px solid rgba(118, 75, 162, 0.1);
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+}
+
+.userRatingLabel {
+  font-weight: 600;
+  color: #374151;
+  white-space: nowrap;
+}
+
+.deleteRatingContainer {
+  margin-top: 0.75rem;
+}
+
+.deleteRatingButton {
+  background: rgba(239, 68, 68, 0.1) !important;
+  border: 2px solid rgba(239, 68, 68, 0.2) !important;
+  color: #dc2626 !important;
+  transition: all 0.3s ease !important;
+}
+
+.deleteRatingButton:hover:not(:disabled) {
+  background: rgba(239, 68, 68, 0.2) !important;
+  border-color: rgba(239, 68, 68, 0.3) !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2) !important;
+}
+
+.ratingError {
+  background: rgba(248, 113, 113, 0.1);
+  border: 1px solid rgba(248, 113, 113, 0.2);
+  border-radius: 8px;
+  padding: 0.75rem;
+  color: #dc2626;
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
+}
+
+.favoriteSection {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(156, 163, 175, 0.1);
+}
+
+.favoriteButton {
+  background: rgba(168, 85, 247, 0.1) !important;
+  border: 2px solid rgba(168, 85, 247, 0.2) !important;
+  color: #7c3aed !important;
+  transition: all 0.3s ease !important;
+}
+
+.favoriteButton:hover:not(:disabled) {
+  background: rgba(168, 85, 247, 0.2) !important;
+  border-color: rgba(168, 85, 247, 0.3) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 8px 20px rgba(168, 85, 247, 0.2) !important;
+}
+
+/* Ingredients */
+.ingredientsList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.ingredientItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  background: rgba(248, 250, 252, 0.5);
+  border-radius: 12px;
+  border: 1px solid rgba(226, 232, 240, 0.3);
+  transition: all 0.2s ease;
+}
+
+.ingredientItem:hover {
+  background: rgba(248, 250, 252, 0.8);
+  transform: translateX(4px);
+}
+
+.ingredientName {
+  font-weight: 600;
+  color: #374151;
+}
+
+.ingredientAmount {
+  color: #6b7280;
+  font-weight: 500;
+  background: rgba(255, 255, 255, 0.7);
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  border: 1px solid rgba(226, 232, 240, 0.5);
+}
+
+/* Instructions */
+.instructions p {
+  line-height: 1.7;
+  color: #374151;
+  font-size: 1rem;
+  margin: 0;
+}
+
+/* Tags */
+.tagsList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.tag {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(168, 85, 247, 0.1) 100%);
+  color: #4f46e5;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  border: 1px solid rgba(99, 102, 241, 0.2);
+  transition: all 0.2s ease;
+}
+
+.tag:hover {
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.2) 0%, rgba(168, 85, 247, 0.2) 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.1);
+}
+
+/* Meta Information */
+.metaInfo {
+  background: rgba(248, 250, 252, 0.5);
+  border-radius: 12px;
+  padding: 1rem;
+  border: 1px solid rgba(226, 232, 240, 0.3);
+}
+
+.metaItem {
+  color: #6b7280;
+  font-size: 0.9rem;
+  margin: 0;
+  margin-bottom: 0.25rem;
+}
+
+.metaItem:last-child {
+  margin-bottom: 0;
+}
+
+/* Navigation */
+.navigation {
+  border-top: 2px solid rgba(156, 163, 175, 0.1);
+  padding-top: 1.5rem;
+}
+
+.backLink {
+  display: inline-flex;
+  align-items: center;
+  color: #4f46e5;
+  text-decoration: none;
+  font-weight: 600;
+  padding: 0.75rem 1.5rem;
+  background: rgba(99, 102, 241, 0.1);
+  border-radius: 12px;
+  border: 1px solid rgba(99, 102, 241, 0.2);
+  transition: all 0.3s ease;
+}
+
+.backLink:hover {
+  background-color: #3b82f6;
+  color: white;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+/* Rating Stars Specific Overrides for this page */
+.averageRatingSection :global(.ratingContainer) {
+  transform: scale(1.1);
+  transform-origin: left center;
+}
+
+.userInteractionSection :global(.ratingContainer) {
+  margin: 0.25rem 0;
+}
+.customActionButton {
+  background-color: white;
+  color: black;
+  border: 1px solid black;
+  padding: 0.5em 1em; /* Przykładowy padding, dostosuj wg potrzeb */
+  cursor: pointer;
+  text-decoration: none; /* Ważne dla guzika "as='link'" */
+  display: inline-flex; /* Aby ikona i tekst były ładnie ułożone */
+  align-items: center;
+  gap: 0.5em; /* Odstęp między ikoną a tekstem */
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease; /* Płynne przejście */
+}
+
+.customActionButton:hover {
+  color: color-primary-dark; /* Lub border: 1px solid white; jeśli chcesz mieć pewność */
+}
+
+/* Dodatkowe style, aby ikony również zmieniały kolor (zakładając, że są to SVG) */
+.customActionButton svg {
+  stroke: black; /* Lub fill, w zależności od tego jak ikona jest zbudowana */
+  transition: stroke 0.3s ease; /* Lub fill */
+}
+
+.customActionButton:hover svg {
+  stroke: white; /* Lub fill */
+}
+
+.ownerActions button:hover {
+    background-color: #764ba2;
+    background:rgba(168, 85, 247, 0.05);
+  }
+  
+/* Responsive design */
+@media (max-width: 768px) {
+  .cocktailDetailContainer {
+    padding: 1rem;
+  }
+  
+  .cocktailName {
+    font-size: 2rem;
+  }
+  
+  .header {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: stretch;
+  }
+  
+  .ownerActions {
+    justify-content: flex-end;
+  }
+  
+  .mainContent {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+  
+  .imageContainer {
+    position: static;
+  }
+  
+  .ingredientItem {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+  
+  .ingredientAmount {
+    align-self: flex-end;
+  }
+  
+  .ratingDisplay {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+  
+  .userInteractionSection {
+    padding: 1rem;
+  }
+  
+  .ratingControls {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+  }
+  
+  .userRatingDisplay {
+    justify-content: center;
+  }
+  
+  .averageRatingSection .ratingDisplay {
+    padding: 0.75rem;
+  }
+  
+  .averageRatingSection :global(.ratingContainer) {
+    transform: scale(1);
+  }
+}
+
+@media (max-width: 480px) {
+  .cocktailDetailContainer {
+    padding: 0.75rem;
+  }
+  
+  .cocktailName {
+    font-size: 1.75rem;
+  }
+  
+  .ownerActions {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .tagsList {
+    gap: 0.5rem;
+  }
+  
+  .tag {
+    font-size: 0.8rem;
+    padding: 0.4rem 0.8rem;
+  }
+  
+  .ratingText {
+    font-size: 1rem;
+  }
+  
+  .averageRating {
+    font-size: 1.1rem;
+  }
+  
+  .userRatingDisplay {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 0.5rem;
+  }
 }

@@ -33,7 +33,7 @@ const AppRoutes: React.FC = () => (
         <Route path="add-cocktail" element={<AddCocktailPage />} />
         <Route path="edit-cocktail/:id" element={<EditCocktailPage />} />
         <Route path="cocktails" element={<CocktailsPage />} />
-        <Route path="cocktails/:id" element={<CocktailDetailPage />} />
+        <Route path="cocktails/:cocktailId" element={<CocktailDetailPage />} />
         <Route path="profile" element={<ProfilePage />} />
         <Route path="my-favorites" element={<MyFavoritesPage />} />
       </Route>
