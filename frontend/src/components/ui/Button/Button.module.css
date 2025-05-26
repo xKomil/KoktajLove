@@ -1,188 +1,207 @@
-/* Button.module.css - Zmodyfikowany dla większego zaokrąglenia */
+/* frontend/src/components/ui/Button/Button.module.css */
 .button {
   position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: var(--spacing-2);
-  font-weight: var(--font-weight-medium);
-  line-height: var(--line-height-base);
+  gap: var(--spacing-2, 0.5rem);
+  font-weight: var(--font-weight-medium, 500);
+  line-height: var(--line-height-base, 1.5);
   white-space: nowrap;
   text-decoration: none;
-  transition: all var(--transition-base);
+  transition: all 0.2s ease-in-out; /* Szybsza tranzysja */
   cursor: pointer;
   user-select: none;
-  /* === NOWOŚĆ: Domyślne zaokrąglenie dla wszystkich przycisków === */
-  /* Jeśli chcesz, aby domyślne zaokrąglenie było inne, zmień wartość var(--border-radius-base) */
-  /* w miejscu, gdzie jest zdefiniowana, lub ustaw tutaj inną wartość. */
-  border-radius: var(--border-radius-base);
+  border-radius: var(--border-radius-base, 0.375rem); /* Domyślne zaokrąglenie */
+  border: 1px solid transparent; /* Domyślny border, przydatny dla wariantów outline */
+  -webkit-font-smoothing: antialiased; /* Lepsze renderowanie czcionek */
+  -moz-osx-font-smoothing: grayscale;
 }
 
 /* Sizes */
 .xs {
-  padding: var(--spacing-1) var(--spacing-2);
-  font-size: var(--font-size-xs);
-  min-height: 1.5rem;
+  padding: var(--spacing-1, 0.25rem) var(--spacing-2, 0.5rem);
+  font-size: var(--font-size-xs, 0.75rem);
+  min-height: 1.75rem; /* Nieco wyższy dla lepszego kliknięcia */
 }
 
 .sm {
-  padding: var(--spacing-1) var(--spacing-3);
-  font-size: var(--font-size-sm);
-  min-height: 2rem;
+  padding: var(--spacing-1-5, 0.375rem) var(--spacing-3, 0.75rem); /* Nowa zmienna lub wartość */
+  font-size: var(--font-size-sm, 0.875rem);
+  min-height: 2.25rem;
 }
 
 .md {
-  padding: var(--spacing-2) var(--spacing-4);
-  font-size: var(--font-size-base);
-  min-height: 2.5rem;
+  padding: var(--spacing-2, 0.5rem) var(--spacing-4, 1rem);
+  font-size: var(--font-size-base, 1rem);
+  min-height: 2.75rem;
 }
 
 .lg {
-  padding: var(--spacing-3) var(--spacing-5);
-  font-size: var(--font-size-lg);
-  min-height: 3rem;
+  padding: var(--spacing-2-5, 0.625rem) var(--spacing-5, 1.25rem); /* Nowa zmienna lub wartość */
+  font-size: var(--font-size-lg, 1.125rem);
+  min-height: 3.25rem;
 }
 
 .xl {
-  padding: var(--spacing-4) var(--spacing-6);
-  font-size: var(--font-size-xl);
-  min-height: 3.5rem;
+  padding: var(--spacing-3, 0.75rem) var(--spacing-6, 1.5rem);
+  font-size: var(--font-size-xl, 1.25rem);
+  min-height: 3.75rem;
 }
 
 /* Shapes */
 .square {
-  /* Dla mniejszego zaokrąglenia lub ostrych krawędzi (jeśli --border-radius-sm to 0) */
-  border-radius: var(--border-radius-sm);
+  border-radius: var(--border-radius-sm, 0.25rem);
 }
 
-.rounded {
-  border-radius: 8px;
+.rounded { /* Użyj bardziej spójnej zmiennej, jeśli masz */
+  border-radius: var(--border-radius-md, 0.5rem); /* Np. 8px */
 }
 
 .pill {
-  /* Dla kształtu kapsułki / w pełni zaokrąglonego */
-  border-radius: var(--border-radius-full);
+  border-radius: var(--border-radius-full, 9999px);
 }
 
 /* Variants */
 .primary {
-  background-color: var(--color-primary);
-  color: var(--color-white);
-  border: none;
+  background-color: var(--color-primary, #667eea);
+  color: var(--color-white, #fff);
+  border-color: var(--color-primary, #667eea);
 }
 
 .primary:hover:not(:disabled) {
-  background-color: var(--color-primary-dark);
+  background-color: var(--color-primary-dark, #5a67d8);
+  border-color: var(--color-primary-dark, #5a67d8);
 }
 
 .secondary {
-  background-color: var(--color-secondary);
-  color: var(--color-white);
-  border: none;
+  background-color: var(--color-secondary, #764ba2);
+  color: var(--color-white, #fff);
+  border-color: var(--color-secondary, #764ba2);
 }
 
 .secondary:hover:not(:disabled) {
-  background-color: var(--color-secondary-dark);
+  background-color: var(--color-secondary-dark, #6c4291);
+  border-color: var(--color-secondary-dark, #6c4291);
 }
 
 .danger {
-  background-color: var(--color-danger);
-  color: var(--color-white);
-  border: none;
+  background-color: var(--color-danger, #e53e3e);
+  color: var(--color-white, #fff);
+  border-color: var(--color-danger, #e53e3e);
 }
 
 .danger:hover:not(:disabled) {
-  background-color: var(--color-danger-dark);
+  background-color: var(--color-danger-dark, #c53030);
+  border-color: var(--color-danger-dark, #c53030);
 }
 
 .success {
-  background-color: var(--color-success);
-  color: var(--color-white);
-  border: none;
+  background-color: var(--color-success, #38a169);
+  color: var(--color-white, #fff);
+  border-color: var(--color-success, #38a169);
 }
 
 .success:hover:not(:disabled) {
-  filter: brightness(0.9);
+  background-color: var(--color-success-dark, #2f855a);
+  border-color: var(--color-success-dark, #2f855a);
 }
 
 .warning {
-  background-color: var(--color-warning);
-  color: var(--color-gray-900);
-  border: none;
+  background-color: var(--color-warning, #dd6b20);
+  color: var(--color-white, #fff); /* Zazwyczaj biały tekst na ostrzegawczym tle */
+  border-color: var(--color-warning, #dd6b20);
 }
 
 .warning:hover:not(:disabled) {
-  filter: brightness(0.9);
+  background-color: var(--color-warning-dark, #c05621);
+  border-color: var(--color-warning-dark, #c05621);
 }
 
 .info {
-  background-color: var(--color-info);
-  color: var(--color-white);
-  border: none;
+  background-color: var(--color-info, #3182ce);
+  color: var(--color-white, #fff);
+  border-color: var(--color-info, #3182ce);
 }
 
 .info:hover:not(:disabled) {
-  filter: brightness(0.9);
+  background-color: var(--color-info-dark, #2b6cb0);
+  border-color: var(--color-info-dark, #2b6cb0);
 }
 
 .ghost {
   background-color: transparent;
-  color: var(--color-gray-700);
-  border: 1px solid var(--color-gray-300);
+  color: var(--color-gray-700, #374151);
+  border: 1px solid var(--color-gray-300, #d1d5db);
 }
 
 .ghost:hover:not(:disabled) {
-  background-color: var(--color-gray-100);
-  border-color: var(--color-gray-400);
+  background-color: var(--color-gray-100, #f3f4f6);
+  border-color: var(--color-gray-400, #9ca3af);
 }
 
 /* Outline variants */
-.outline-primary {
+.outlinePrimary { /* Zmieniona nazwa na camelCase jak w React */
   background: transparent;
-  color: #667eea;
-  border: 2px solid #667eea;
+  color: var(--color-primary, #667eea);
+  border: 1px solid var(--color-primary, #667eea); /* Użyj 1px dla spójności, chyba że 2px jest zamierzone */
 }
 
-.outline-primary:hover:not(.disabled) {
-  background: #667eea;
-  color: white;
-  transform: translateY(-1px);
+.outlinePrimary:hover:not(:disabled) { /* Zmieniona nazwa */
+  background: var(--color-primary-lightest, #f0f2fe); /* Bardzo jasne tło primary */
+  color: var(--color-primary-dark, #5a67d8);
+  /* transform: translateY(-1px); Można usunąć, jeśli nie jest potrzebne wszędzie */
 }
 
 /* States */
 .button:focus-visible {
   outline: none;
-  box-shadow: 0 0 0 2px var(--color-white), 0 0 0 4px var(--color-primary);
+  box-shadow: 0 0 0 3px var(--color-focus-ring, rgba(102, 126, 234, 0.4)); /* Użyj zmiennej dla focus ring */
 }
 
 .button:disabled {
-  opacity: 0.6;
+  opacity: 0.65; /* Nieco większa opacity dla lepszej widoczności */
   cursor: not-allowed;
+  /* Dla niektórych wariantów, np. solid, można chcieć zmienić tło na jaśniejsze szare */
+  /* background-color: var(--color-gray-200, #e5e7eb); */
+  /* color: var(--color-gray-400, #9ca3af); */
+  /* border-color: var(--color-gray-200, #e5e7eb); */
 }
 
 /* Loading state */
 .loading {
   cursor: wait;
+  color: transparent !important; /* Ukryj tekst, gdy spinner jest widoczny */
 }
 
 .loading .content {
-  opacity: 0.8;
+  /* Treść przycisku (tekst, ikony) jest ukrywana przez color: transparent na .loading */
+  /* visibility: hidden; alternatywnie, ale może wpłynąć na layout */
 }
 
 .spinner {
   position: absolute;
   left: 50%;
-  transform: translateX(-50%);
+  top: 50%;
+  transform: translate(-50%, -50%);
   display: flex;
   align-items: center;
   justify-content: center;
+  color: currentColor; /* Spinner dziedziczy kolor tekstu przycisku (przed ukryciem) */
 }
 
 .spinnerIcon {
-  width: 1.25em;
+  width: 1.25em; /* Względny do font-size przycisku */
   height: 1.25em;
-  animation: spin 1s linear infinite;
+  animation: spin 0.8s linear infinite; /* Szybszy spin */
+  color: var(--spinner-color, currentColor); /* Pobierz kolor z :root lub użyj 'currentColor' z .button przed ukryciem */
 }
+/* Należy ustawić --spinner-color dla każdego wariantu przycisku, jeśli potrzeba */
+.primary .spinnerIcon { --spinner-color: var(--color-white, #fff); }
+.secondary .spinnerIcon { --spinner-color: var(--color-white, #fff); }
+.ghost .spinnerIcon { --spinner-color: var(--color-primary, #667eea); }
+/* itd. dla innych wariantów */
+
 
 @keyframes spin {
   from {
@@ -198,8 +217,15 @@
 .rightIcon {
   display: flex;
   align-items: center;
-  font-size: 1.25em;
+  font-size: 1.2em; /* Nieco większe ikony */
 }
+.leftIcon {
+  margin-right: var(--spacing-1-5, 0.375rem); /* Lepszy odstęp dla ikony po lewej */
+}
+.rightIcon {
+  margin-left: var(--spacing-1-5, 0.375rem); /* Lepszy odstęp dla ikony po prawej */
+}
+
 
 /* Full width */
 .fullWidth {
@@ -209,20 +235,49 @@
 /* Dark mode adjustments */
 @media (prefers-color-scheme: dark) {
   .ghost {
-    color: var(--color-gray-300);
-    border-color: var(--color-gray-600);
+    color: var(--color-gray-300, #d1d5db);
+    border-color: var(--color-gray-600, #4b5563);
   }
 
   .ghost:hover:not(:disabled) {
-    background-color: var(--color-gray-800);
-    border-color: var(--color-gray-500);
+    background-color: var(--color-gray-700, #374151);
+    border-color: var(--color-gray-500, #6b7280);
   }
 
   .warning {
-    color: var(--color-gray-900);
+    /* Kolor tekstu dla warning w dark mode może wymagać dostosowania dla kontrastu */
+    /* np. color: var(--color-gray-900, #111827); jeśli tło warning jest jasne */
   }
 
   .button:focus-visible {
-    box-shadow: 0 0 0 2px var(--color-gray-900), 0 0 0 4px var(--color-primary);
+    box-shadow: 0 0 0 3px var(--color-focus-ring-dark, rgba(169, 182, 245, 0.5)); /* Inny kolor dla dark mode */
+  }
+
+  /* Dla przycisków disabled w dark mode */
+  .button:disabled {
+    /* background-color: var(--color-gray-700, #374151); */
+    /* color: var(--color-gray-500, #6b7280); */
+    /* border-color: var(--color-gray-700, #374151); */
+  }
+
+  .outlinePrimary:hover:not(:disabled) {
+    background: var(--color-primary-darker-transparent, rgba(80,95,197,0.2)); /* Ciemniejsze, przezroczyste tło */
+    color: var(--color-primary-light, #a9b6f5);
+  }
+  .ghost .spinnerIcon { --spinner-color: var(--color-primary-light, #a9b6f5); }
+}
+
+/* Dodatkowe style dla telefonów, jeśli trzeba zmniejszyć paddingi globalnie */
+/*
+@media (max-width: 480px) {
+  .button {
+     Dla bardzo małych ekranów, można by zmniejszyć domyślne paddingi przycisków,
+       ale klasy rozmiarów (xs, sm, md, etc.) powinny być głównym sposobem kontroli.
+  }
+  .lg, .xl {
+    font-size: var(--font-size-md); // Przykładowe zmniejszenie dużych przycisków
+    padding: var(--spacing-2) var(--spacing-4);
+    min-height: 2.5rem;
   }
 }
+*/
