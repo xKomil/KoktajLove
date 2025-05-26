@@ -1,4 +1,4 @@
-// Navbar.tsx - Zaktualizowany z linkiem do ulubionych
+// Navbar.tsx - Zaktualizowany z linkiem do Edytora Zasobów
 import React, { useState, useEffect } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
@@ -70,8 +70,9 @@ const Navbar: React.FC = () => {
             <NavLink to="/my-favorites" className={getNavLinkClass} onClick={closeMobileMenu}>
               My Favorites
             </NavLink>
-            <NavLink to="/my-cocktails" className={getNavLinkClass} onClick={closeMobileMenu}>
-              My Cocktails
+            {/* Zmieniony link - zamiast "My Cocktails" jest "Edytor Zasobów" */}
+            <NavLink to="/resource-editor" className={getNavLinkClass} onClick={closeMobileMenu}>
+              Resource Editor
             </NavLink>
             <NavLink to="/profile" className={getNavLinkClass} onClick={closeMobileMenu}>
               {user?.username || 'Profile'}

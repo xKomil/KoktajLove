@@ -42,6 +42,7 @@ const CocktailForm: React.FC<CocktailFormProps> = ({ cocktail, onSubmitSuccess }
   const getDefaultValues = (): CocktailFormData => {
     if (cocktail) {
       // Debug logging for ingredients
+      console.log('--- DEBUG [CocktailForm] --- Cocktail data:', cocktail);
       console.log('--- DEBUG [CocktailForm] --- Cocktail ingredients:', cocktail.ingredients);
       
       return {
@@ -53,11 +54,14 @@ const CocktailForm: React.FC<CocktailFormProps> = ({ cocktail, onSubmitSuccess }
         ingredients: cocktail.ingredients && cocktail.ingredients.length > 0 
           ? cocktail.ingredients
               .filter(ci => ci.ingredient && ci.ingredient.id) // Filter out ingredients without valid ingredient data
-              .map(ci => ({
-                ingredient_id: String(ci.ingredient.id),
-                quantity: String(ci.amount),
-                unit: ci.unit,
-              }))
+              .map(ci => {
+                console.log('--- DEBUG [CocktailForm] --- Processing ingredient:', ci);
+                return {
+                  ingredient_id: String(ci.ingredient.id),
+                  quantity: String(ci.amount),
+                  unit: ci.unit,
+                };
+              })
           : [{ ingredient_id: '', quantity: '', unit: UnitEnum.ML }],
         tag_ids: cocktail.tags ? cocktail.tags.map(t => String(t.id)) : [],
       };
@@ -134,13 +138,25 @@ const CocktailForm: React.FC<CocktailFormProps> = ({ cocktail, onSubmitSuccess }
     fetchData();
   }, []);
 
-  // Reset form when cocktail prop changes
+  // Reset form when cocktail prop changes and data is loaded
   useEffect(() => {
     if (isDataLoaded) {
       const newDefaultValues = getDefaultValues();
+      console.log('--- DEBUG [CocktailForm] --- Resetting form with values:', newDefaultValues);
       reset(newDefaultValues);
     }
   }, [cocktail, isDataLoaded, reset]);
+
+  // Handle cancel button click
+  const handleCancel = () => {
+    if (isEditMode && cocktail?.id) {
+      // If editing, go back to the cocktail detail page
+      navigate(`/cocktails/${cocktail.id}`);
+    } else {
+      // If creating new cocktail, go to cocktails list or previous page
+      navigate('/cocktails');
+    }
+  };
 
   // Form submission handler
   const onSubmit: SubmitHandler<CocktailFormData> = async (data) => {
@@ -478,13 +494,29 @@ const CocktailForm: React.FC<CocktailFormProps> = ({ cocktail, onSubmitSuccess }
         {errors.tag_ids && <p className={styles.errorMessage} role="alert">{errors.tag_ids.message}</p>}
       </section>
 
-      {/* Submit Button */}
-      <Button type="submit" disabled={isSubmitting} className={styles.submitButton}>
-        {isSubmitting 
-          ? (isEditMode ? 'Saving Changes...' : 'Adding Cocktail...') 
-          : (isEditMode ? 'Save Changes' : 'Add Cocktail')
-        }
-      </Button>
+      {/* Form Actions */}
+      <div className={styles.formActions}>
+        <Button 
+          type="button" 
+          onClick={handleCancel}
+          variant="secondary"
+          disabled={isSubmitting}
+          className={styles.cancelButton}
+        >
+          Cancel
+        </Button>
+        
+        <Button 
+          type="submit" 
+          disabled={isSubmitting} 
+          className={styles.submitButton}
+        >
+          {isSubmitting 
+            ? (isEditMode ? 'Saving Changes...' : 'Adding Cocktail...') 
+            : (isEditMode ? 'Save Changes' : 'Add Cocktail')
+          }
+        </Button>
+      </div>
     </form>
   );
 };
