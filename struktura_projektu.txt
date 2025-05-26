@@ -106,16 +106,15 @@ KoktajLove/
     │   │   │   │   ├── RatingStars.tsx
     │   │   │   │   ├── SearchFilters.module.css
     │   │   │   │   └── SearchFilters.tsx
-    │   │   │   ├── profile/
-    │   │   │   │   ├── ChangePasswordForm.module.css
-    │   │   │   │   ├── ChangePasswordForm.tsx
-    │   │   │   │   ├── EditProfileForm.module.css
-    │   │   │   │   ├── EditProfileForm.tsx
-    │   │   │   │   ├── ProfileDetails.module.css
-    │   │   │   │   ├── ProfileDetails.tsx
-    │   │   │   │   ├── UserCocktailList.module.css
-    │   │   │   │   └── UserCocktailList.tsx
-    │   │   │   └── ratings/
+    │   │   │   └── profile/
+    │   │   │       ├── ChangePasswordForm.module.css
+    │   │   │       ├── ChangePasswordForm.tsx
+    │   │   │       ├── EditProfileForm.module.css
+    │   │   │       ├── EditProfileForm.tsx
+    │   │   │       ├── ProfileDetails.module.css
+    │   │   │       ├── ProfileDetails.tsx
+    │   │   │       ├── UserCocktailList.module.css
+    │   │   │       └── UserCocktailList.tsx
     │   │   ├── layout/
     │   │   │   ├── Footer/
     │   │   │   │   ├── Footer.module.css
@@ -160,8 +159,7 @@ KoktajLove/
     │   ├── hooks/
     │   │   ├── useApi.ts
     │   │   ├── useAuth.ts
-    │   │   ├── useDebounce.ts
-    │   │   └── useProfile.ts
+    │   │   └── useDebounce.ts
     │   ├── main.tsx
     │   ├── pages/
     │   │   ├── AddCocktailPage.tsx
@@ -178,7 +176,9 @@ KoktajLove/
     │   │   ├── NotFoundPage.tsx
     │   │   ├── PageStyles.module.css
     │   │   ├── ProfilePage.tsx
-    │   │   └── RegisterPage.tsx
+    │   │   ├── RegisterPage.tsx
+    │   │   ├── ResourceEditorPage.module.css
+    │   │   └── ResourceEditorPage.tsx
     │   ├── router/
     │   │   ├── AppRoutes.tsx
     │   │   └── ProtectedRoute.tsx
@@ -199,6 +199,7 @@ KoktajLove/
     │   │   ├── authTypes.ts
     │   │   ├── cocktailTypes.ts
     │   │   ├── commonTypes.ts
+    │   │   ├── favoriteTypes.ts
     │   │   └── index.ts
     │   ├── utils/
     │   │   ├── helpers.ts
