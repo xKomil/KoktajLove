@@ -19,7 +19,7 @@ const StarRatingInput: React.FC<StarRatingInputProps> = ({
   onChange,
   count = 5,
   size = 'md',
-  color = 'linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%)', // Domyślnie użyje koloru tekstu (np. text-gray-400)
+  color = '#9CA3AF', // ZMIANA: Domyślnie szary (text-gray-400) dla obramowania nieaktywnej gwiazdki
   activeColor = '#764ba2', // Fallback color z gradientu
   className = '',
   label,
@@ -34,7 +34,8 @@ const StarRatingInput: React.FC<StarRatingInputProps> = ({
   const iconPixelSize = iconSizeMap[size];
 
   // Unikalne ID dla defs w SVG (aby uniknąć konfliktów)
-  const gradientId = `star-gradient-${Math.random().toString(36).substr(2, 9)}`;
+  // Dla stabilności ID per instancja, można użyć React.useMemo
+  const gradientId = `star-gradient-${React.useMemo(() => Math.random().toString(36).substr(2, 9), [])}`;
 
   const handleStarClick = (rating: number) => {
     if (value === rating) {
@@ -62,7 +63,7 @@ const StarRatingInput: React.FC<StarRatingInputProps> = ({
         <div className="relative">
           <Star
             size={iconPixelSize}
-            fill={isActive && useGradient ? `url(#${gradientId})` : isActive ? activeColor : 'none'}
+            fill={isActive && useGradient ? `url(#${gradientId})` : isActive ? activeColor : 'gray'} // ZMIANA: Nieaktywna gwiazdka ma białe wypełnienie
             stroke={isActive && useGradient ? `url(#${gradientId})` : isActive ? activeColor : color}
             strokeWidth={1.5}
             className={`transition-all duration-150 ${
@@ -71,7 +72,7 @@ const StarRatingInput: React.FC<StarRatingInputProps> = ({
           />
           {/* Gradient definition - tylko gdy useGradient jest true */}
           {useGradient && (
-            <svg width="0" height="0" className="absolute">
+            <svg width="0" height="0" style={{ position: 'absolute' }}> {/* Użycie style dla lepszej kompatybilności SVG w przepływie */}
               <defs>
                 <linearGradient id={gradientId} x1="0%" y1="0%" x2="100%" y2="100%">
                   <stop offset="0%" stopColor="#667eea" />
