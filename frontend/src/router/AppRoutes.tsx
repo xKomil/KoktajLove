@@ -15,6 +15,7 @@ import AddCocktailPage from '@/pages/AddCocktailPage';
 import EditCocktailPage from '@/pages/EditCocktailPage';
 import ProfilePage from '@/pages/ProfilePage';
 import MyFavoritesPage from '@/pages/MyFavoritesPage';
+import ResourceEditorPage from '@/pages/ResourceEditorPage';
 import NotFoundPage from '@/pages/NotFoundPage';
 
 // Protected Route
@@ -36,6 +37,7 @@ const AppRoutes: React.FC = () => (
         <Route path="cocktails/:cocktailId" element={<CocktailDetailPage />} />
         <Route path="profile" element={<ProfilePage />} />
         <Route path="my-favorites" element={<MyFavoritesPage />} />
+        <Route path="resource-editor" element={<ResourceEditorPage />} />
       </Route>
       
       {/* Not Found */}
