@@ -1,17 +1,17 @@
 // frontend/src/components/ui/StarRatingInput/StarRatingInput.tsx
 import React from 'react';
-import { Star } from 'lucide-react'; // Import ikony Star z lucide-react
+import { Star } from 'lucide-react'; // Import Star icon from lucide-react
 
 interface StarRatingInputProps {
   value: number | null;
   onChange: (rating: number | null) => void;
   count?: number;
-  size?: 'sm' | 'md' | 'lg'; // Możemy mapować to na rozmiar ikony Lucide
-  color?: string; // Kolor nieaktywnej gwiazdki (obramowanie)
-  activeColor?: string; // Kolor aktywnej gwiazdki (wypełnienie i obramowanie) - deprecated, używamy gradientu
+  size?: 'sm' | 'md' | 'lg'; // We can map this to Lucide icon size
+  color?: string; // Inactive star color (border)
+  activeColor?: string; // Active star color (fill and border) - deprecated, using gradient
   className?: string;
   label?: string;
-  useGradient?: boolean; // Nowa prop do włączania gradientu
+  useGradient?: boolean; // New prop to enable gradient
 }
 
 const StarRatingInput: React.FC<StarRatingInputProps> = ({
@@ -19,13 +19,13 @@ const StarRatingInput: React.FC<StarRatingInputProps> = ({
   onChange,
   count = 5,
   size = 'md',
-  color = '#9CA3AF', // ZMIANA: Domyślnie szary (text-gray-400) dla obramowania nieaktywnej gwiazdki
-  activeColor = '#764ba2', // Fallback color z gradientu
+  color = '#9CA3AF', // CHANGE: Default gray (text-gray-400) for the inactive star border
+  activeColor = '#764ba2', // Fallback color from gradient
   className = '',
   label,
-  useGradient = true // Domyślnie używamy gradientu
+  useGradient = true // Use gradient by default
 }) => {
-  // Mapowanie rozmiaru prop na rozmiar ikony Lucide (w pikselach)
+  // Map prop size to Lucide icon size (in pixels)
   const iconSizeMap = {
     sm: 16, // w-4 h-4
     md: 20, // w-5 h-5
@@ -33,13 +33,13 @@ const StarRatingInput: React.FC<StarRatingInputProps> = ({
   };
   const iconPixelSize = iconSizeMap[size];
 
-  // Unikalne ID dla defs w SVG (aby uniknąć konfliktów)
-  // Dla stabilności ID per instancja, można użyć React.useMemo
+  // Unique ID for defs in SVG (to avoid conflicts)
+  // For ID stability per instance, React.useMemo can be used
   const gradientId = `star-gradient-${React.useMemo(() => Math.random().toString(36).substr(2, 9), [])}`;
 
   const handleStarClick = (rating: number) => {
     if (value === rating) {
-      onChange(null); // Wyczyść filtr, jeśli kliknięto tę samą gwiazdkę
+      onChange(null); // Clear the filter if the same star is clicked
     } else {
       onChange(rating);
     }
@@ -57,22 +57,22 @@ const StarRatingInput: React.FC<StarRatingInputProps> = ({
         className={`transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded p-0.5 hover:scale-110 hover:drop-shadow-md ${
           isActive ? 'transform hover:scale-125' : ''
         }`}
-        aria-label={`${ratingValue} ${ratingValue === 1 ? 'gwiazdka' : 'gwiazdki'}`}
-        title={value === ratingValue ? 'Kliknij aby wyczyścić filtr' : `Minimalna ocena: ${ratingValue}+`}
+        aria-label={`${ratingValue} ${ratingValue === 1 ? 'star' : 'stars'}`}
+        title={value === ratingValue ? 'Click to clear filter' : `Minimum rating: ${ratingValue}+`}
       >
         <div className="relative">
           <Star
             size={iconPixelSize}
-            fill={isActive && useGradient ? `url(#${gradientId})` : isActive ? activeColor : 'gray'} // ZMIANA: Nieaktywna gwiazdka ma białe wypełnienie
+            fill={isActive && useGradient ? `url(#${gradientId})` : isActive ? activeColor : 'gray'} // CHANGE: Inactive star has white fill (Note: code uses 'gray', comment might be outdated)
             stroke={isActive && useGradient ? `url(#${gradientId})` : isActive ? activeColor : color}
             strokeWidth={1.5}
             className={`transition-all duration-150 ${
               isActive ? 'drop-shadow-sm' : ''
             }`}
           />
-          {/* Gradient definition - tylko gdy useGradient jest true */}
+          {/* Gradient definition - only when useGradient is true */}
           {useGradient && (
-            <svg width="0" height="0" style={{ position: 'absolute' }}> {/* Użycie style dla lepszej kompatybilności SVG w przepływie */}
+            <svg width="0" height="0" style={{ position: 'absolute' }}> {/* Using style for better SVG compatibility in flow */}
               <defs>
                 <linearGradient id={gradientId} x1="0%" y1="0%" x2="100%" y2="100%">
                   <stop offset="0%" stopColor="#667eea" />
@@ -98,7 +98,7 @@ const StarRatingInput: React.FC<StarRatingInputProps> = ({
         {Array.from({ length: count }, (_, index) => renderStar(index))}
         {value !== null && (
           <span className="ml-2 text-sm text-gray-600">
-            {/* Możesz dodać tekst tutaj jeśli potrzebny */}
+            {/* You can add text here if needed */}
           </span>
         )}
       </div>

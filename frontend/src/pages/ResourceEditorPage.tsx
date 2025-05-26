@@ -31,7 +31,7 @@ const ResourceEditorPage: React.FC = () => {
       }
     } catch (error: any) {
       console.error('Error fetching tags:', error);
-      setTagsError(error.message || 'Błąd podczas pobierania tagów');
+      setTagsError(error.message || 'Error fetching tags');
     } finally {
       setTagsLoading(false);
     }
@@ -50,7 +50,7 @@ const ResourceEditorPage: React.FC = () => {
       }
     } catch (error: any) {
       console.error('Error fetching ingredients:', error);
-      setIngredientsError(error.message || 'Błąd podczas pobierania składników');
+      setIngredientsError(error.message || 'Error fetching ingredients');
     } finally {
       setIngredientsLoading(false);
     }
@@ -63,7 +63,7 @@ const ResourceEditorPage: React.FC = () => {
 
   // Tag handlers
   const handleAddTag = async () => {
-    const name = window.prompt('Podaj nazwę nowego tagu:');
+    const name = window.prompt('Enter the name of the new tag:');
     if (!name || name.trim() === '') return;
 
     setTagActionLoading(true);
@@ -73,14 +73,14 @@ const ResourceEditorPage: React.FC = () => {
       await fetchTags();
     } catch (error: any) {
       console.error('Error creating tag:', error);
-      alert(`Błąd podczas tworzenia tagu: ${error.message || 'Nieznany błąd'}`);
+      alert(`Error creating tag: ${error.message || 'Unknown error'}`);
     } finally {
       setTagActionLoading(false);
     }
   };
 
   const handleEditTag = async (tag: Tag) => {
-    const newName = window.prompt('Podaj nową nazwę tagu:', tag.name);
+    const newName = window.prompt('Enter the new name for the tag:', tag.name);
     if (!newName || newName.trim() === '' || newName.trim() === tag.name) return;
 
     setTagActionLoading(true);
@@ -90,14 +90,14 @@ const ResourceEditorPage: React.FC = () => {
       await fetchTags();
     } catch (error: any) {
       console.error('Error updating tag:', error);
-      alert(`Błąd podczas edycji tagu: ${error.message || 'Nieznany błąd'}`);
+      alert(`Error editing tag: ${error.message || 'Unknown error'}`);
     } finally {
       setTagActionLoading(false);
     }
   };
 
   const handleDeleteTag = async (tag: Tag) => {
-    const confirmed = window.confirm(`Czy na pewno chcesz usunąć tag "${tag.name}"?`);
+    const confirmed = window.confirm(`Are you sure you want to delete the tag "${tag.name}"?`);
     if (!confirmed) return;
 
     setTagActionLoading(true);
@@ -106,7 +106,7 @@ const ResourceEditorPage: React.FC = () => {
       await fetchTags();
     } catch (error: any) {
       console.error('Error deleting tag:', error);
-      alert(`Błąd podczas usuwania tagu: ${error.message || 'Nieznany błąd'}`);
+      alert(`Error deleting tag: ${error.message || 'Unknown error'}`);
     } finally {
       setTagActionLoading(false);
     }
@@ -114,10 +114,10 @@ const ResourceEditorPage: React.FC = () => {
 
   // Ingredient handlers
   const handleAddIngredient = async () => {
-    const name = window.prompt('Podaj nazwę nowego składnika:');
+    const name = window.prompt('Enter the name of the new ingredient:');
     if (!name || name.trim() === '') return;
 
-    const description = window.prompt('Podaj opis składnika (opcjonalnie):');
+    const description = window.prompt('Enter the ingredient description (optional):');
 
     setIngredientActionLoading(true);
     try {
@@ -129,17 +129,17 @@ const ResourceEditorPage: React.FC = () => {
       await fetchIngredients();
     } catch (error: any) {
       console.error('Error creating ingredient:', error);
-      alert(`Błąd podczas tworzenia składnika: ${error.message || 'Nieznany błąd'}`);
+      alert(`Error creating ingredient: ${error.message || 'Unknown error'}`);
     } finally {
       setIngredientActionLoading(false);
     }
   };
 
   const handleEditIngredient = async (ingredient: Ingredient) => {
-    const newName = window.prompt('Podaj nową nazwę składnika:', ingredient.name);
+    const newName = window.prompt('Enter the new name for the ingredient:', ingredient.name);
     if (!newName || newName.trim() === '') return;
 
-    const newDescription = window.prompt('Podaj nowy opis składnika (pozostaw puste, aby usunąć):', ingredient.description || '');
+    const newDescription = window.prompt('Enter the new description for the ingredient (leave empty to remove):', ingredient.description || '');
 
     if (newName.trim() === ingredient.name && 
         (newDescription || '').trim() === (ingredient.description || '')) {
@@ -156,14 +156,14 @@ const ResourceEditorPage: React.FC = () => {
       await fetchIngredients();
     } catch (error: any) {
       console.error('Error updating ingredient:', error);
-      alert(`Błąd podczas edycji składnika: ${error.message || 'Nieznany błąd'}`);
+      alert(`Error editing ingredient: ${error.message || 'Unknown error'}`);
     } finally {
       setIngredientActionLoading(false);
     }
   };
 
   const handleDeleteIngredient = async (ingredient: Ingredient) => {
-    const confirmed = window.confirm(`Czy na pewno chcesz usunąć składnik "${ingredient.name}"?`);
+    const confirmed = window.confirm(`Are you sure you want to delete the ingredient "${ingredient.name}"?`);
     if (!confirmed) return;
 
     setIngredientActionLoading(true);
@@ -172,7 +172,7 @@ const ResourceEditorPage: React.FC = () => {
       await fetchIngredients();
     } catch (error: any) {
       console.error('Error deleting ingredient:', error);
-      alert(`Błąd podczas usuwania składnika: ${error.message || 'Nieznany błąd'}`);
+      alert(`Error deleting ingredient: ${error.message || 'Unknown error'}`);
     } finally {
       setIngredientActionLoading(false);
     }
@@ -182,22 +182,22 @@ const ResourceEditorPage: React.FC = () => {
 
   return (
     <div className={styles.container}>
-      <h1 className={styles.title}>Zarządzanie Katalogiem</h1>
+      <h1 className={styles.title}>Catalog Management</h1>
 
       {/* Tags Section */}
       <section className={styles.section}>
         <div className={styles.sectionHeader}>
-          <h2 className={styles.sectionTitle}>Tagi</h2>
+          <h2 className={styles.sectionTitle}>Tags</h2>
           <button
             onClick={handleAddTag}
             disabled={isLoadingAnyAction || tagsLoading}
             className={styles.addButton}
           >
-            {tagActionLoading ? 'Przetwarzanie...' : 'Dodaj nowy Tag'}
+            {tagActionLoading ? 'Processing...' : 'Add new Tag'}
           </button>
         </div>
 
-        {tagsLoading && <p className={styles.loadingText}>Ładowanie tagów...</p>}
+        {tagsLoading && <p className={styles.loadingText}>Loading tags...</p>}
         
         {tagsError && (
           <div className={styles.errorText}>
@@ -207,7 +207,7 @@ const ResourceEditorPage: React.FC = () => {
 
         {!tagsLoading && !tagsError && tags.length === 0 && (
           <p className={styles.emptyText}>
-            Nie znaleziono tagów. Kliknij "Dodaj nowy Tag", aby utworzyć pierwszy!
+            No tags found. Click "Add new Tag" to create the first one!
           </p>
         )}
 
@@ -228,14 +228,14 @@ const ResourceEditorPage: React.FC = () => {
                     disabled={isLoadingAnyAction}
                     className={styles.editButton}
                   >
-                    Edytuj
+                    Edit
                   </button>
                   <button
                     onClick={() => handleDeleteTag(tag)}
                     disabled={isLoadingAnyAction}
                     className={styles.deleteButton}
                   >
-                    Usuń
+                    Delete
                   </button>
                 </div>
               </div>
@@ -247,17 +247,17 @@ const ResourceEditorPage: React.FC = () => {
       {/* Ingredients Section */}
       <section className={styles.section}>
         <div className={styles.sectionHeader}>
-          <h2 className={styles.sectionTitle}>Składniki</h2>
+          <h2 className={styles.sectionTitle}>Ingredients</h2>
           <button
             onClick={handleAddIngredient}
             disabled={isLoadingAnyAction || ingredientsLoading}
             className={styles.addButton}
           >
-            {ingredientActionLoading ? 'Przetwarzanie...' : 'Dodaj nowy Składnik'}
+            {ingredientActionLoading ? 'Processing...' : 'Add new Ingredient'}
           </button>
         </div>
 
-        {ingredientsLoading && <p className={styles.loadingText}>Ładowanie składników...</p>}
+        {ingredientsLoading && <p className={styles.loadingText}>Loading ingredients...</p>}
         
         {ingredientsError && (
           <div className={styles.errorText}>
@@ -267,7 +267,7 @@ const ResourceEditorPage: React.FC = () => {
 
         {!ingredientsLoading && !ingredientsError && ingredients.length === 0 && (
           <p className={styles.emptyText}>
-            Nie znaleziono składników. Kliknij "Dodaj nowy Składnik", aby utworzyć pierwszy!
+            No ingredients found. Click "Add new Ingredient" to create the first one!
           </p>
         )}
 
@@ -293,14 +293,14 @@ const ResourceEditorPage: React.FC = () => {
                     disabled={isLoadingAnyAction}
                     className={styles.editButton}
                   >
-                    Edytuj
+                    Edit
                   </button>
                   <button
                     onClick={() => handleDeleteIngredient(ingredient)}
                     disabled={isLoadingAnyAction}
                     className={styles.deleteButton}
                   >
-                    Usuń
+                    Delete
                   </button>
                 </div>
               </div>

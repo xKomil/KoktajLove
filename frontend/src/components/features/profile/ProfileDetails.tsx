@@ -99,15 +99,6 @@ const ProfileDetails: React.FC<ProfileDetailsProps> = ({
         <dt>Email:</dt>
         <dd>{user.email}</dd>
         
-        
-        
-        {user.is_superuser && (
-          <>
-            <dt>Role:</dt>
-            <dd className={styles.roleAdmin}>Administrator</dd>
-          </>
-        )}
-        
         <dt>Member Since:</dt>
         <dd>{formatDate(user.created_at)}</dd>
       </dl>

@@ -254,18 +254,21 @@ const CocktailCard: React.FC<CocktailCardProps> = ({
             <span>No image</span>
           </div>
         ) : (
-          <>
-            <img
-              src={currentSrc} // Use currentSrc which handles fallbacks
-              alt={`Cocktail ${cocktail.name}`}
-              className={styles.image}
-              onError={handleImageError}
-              onLoad={handleImageLoad}
-              loading="lazy" // Lazy load images for performance
-              decoding="async" // Asynchronous image decoding
-            />
-            <div className={styles.imageOverlay} aria-hidden="true" /> {/* Optional overlay for styling */}
-          </>
+          // Only render img if currentSrc is not empty
+          currentSrc && (
+            <>
+              <img
+                src={currentSrc} // Use currentSrc which handles fallbacks
+                alt={`Cocktail ${cocktail.name}`}
+                className={styles.image}
+                onError={handleImageError}
+                onLoad={handleImageLoad}
+                loading="lazy" // Lazy load images for performance
+                decoding="async" // Asynchronous image decoding
+              />
+              <div className={styles.imageOverlay} aria-hidden="true" /> {/* Optional overlay for styling */}
+            </>
+          )
         )}
       </div>
 

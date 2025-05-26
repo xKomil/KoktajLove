@@ -20,14 +20,14 @@ interface MultiAutoCompleteSelectProps<T> {
 
 const MultiAutoCompleteSelect = <T,>({
   label,
-  placeholder = "Wybierz opcje...",
-  searchPlaceholder = "Wyszukaj...",
+  placeholder = "Select options...", // TRANSLATED
+  searchPlaceholder = "Search...", // TRANSLATED
   items,
   selectedItems,
   onSelectionChange,
   getItemLabel,
   getItemValue,
-  noOptionsText = "Brak opcji",
+  noOptionsText = "No options", // TRANSLATED
   disabled = false,
   error,
   helperText,
@@ -190,7 +190,7 @@ const MultiAutoCompleteSelect = <T,>({
                     type="button"
                     className={styles.removeButton}
                     onClick={() => handleItemRemove(item)}
-                    aria-label={`Usuń ${getItemLabel(item)}`}
+                    aria-label={`Remove ${getItemLabel(item)}`} // TRANSLATED
                   >
                     ×
                   </button>
@@ -222,7 +222,7 @@ const MultiAutoCompleteSelect = <T,>({
           className={`${styles.dropdownButton} ${isOpen ? styles.open : ''}`}
           onClick={() => !disabled && setIsOpen(!isOpen)}
           disabled={disabled}
-          aria-label="Otwórz listę opcji"
+          aria-label="Open options list" // TRANSLATED
         >
           <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
             <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
@@ -253,7 +253,8 @@ const MultiAutoCompleteSelect = <T,>({
               ))
             ) : (
               <li className={styles.noOptions}>
-                {searchValue ? `Brak wyników dla "${searchValue}"` : noOptionsText}
+                {searchValue ? `No results for "${searchValue}"` : noOptionsText} 
+                {/* TRANSLATED "Brak wyników dla" */}
               </li>
             )}
           </ul>
