@@ -9,18 +9,16 @@ import {
   Ingredient,
   Tag,
   UnitEnum,
-} from '@/types'; // Assuming types are defined in @/types
-import * as cocktailService from '@/services/cocktailService'; // Service for cocktail API calls
-import * as ingredientService from '@/services/ingredientService'; // Service for ingredient API calls
-import * as tagService from '@/services/tagService'; // Service for tag API calls
-import Button from '@/components/ui/Button/Button'; // UI Button component
-import Input from '@/components/ui/Input/Input'; // UI Input component
-import styles from './CocktailForm.module.css'; // CSS module for styling
+} from '@/types';
+import * as cocktailService from '@/services/cocktailService';
+import * as ingredientService from '@/services/ingredientService';
+import * as tagService from '@/services/tagService';
+import Button from '@/components/ui/Button/Button';
+import Input from '@/components/ui/Input/Input';
+import styles from './CocktailForm.module.css';
 
-// Type for individual ingredient form field within the form
 type IngredientFormField = { ingredient_id: string; quantity: string; unit: UnitEnum };
 
-// Type for the entire cocktail form data structure
 type CocktailFormData = {
   name: string;
   description: string;
@@ -28,72 +26,79 @@ type CocktailFormData = {
   image_url?: string;
   is_public: boolean;
   ingredients: IngredientFormField[];
-  tag_ids: string[]; // Array of tag IDs as strings
+  tag_ids: string[];
 };
 
-/**
- * Props for the CocktailForm component.
- */
 interface CocktailFormProps {
-  cocktail?: CocktailWithDetails; // Optional: Existing cocktail data for editing
-  onSubmitSuccess?: (savedCocktail: CocktailWithDetails) => void; // Optional: Callback on successful submission
+  cocktail?: CocktailWithDetails;
+  onSubmitSuccess?: (savedCocktail: CocktailWithDetails) => void;
 }
 
-/**
- * CocktailForm component.
- * Handles creation and updating of cocktails.
- */
 const CocktailForm: React.FC<CocktailFormProps> = ({ cocktail, onSubmitSuccess }) => {
-  const navigate = useNavigate(); // Hook for programmatic navigation
+  const navigate = useNavigate();
+  const isEditMode = Boolean(cocktail?.id);
+  
+  // Create default values based on mode
+  const getDefaultValues = (): CocktailFormData => {
+    if (cocktail) {
+      // Debug logging for ingredients
+      console.log('--- DEBUG [CocktailForm] --- Cocktail ingredients:', cocktail.ingredients);
+      
+      return {
+        name: cocktail.name,
+        description: cocktail.description,
+        instructions: cocktail.instructions,
+        image_url: cocktail.image_url || '',
+        is_public: cocktail.is_public,
+        ingredients: cocktail.ingredients && cocktail.ingredients.length > 0 
+          ? cocktail.ingredients
+              .filter(ci => ci.ingredient && ci.ingredient.id) // Filter out ingredients without valid ingredient data
+              .map(ci => ({
+                ingredient_id: String(ci.ingredient.id),
+                quantity: String(ci.amount),
+                unit: ci.unit,
+              }))
+          : [{ ingredient_id: '', quantity: '', unit: UnitEnum.ML }],
+        tag_ids: cocktail.tags ? cocktail.tags.map(t => String(t.id)) : [],
+      };
+    }
+    
+    return {
+      name: '',
+      description: '',
+      instructions: '',
+      image_url: '',
+      is_public: true,
+      ingredients: [{ ingredient_id: '', quantity: '', unit: UnitEnum.ML }],
+      tag_ids: [],
+    };
+  };
+
   const {
     register,
     handleSubmit,
     control,
     formState: { errors, isSubmitting },
-    reset, // Function to reset form state
+    reset,
+    setValue,
+    watch,
   } = useForm<CocktailFormData>({
-    // Set default form values based on whether it's an edit or create operation
-    defaultValues: cocktail
-      ? {
-          name: cocktail.name,
-          description: cocktail.description,
-          instructions: cocktail.instructions,
-          image_url: cocktail.image_url || '',
-          is_public: cocktail.is_public,
-          ingredients: cocktail.ingredients.map(ci => ({
-            ingredient_id: String(ci.ingredient.id),
-            quantity: String(ci.amount),
-            unit: ci.unit,
-          })),
-          tag_ids: cocktail.tags.map(t => String(t.id)),
-        }
-      : {
-          name: '',
-          description: '',
-          instructions: '',
-          image_url: '',
-          is_public: true, // Default to public
-          ingredients: [{ ingredient_id: '', quantity: '', unit: UnitEnum.ML }], // Start with one empty ingredient
-          tag_ids: [],
-        },
+    defaultValues: getDefaultValues(),
   });
 
-  // `useFieldArray` for managing dynamic ingredient fields
   const { fields, append, remove } = useFieldArray({
     control,
     name: 'ingredients',
   });
 
-  // State for available ingredients and tags fetched from the API
   const [availableIngredients, setAvailableIngredients] = useState<Ingredient[]>([]);
   const [availableTags, setAvailableTags] = useState<Tag[]>([]);
-  // State for displaying general form errors (e.g., API errors)
   const [formError, setFormError] = useState<string | null>(null);
+  const [isDataLoaded, setIsDataLoaded] = useState(false);
 
-  // Regular expression for URL validation
   const urlPattern = /^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)$/;
 
-  // Effect to fetch available ingredients and tags when the component mounts
+  // Fetch available ingredients and tags
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -102,144 +107,117 @@ const CocktailForm: React.FC<CocktailFormProps> = ({ cocktail, onSubmitSuccess }
           tagService.getTags(),
         ]);
 
-        // Handle potentially paginated or direct array responses for ingredients
         if (ingredientsResponse && 'items' in ingredientsResponse) {
           setAvailableIngredients(ingredientsResponse.items);
         } else if (Array.isArray(ingredientsResponse)) {
           setAvailableIngredients(ingredientsResponse);
         } else {
-          setAvailableIngredients([]); // Default to empty if response is unexpected
+          setAvailableIngredients([]);
         }
 
-        // Handle potentially paginated or direct array responses for tags
         if (tagsResponse && 'items' in tagsResponse) {
           setAvailableTags(tagsResponse.items);
         } else if (Array.isArray(tagsResponse)) {
           setAvailableTags(tagsResponse);
         } else {
-          setAvailableTags([]); // Default to empty if response is unexpected
+          setAvailableTags([]);
         }
+        
+        setIsDataLoaded(true);
       } catch (error) {
         console.error('Failed to fetch ingredients or tags', error);
         setFormError('Unable to load form data. Please refresh the page and try again.');
+        setIsDataLoaded(true);
       }
     };
+    
     fetchData();
   }, []);
 
-  // Effect to reset the form when the `cocktail` prop changes (e.g., navigating to edit another cocktail)
+  // Reset form when cocktail prop changes
   useEffect(() => {
-    if (cocktail) {
-      reset({
-        name: cocktail.name,
-        description: cocktail.description,
-        instructions: cocktail.instructions,
-        image_url: cocktail.image_url || '',
-        is_public: cocktail.is_public,
-        ingredients: cocktail.ingredients.map(ci => ({
-          ingredient_id: String(ci.ingredient.id),
-          quantity: String(ci.amount),
-          unit: ci.unit,
-        })),
-        tag_ids: cocktail.tags.map(t => String(t.id)),
-      });
-    } else {
-       // Reset to default empty state if no cocktail prop (create mode)
-       reset({
-        name: '',
-        description: '',
-        instructions: '',
-        image_url: '',
-        is_public: true,
-        ingredients: [{ ingredient_id: '', quantity: '', unit: UnitEnum.ML }],
-        tag_ids: [],
-      });
+    if (isDataLoaded) {
+      const newDefaultValues = getDefaultValues();
+      reset(newDefaultValues);
     }
-  }, [cocktail, reset]);
+  }, [cocktail, isDataLoaded, reset]);
 
-  // Handler for form submission
+  // Form submission handler
   const onSubmit: SubmitHandler<CocktailFormData> = async (data) => {
-    setFormError(null); // Clear previous form errors
+    setFormError(null);
 
-    // Process ingredients data for the backend
     const processedIngredients = data.ingredients
       .map(ing => ({
         ingredient_id: parseInt(ing.ingredient_id, 10),
-        amount: parseInt(ing.quantity, 10), // Use 'amount' as per backend expectation
+        amount: parseInt(ing.quantity, 10),
         unit: ing.unit as UnitEnum,
       }))
-      // Filter out ingredients that are incomplete or invalid
       .filter(ing => ing.ingredient_id && !isNaN(ing.ingredient_id) && !isNaN(ing.amount) && ing.amount > 0);
 
-    // Process tags data for the backend
     const processedTags = data.tag_ids
       ? data.tag_ids.map(idStr => ({ tag_id: parseInt(idStr, 10) })).filter(tag => !isNaN(tag.tag_id))
       : [];
 
-    // Construct the payload for creating a cocktail
-    const payloadForBackend: CocktailCreate = {
-      name: data.name,
-      description: data.description,
-      instructions: data.instructions,
-      is_public: data.is_public,
-      image_url: data.image_url ? data.image_url : null, // Send null if empty string
-      ingredients: processedIngredients,
-      tags: processedTags,
-    };
-
-    console.log("--- DEBUG [CocktailForm FRONTEND] --- Payload sent to the service:", JSON.stringify(payloadForBackend, null, 2));
-
     try {
       let savedCocktail;
-      if (cocktail?.id) {
-        // If editing an existing cocktail, prepare an update payload
+      
+      if (isEditMode && cocktail?.id) {
+        // Update existing cocktail
         const updatePayload: CocktailUpdate = {
-            // Conditionally include fields only if they have values to avoid overwriting with empty strings
-            ...(data.name && { name: data.name }),
-            ...(data.description && { description: data.description }),
-            ...(data.instructions && { instructions: data.instructions }),
-            ...(data.image_url !== undefined && { image_url: data.image_url ? data.image_url : null }),
-            ...(data.is_public !== undefined && { is_public: data.is_public }),
-            ingredients: processedIngredients, // Always send ingredients and tags arrays
-            tags: processedTags,
+          name: data.name,
+          description: data.description,
+          instructions: data.instructions,
+          image_url: data.image_url || null,
+          is_public: data.is_public,
+          ingredients: processedIngredients,
+          tags: processedTags,
         };
+        
+        console.log("--- DEBUG [CocktailForm EDIT] --- Update payload:", JSON.stringify(updatePayload, null, 2));
         savedCocktail = await cocktailService.updateCocktail(cocktail.id, updatePayload);
       } else {
-        // If creating a new cocktail
-        savedCocktail = await cocktailService.createCocktail(payloadForBackend);
+        // Create new cocktail
+        const createPayload: CocktailCreate = {
+          name: data.name,
+          description: data.description,
+          instructions: data.instructions,
+          is_public: data.is_public,
+          image_url: data.image_url || null,
+          ingredients: processedIngredients,
+          tags: processedTags,
+        };
+        
+        console.log("--- DEBUG [CocktailForm CREATE] --- Create payload:", JSON.stringify(createPayload, null, 2));
+        savedCocktail = await cocktailService.createCocktail(createPayload);
       }
 
-      // Handle successful submission
       if (onSubmitSuccess) {
         onSubmitSuccess(savedCocktail);
       } else {
-        // Default navigation to the detail page of the saved cocktail
-        navigate(`/cocktails`);
+        navigate(`/cocktails/${savedCocktail.id}`);
       }
     } catch (error: any) {
       console.error('Failed to save cocktail:', error);
       
-      let displayMessage = 'An error occurred while saving the cocktail. Please try again.';
+      let displayMessage = `An error occurred while ${isEditMode ? 'updating' : 'creating'} the cocktail. Please try again.`;
       
-      // Handle specific HTTP error statuses from the backend
-      if (error.response?.status === 422 && error.response.data?.detail) { // Unprocessable Entity (Validation Error)
+      if (error.response?.status === 422 && error.response.data?.detail) {
         const detail = error.response.data.detail;
         
         if (typeof detail === 'string') {
           displayMessage = detail;
         } else if (Array.isArray(detail)) {
-          // Extract and format validation error messages from the API response
           const errorMessages = detail
-            .map((err: any) => err.msg || 'Invalid field data') // Use 'msg' or a generic message
-            .filter((msg, index, array) => array.indexOf(msg) === index) // Remove duplicate messages
+            .map((err: any) => err.msg || 'Invalid field data')
+            .filter((msg, index, array) => array.indexOf(msg) === index)
             .join('. ');
           displayMessage = errorMessages || 'Please check your form data and try again.';
         }
-      } else if (error.response?.status === 409) { // Conflict (e.g., cocktail name already exists)
+      } else if (error.response?.status === 409) {
         displayMessage = 'A cocktail with this name already exists. Please choose a different name.';
-      } else if (error.response?.status >= 500) { // Server errors
+      } else if (error.response?.status >= 500) {
         displayMessage = 'A server error occurred. Please try again later.';
-      } else if (error.message) { // Other network or client-side errors
+      } else if (error.message) {
         displayMessage = `Failed to save cocktail: ${error.message}`;
       }
       
@@ -247,11 +225,21 @@ const CocktailForm: React.FC<CocktailFormProps> = ({ cocktail, onSubmitSuccess }
     }
   };
 
+  // Show loading state while data is being fetched
+  if (!isDataLoaded) {
+    return (
+      <div className={styles.loadingContainer}>
+        <p>Loading form data...</p>
+      </div>
+    );
+  }
+
   return (
     <form onSubmit={handleSubmit(onSubmit)} className={styles.form}>
-      <h2 className={styles.formTitle}>{cocktail ? 'Edit Cocktail' : 'Add New Cocktail'}</h2>
+      <h2 className={styles.formTitle}>
+        {isEditMode ? `Edit "${cocktail?.name}"` : 'Add New Cocktail'}
+      </h2>
       
-      {/* Display general form errors */}
       {formError && (
         <div className={styles.formErrorContainer} role="alert">
           <p className={styles.errorMessage}>{formError}</p>
@@ -275,7 +263,7 @@ const CocktailForm: React.FC<CocktailFormProps> = ({ cocktail, onSubmitSuccess }
               message: 'Cocktail name cannot exceed 100 characters.'
             },
             pattern: {
-              value: /^[a-zA-Z0-9ąćęłńóśźżĄĆĘŁŃÓŚŹŻ\s\-'&.()]+$/, // Allow letters, numbers, spaces, and some special characters
+              value: /^[a-zA-Z0-9ąćęłńóśźżĄĆĘŁŃÓŚŹŻ\s\-'&.()]+$/,
               message: 'Cocktail name contains invalid characters.'
             }
           })}
@@ -334,7 +322,7 @@ const CocktailForm: React.FC<CocktailFormProps> = ({ cocktail, onSubmitSuccess }
           placeholder="https://example.com/image.jpg"
           {...register('image_url', {
             validate: (value) => {
-              if (!value || value.trim() === '') return true; // Optional field, valid if empty
+              if (!value || value.trim() === '') return true;
               if (!urlPattern.test(value)) {
                 return 'Please enter a valid URL (must start with http:// or https://).';
               }
@@ -348,7 +336,10 @@ const CocktailForm: React.FC<CocktailFormProps> = ({ cocktail, onSubmitSuccess }
       {/* Publicly Visible Checkbox */}
       <div className={styles.formGroup}>
         <label className={styles.checkboxLabel}>
-          <input type="checkbox" {...register('is_public')} defaultChecked={cocktail?.is_public ?? true} />
+          <input 
+            type="checkbox" 
+            {...register('is_public')} 
+          />
           <span className={styles.checkboxText}> Publicly Visible</span>
         </label>
       </div>
@@ -383,6 +374,7 @@ const CocktailForm: React.FC<CocktailFormProps> = ({ cocktail, onSubmitSuccess }
                   </div>
                 )}
               />
+              
               {/* Quantity Input */}
               <div className={styles.ingredientField}>
                 <Input
@@ -408,6 +400,7 @@ const CocktailForm: React.FC<CocktailFormProps> = ({ cocktail, onSubmitSuccess }
                   </p>
                 )}
               </div>
+              
               {/* Unit Select */}
               <Controller
                 name={`ingredients.${index}.unit`}
@@ -431,13 +424,14 @@ const CocktailForm: React.FC<CocktailFormProps> = ({ cocktail, onSubmitSuccess }
                   </div>
                 )}
               />
+              
               {/* Remove Ingredient Button */}
               <Button
                 type="button"
                 onClick={() => remove(index)}
                 variant="danger"
                 size="sm"
-                disabled={fields.length === 1} // Cannot remove if it's the only ingredient
+                disabled={fields.length === 1}
                 title={fields.length === 1 ? "At least one ingredient is required" : "Remove ingredient"}
                 aria-label={`Remove ingredient ${index + 1}`}
               >
@@ -447,14 +441,12 @@ const CocktailForm: React.FC<CocktailFormProps> = ({ cocktail, onSubmitSuccess }
           ))}
         </div>
         
-        {/* General error message for the ingredients array itself (e.g., if minLength rule applied to array) */}
         {errors.ingredients && !Array.isArray(errors.ingredients) && (errors.ingredients as FieldError)?.message && (
-            <div className={styles.errorMessage} role="alert">
-                <p>{(errors.ingredients as FieldError).message}</p>
-            </div>
+          <div className={styles.errorMessage} role="alert">
+            <p>{(errors.ingredients as FieldError).message}</p>
+          </div>
         )}
 
-        {/* Add Ingredient Button */}
         <Button
           type="button"
           onClick={() => append({ ingredient_id: '', quantity: '', unit: UnitEnum.ML })}
@@ -476,7 +468,7 @@ const CocktailForm: React.FC<CocktailFormProps> = ({ cocktail, onSubmitSuccess }
                   type="checkbox"
                   id={`tag-${tag.id}`}
                   value={String(tag.id)}
-                  {...register('tag_ids')} // Register each checkbox to the 'tag_ids' array
+                  {...register('tag_ids')}
                 />
                 <span className={styles.checkboxText}>{tag.name}</span>
               </label>
@@ -488,7 +480,10 @@ const CocktailForm: React.FC<CocktailFormProps> = ({ cocktail, onSubmitSuccess }
 
       {/* Submit Button */}
       <Button type="submit" disabled={isSubmitting} className={styles.submitButton}>
-        {isSubmitting ? (cocktail ? 'Saving...' : 'Adding...') : (cocktail ? 'Save Changes' : 'Add Cocktail')}
+        {isSubmitting 
+          ? (isEditMode ? 'Saving Changes...' : 'Adding Cocktail...') 
+          : (isEditMode ? 'Save Changes' : 'Add Cocktail')
+        }
       </Button>
     </form>
   );

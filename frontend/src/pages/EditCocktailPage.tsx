@@ -30,10 +30,11 @@ const EditCocktailPage: React.FC = () => {
       setError(null);
       try {
         const data = await cocktailService.getCocktailById(cocktailId);
+        
         // Authorization check: only owner can edit
-        if (!user || data.owner_id !== user.id) {
+        // Use author.id as the owner identifier (instead of user_id)
+        if (!user || data.author?.id !== user.id) {
           setError('You are not authorized to edit this cocktail.');
-          // setTimeout(() => navigate('/'), 3000); // Redirect after a delay
           setCocktail(null); // Clear cocktail data
         } else {
           setCocktail(data);
@@ -51,7 +52,7 @@ const EditCocktailPage: React.FC = () => {
 
   const handleUpdateSuccess = (updatedCocktail: CocktailWithDetails) => {
     // Optionally show a success message
-    navigate(`/cocktail/${updatedCocktail.id}`);
+    navigate(`/cocktails/${updatedCocktail.id}`);
   };
 
   if (isLoading || authLoading) {
