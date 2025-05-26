@@ -214,7 +214,7 @@ const CocktailForm: React.FC<CocktailFormProps> = ({ cocktail, onSubmitSuccess }
         onSubmitSuccess(savedCocktail);
       } else {
         // Default navigation to the detail page of the saved cocktail
-        navigate(`/cocktail/${savedCocktail.id}`);
+        navigate(`/cocktails`);
       }
     } catch (error: any) {
       console.error('Failed to save cocktail:', error);
