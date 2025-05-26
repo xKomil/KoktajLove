@@ -30,19 +30,17 @@ export type TagUpdate = Partial<TagCreate>;
 export enum UnitEnum {
   ML = "ml",
   L = "l",
-  G = "g",
-  KG = "kg",
-  TSP = "tsp", // teaspoon
-  TBSP = "tbsp", // tablespoon
   OZ = "oz",
-  SHOT = "shot",
-  DASH = "dash",
+  TSP = "tsp",
+  TBSP = "tbsp",
+  CUP = "cup",
   PIECE = "piece",
-  SLICE = "slice",
-  OTHER = "other",
+  DASH = "dash",
+  DROP = "drop",
+  OTHER = "other"
 }
 /**
- * Data for an ingredient when creating/updating a cocktail (to match backend's CocktailIngredientData).
+ * Data for an ingredient when creating/updating a cocktail (to match backend's CocktailIngredientData)
  */
 export interface CocktailIngredientCreateData {
   ingredient_id: number;

@@ -275,7 +275,7 @@ const CocktailForm: React.FC<CocktailFormProps> = ({ cocktail, onSubmitSuccess }
               message: 'Cocktail name cannot exceed 100 characters.'
             },
             pattern: {
-              value: /^[a-zA-Z0-9\s\-'&.()]+$/, // Allow letters, numbers, spaces, and some special characters
+              value: /^[a-zA-Z0-9ąćęłńóśźżĄĆĘŁŃÓŚŹŻ\s\-'&.()]+$/, // Allow letters, numbers, spaces, and some special characters
               message: 'Cocktail name contains invalid characters.'
             }
           })}
