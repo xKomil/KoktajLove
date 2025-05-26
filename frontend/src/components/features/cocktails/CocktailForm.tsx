@@ -45,23 +45,28 @@ const CocktailForm: React.FC<CocktailFormProps> = ({ cocktail, onSubmitSuccess }
       console.log('--- DEBUG [CocktailForm] --- Cocktail data:', cocktail);
       console.log('--- DEBUG [CocktailForm] --- Cocktail ingredients:', cocktail.ingredients);
       
+      const validIngredients = cocktail.ingredients && cocktail.ingredients.length > 0 
+        ? cocktail.ingredients
+            .filter(ci => ci.id && ci.name) // Filter out ingredients without valid data
+            .map(ci => {
+              console.log('--- DEBUG [CocktailForm] --- Processing ingredient:', ci);
+              return {
+                ingredient_id: String(ci.id),
+                quantity: String(ci.amount),
+                unit: ci.unit,
+              };
+            })
+        : [];
+
       return {
         name: cocktail.name,
         description: cocktail.description,
         instructions: cocktail.instructions,
         image_url: cocktail.image_url || '',
         is_public: cocktail.is_public,
-        ingredients: cocktail.ingredients && cocktail.ingredients.length > 0 
-          ? cocktail.ingredients
-              .filter(ci => ci.ingredient && ci.ingredient.id) // Filter out ingredients without valid ingredient data
-              .map(ci => {
-                console.log('--- DEBUG [CocktailForm] --- Processing ingredient:', ci);
-                return {
-                  ingredient_id: String(ci.ingredient.id),
-                  quantity: String(ci.amount),
-                  unit: ci.unit,
-                };
-              })
+        // Only add default empty ingredient if no valid ingredients exist
+        ingredients: validIngredients.length > 0 
+          ? validIngredients 
           : [{ ingredient_id: '', quantity: '', unit: UnitEnum.ML }],
         tag_ids: cocktail.tags ? cocktail.tags.map(t => String(t.id)) : [],
       };
@@ -87,10 +92,10 @@ const CocktailForm: React.FC<CocktailFormProps> = ({ cocktail, onSubmitSuccess }
     setValue,
     watch,
   } = useForm<CocktailFormData>({
-    defaultValues: getDefaultValues(),
+    mode: 'onChange', // This helps with dynamic updates
   });
 
-  const { fields, append, remove } = useFieldArray({
+  const { fields, append, remove, replace } = useFieldArray({
     control,
     name: 'ingredients',
   });
@@ -138,14 +143,37 @@ const CocktailForm: React.FC<CocktailFormProps> = ({ cocktail, onSubmitSuccess }
     fetchData();
   }, []);
 
-  // Reset form when cocktail prop changes and data is loaded
+  // Initialize form when data is loaded
   useEffect(() => {
     if (isDataLoaded) {
+      const defaultValues = getDefaultValues();
+      console.log('--- DEBUG [CocktailForm] --- Initializing form with:', defaultValues);
+      reset(defaultValues);
+      
+      // Initialize ingredients field array
+      if (defaultValues.ingredients && defaultValues.ingredients.length > 0) {
+        replace(defaultValues.ingredients);
+      }
+    }
+  }, [isDataLoaded, reset, replace]);
+
+  // Reset form when cocktail prop changes and data is loaded
+  useEffect(() => {
+    if (isDataLoaded && availableIngredients.length > 0) {
       const newDefaultValues = getDefaultValues();
       console.log('--- DEBUG [CocktailForm] --- Resetting form with values:', newDefaultValues);
+      console.log('--- DEBUG [CocktailForm] --- Available ingredients:', availableIngredients);
+      
+      // Reset the form
       reset(newDefaultValues);
+      
+      // Replace the ingredients field array
+      if (newDefaultValues.ingredients && newDefaultValues.ingredients.length > 0) {
+        console.log('--- DEBUG [CocktailForm] --- Replacing ingredients:', newDefaultValues.ingredients);
+        replace(newDefaultValues.ingredients);
+      }
     }
-  }, [cocktail, isDataLoaded, reset]);
+  }, [cocktail, isDataLoaded, availableIngredients, reset, replace]);
 
   // Handle cancel button click
   const handleCancel = () => {
