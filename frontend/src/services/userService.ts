@@ -1,6 +1,6 @@
 // frontend/src/services/userService.ts
 import apiClient from './apiClient';
-import { User, UserUpdate, PaginatedUserResponse } from '@/types/authTypes'; // Assuming User type is in authTypes
+import { User, UserUpdate } from '@/types/authTypes'; // Assuming User type is in authTypes
 import { CocktailWithDetails } from '@/types/cocktailTypes';
 import { CommonQueryPaginationParams, PaginatedResponse } from '@/types/commonTypes';
 
